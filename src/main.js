@@ -21,6 +21,13 @@ const config = {
             debug: false
         }
     },
+    input: {
+        // Default is 1 tracked pointer -- not enough for holding a
+        // movement button while tapping jump/interact with a second
+        // finger, the exact tablet-play scenario the touch controls are
+        // for. Reserve room for a held move + jump + interact at once.
+        activePointers: 3
+    },
     scene: [
         Preloader,
         LivingRoom,
