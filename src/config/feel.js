@@ -41,3 +41,10 @@ export const SNIFF_REACT = {
     scaleX: 1.06,
     ms: 90
 };
+
+export const SNIFF_CUE = {
+    noteCount: 3,
+    staggerMs: 220,
+    risePx: 40,
+    ms: 700
+};

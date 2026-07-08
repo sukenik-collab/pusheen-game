@@ -80,6 +80,10 @@ export class LivingRoom extends Scene
 
         if (peekOpen) {
             this.pusheen.stopMoving();
+
+            if (interactPressed) {
+                this.registry.set('cabinet:peekOpen', false);
+            }
         } else {
             const left = this.cursors.left.isDown || this.keys.A.isDown || this.registry.get('input:left');
             const right = this.cursors.right.isDown || this.keys.D.isDown || this.registry.get('input:right');

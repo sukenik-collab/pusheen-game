@@ -1,5 +1,5 @@
 import { GameObjects, Geom } from 'phaser';
-import { RADAR } from '../config/feel.js';
+import { RADAR, SNIFF_CUE } from '../config/feel.js';
 
 const WIDTH = 140;
 const HEIGHT = 160;
@@ -7,8 +7,6 @@ const COLOR = 0x6d4c41;
 
 export const CABINET_HEIGHT = HEIGHT;
 const CUE_COLOR = '#fff6d8';
-const CUE_RISE_PX = 40;
-const CUE_MS = 700;
 
 export class Cabinet extends GameObjects.Container
 {
@@ -43,7 +41,16 @@ export class Cabinet extends GameObjects.Container
         this.inInnerZone = nowInner;
     }
 
+    // A single note reads as a blink-and-you-miss-it flicker, so one sniff
+    // fires a short flutter of notes rather than a lone instant one.
     playSniffCue ()
+    {
+        for (let i = 0; i < SNIFF_CUE.noteCount; i++) {
+            this.scene.time.delayedCall(i * SNIFF_CUE.staggerMs, () => this.spawnNote());
+        }
+    }
+
+    spawnNote ()
     {
         const note = this.scene.add.text(this.x, this.y - HEIGHT / 2, '♪', {
             fontSize: '32px',
@@ -52,9 +59,9 @@ export class Cabinet extends GameObjects.Container
 
         this.scene.tweens.add({
             targets: note,
-            y: note.y - CUE_RISE_PX,
+            y: note.y - SNIFF_CUE.risePx,
             alpha: 0,
-            duration: CUE_MS,
+            duration: SNIFF_CUE.ms,
             ease: 'Quad.easeOut',
             onComplete: () => note.destroy()
         });
