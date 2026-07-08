@@ -63,6 +63,22 @@ export class LivingRoom extends Scene
         this.registry.set('nap:showCard', false);
         this.registry.set('nap:showPlayAgain', false);
         this.registry.set('game:restartRequested', false);
+
+        // The registry's event emitter is global and outlives any one
+        // LivingRoom instance, so a listener added on every create() (every
+        // restart) would accumulate and pile up stale closures over stale
+        // scene instances -- explicitly drop it on shutdown, unlike UI's
+        // registry listeners, which only ever run through create() once
+        // since UI itself is never restarted.
+        const onSnackCollected = (parent, value) => {
+            if (value) {
+                this.sunbeam.illuminate();
+            }
+        };
+        this.registry.events.on('changedata-snack:collected', onSnackCollected);
+        this.events.once('shutdown', () => {
+            this.registry.events.off('changedata-snack:collected', onSnackCollected);
+        });
     }
 
     update ()

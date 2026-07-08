@@ -6,9 +6,16 @@ const WINDOW_HEIGHT = 160;
 const WINDOW_Y = 150;
 
 const PATCH_COLOR = 0xfff2b2;
-const PATCH_ALPHA = 0.55;
+const PATCH_ALPHA_DIM = 0.2;
+const PATCH_ALPHA_LIT = 0.6;
 const PATCH_WIDTH = 200;
 const PATCH_HEIGHT = 50;
+
+const RAY_COLOR = 0xfff6d8;
+const RAY_ALPHA = 0.4;
+const RAY_TOP_HALF_WIDTH = 18;
+const RAY_BOTTOM_HALF_WIDTH = 90;
+const RAY_FADE_MS = 900;
 
 // Vertical padding on the trigger zone so a full-height Pusheen registers
 // as "in the beam" without needing to stand exactly on the patch's center.
@@ -25,8 +32,24 @@ export class Sunbeam extends GameObjects.Container
 
         scene.add.rectangle(x, WINDOW_Y, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_COLOR);
 
-        this.patch = scene.add.rectangle(0, 0, PATCH_WIDTH, PATCH_HEIGHT, PATCH_COLOR).setAlpha(PATCH_ALPHA);
+        // A dim beam connecting the window to the floor patch, invisible
+        // until illuminate() -- the visual cue that the nap is now armed.
+        const rayTopY = WINDOW_Y + WINDOW_HEIGHT / 2;
+        const rayBottomY = groundTop - PATCH_HEIGHT;
+        this.ray = scene.add.graphics().setAlpha(0);
+        this.ray.fillStyle(RAY_COLOR, 1);
+        this.ray.beginPath();
+        this.ray.moveTo(x - RAY_TOP_HALF_WIDTH, rayTopY);
+        this.ray.lineTo(x + RAY_TOP_HALF_WIDTH, rayTopY);
+        this.ray.lineTo(x + RAY_BOTTOM_HALF_WIDTH, rayBottomY);
+        this.ray.lineTo(x - RAY_BOTTOM_HALF_WIDTH, rayBottomY);
+        this.ray.closePath();
+        this.ray.fillPath();
+
+        this.patch = scene.add.rectangle(0, 0, PATCH_WIDTH, PATCH_HEIGHT, PATCH_COLOR).setAlpha(PATCH_ALPHA_DIM);
         this.add(this.patch);
+
+        this.illuminated = false;
 
         this.zone = new Geom.Rectangle(
             x - PATCH_WIDTH / 2,
@@ -70,5 +93,20 @@ export class Sunbeam extends GameObjects.Container
     startDustMotes ()
     {
         this.dustEmitter.start();
+    }
+
+    // Fires once the snack is collected -- decoupled from the nap trigger
+    // itself, so the room visibly points at the sunbeam the moment there's
+    // somewhere to go, well before she actually walks over.
+    illuminate ()
+    {
+        if (this.illuminated) {
+            return;
+        }
+
+        this.illuminated = true;
+
+        this.scene.tweens.add({ targets: this.ray, alpha: RAY_ALPHA, duration: RAY_FADE_MS, ease: 'Sine.easeOut' });
+        this.scene.tweens.add({ targets: this.patch, alpha: PATCH_ALPHA_LIT, duration: RAY_FADE_MS, ease: 'Sine.easeOut' });
     }
 }
