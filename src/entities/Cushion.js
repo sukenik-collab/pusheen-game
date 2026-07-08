@@ -27,18 +27,31 @@ export class Cushion extends GameObjects.Container
         this.body.setSize(WIDTH, HEIGHT);
         this.body.position.set(x - WIDTH / 2, y - HEIGHT / 2);
 
+        this.touchedThisStep = false;
         this.wasContacted = false;
     }
 
-    checkContact (pusheenBody)
+    // Called from the pusheen<->cushion collider callback -- only fires on
+    // steps where Arcade Physics actually detects a fresh overlap between
+    // this exact pair. Don't use body.touching.up for this: static bodies
+    // never get their touching flags reset each step (only dynamic bodies
+    // do), so once true it stays stuck true forever, and "is pusheen on
+    // the cushion" silently degrades into "is pusheen touching anything".
+    onCollide ()
     {
-        const contacting = pusheenBody.touching.down && this.body.touching.up;
+        this.touchedThisStep = true;
+    }
 
-        if (contacting && !this.wasContacted) {
+    // Called once per frame after the physics step has already run (and so
+    // after onCollide() would have fired for this step, if it was going to).
+    resolveContact ()
+    {
+        if (this.touchedThisStep && !this.wasContacted) {
             this.playSquash();
         }
 
-        this.wasContacted = contacting;
+        this.wasContacted = this.touchedThisStep;
+        this.touchedThisStep = false;
     }
 
     playSquash ()

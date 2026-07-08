@@ -59,7 +59,7 @@ export class LivingRoom extends Scene
 
         this.pusheen = new Pusheen(this, 300, height - 200);
         this.physics.add.collider(this.pusheen, this.ground);
-        this.physics.add.collider(this.pusheen, this.cushion);
+        this.physics.add.collider(this.pusheen, this.cushion, () => this.cushion.onCollide());
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keys = this.input.keyboard.addKeys('W,A,S,D,SPACE');
@@ -85,6 +85,6 @@ export class LivingRoom extends Scene
         }
 
         this.pusheen.update();
-        this.cushion.checkContact(this.pusheen.body);
+        this.cushion.resolveContact();
     }
 }
