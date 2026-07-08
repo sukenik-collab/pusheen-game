@@ -15,7 +15,7 @@ One fixed screen (no scroll for v0), cozy living-room corner:
 - **Floor** — continuous ground plane the cat walks on.
 - Optional: one cardboard box (hiding spot) somewhere between center and right.
 
-Whimsical arrangement over realism — place things for pleasant left-to-right flow: start near cabinet, play on the couch, end in the sunbeam.
+Whimsical arrangement over realism. Playtest moved the start position: Pusheen now starts near the sunbeam (right) rather than the cabinet, so the loop is "wake up in the light, wander left to the cabinet for the snack, play on the couch, return to the sunbeam to nap" rather than a single left-to-right pass.
 
 ## 2. The cat: movement feel
 She should read as **plump and unhurried** — eases into motion, coasts to a stop with a little slide.
