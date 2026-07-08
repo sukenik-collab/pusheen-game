@@ -5,7 +5,6 @@ const WIDTH = 140;
 const HEIGHT = 34;
 const COLOR = 0xc48a5a;
 
-export const CUSHION_WIDTH = WIDTH;
 export const CUSHION_HEIGHT = HEIGHT;
 
 export class Cushion extends GameObjects.Container
