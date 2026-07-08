@@ -36,14 +36,17 @@ Outer must be meaningfully larger than inner so the cue *leads* the player — t
 
 ## 5. The cabinet peek
 - Approach (inner zone) → press interact → a soft **cozy-zoom overlay** eases in (slight scale-up, gentle ease — reads as leaning in to look, not opening a menu).
-- Overlay shows the inside: a simple grid of 2–3 items, one of which is the snack.
-- Select snack → it lifts out of the panel, the `0/1 → 1/1` counter ticks, overlay eases closed.
+- Overlay shows the inside: three items in a simple grid — a pair of socks, a folded t-shirt, and a bag of popcorn (the snack).
+- This adds a second interaction beyond peek: the player taps/clicks one item to choose it.
+  - Choosing the popcorn: it lifts out of the panel, the `0/1 → 1/1` counter ticks, overlay eases closed.
+  - Choosing a decoy (socks or t-shirt): *open question — nothing happens vs. a small "nope" reaction (a tiny shake/bounce)*. Either way the overlay stays open so the player can try again; no fail state.
 - No inventory. The snack is now "got"; that's all the state we track.
 
 ## 6. The payoff: the sunbeam nap (level complete)
 The finale matches the goal — no flagpole.
 - Once the snack is collected, entering the sunbeam locks controls.
 - Beat sequence: ~0.5 s settle → curl-up tween (~0.6 s, rotate/scale or sprite swap) → "So Cozy!" text fades in and holds ~2 s → soft dust-mote particles drift in the sunbeam → background music gently softens/swells.
+- After the "So Cozy!" beat, show a **"Play again!" button**. Tapping it resets the scene (uncollect the snack, clear the counter, cat back at the start) for another lap — no page reload needed.
 - Slow, warm, unhurried. This beat is the emotional dividend of the whole loop — give it room to breathe.
 
 ## 7. Optional: the hiding box

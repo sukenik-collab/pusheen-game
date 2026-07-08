@@ -80,13 +80,15 @@ Two concentric `Phaser.Geom.Circle` sensor zones centered on the cabinet:
 Test overlap against these geometry zones, not pixel-perfect sprite overlap. Outer strictly larger than inner so the cue *precedes* the action.
 
 ### 5.5 Cabinet peek (UI overlay)
-Approach (inner zone) → interact → UI scene eases in a "cozy zoom" panel (slight scale-up, soft ease — reads as leaning in, not a menu). Panel shows a 2–3 item grid, one is the snack. Select snack → it lifts out, panel eases closed, collection state updates.
+Approach (inner zone) → interact → UI scene eases in a "cozy zoom" panel (slight scale-up, soft ease — reads as leaning in, not a menu). Panel shows three items: a pair of socks, a folded t-shirt, and a bag of popcorn (the snack). Choosing an item is a second interaction on top of peek-and-collect — tap/click routes through the same `interact()` intent function used elsewhere. Selecting the popcorn lifts it out, panel eases closed, collection state updates. Selecting a decoy leaves the panel open for another try (open question: no-op vs. a small "nope" shake — see design doc §5).
 
 ### 5.6 Snack collection & goal state
 On collect: set `snackCollected = true` in the Phaser **registry** (game-wide data), and increment the on-screen counter (`0/1 → 1/1`) in the UI scene. No inventory object, no persistence.
 
 ### 5.7 The sunbeam nap (level complete)
 Only armed once `snackCollected` is true. On entering the sunbeam zone: lock input → ~0.5s settle → curl-up tween (~0.6s) → UI fades in a "So Cozy!" card (hold ~2s) → drift soft dust-mote particles in the beam → gently soften/swell the music. Slow and warm; give the beat room.
+
+Once the card holds, UI shows a **"Play again!" button**. On tap: reset registry state (`snackCollected = false`, `snackCount = 0`, `inputLocked = false`) and restart the LivingRoom scene — replay without a page refresh.
 
 ### 5.8 Hiding box (optional, cheap)
 Enter box → brief pause/hide → pop out. No reward, no effect. Ship only if it costs near-zero.
@@ -106,7 +108,7 @@ No save/load, no localStorage — the slice is a single sitting.
 ## 8. Assets
 Placeholder-first. Keep names stable so real art can drop in later without code changes.
 
-**Sprites** (`public/assets/sprites/`): pusheen (plump oval), cabinet, couch + cushion (separate so the cushion can tween), window + sunbeam, snack, note/"!" cue, optional box. Simple shapes or rough sketches are fine.
+**Sprites** (`public/assets/sprites/`): pusheen (plump oval), cabinet, couch + cushion (separate so the cushion can tween), window + sunbeam, the three cabinet items (socks, folded t-shirt, bag of popcorn — popcorn is the snack), note/"!" cue, "Play again!" button, optional box. Simple shapes or rough sketches are fine.
 
 **Audio** (`public/assets/audio/`): one lo-fi loop (background), squish (cushion), a soft collect chime (snack), a cozy sigh (nap). Optional signature: a kid-recorded "mrrp." Source CC0/royalty-free (Kenney packs for UI/collect SFX, Freesound for organic foley, Pixabay Music / Incompetech / OpenGameArt for the loop). **Wire audio in early** — it carries half the vibe.
 
