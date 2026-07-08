@@ -12,6 +12,11 @@ export default defineConfig({
         },
     },
     server: {
-        port: 8080
+        port: 8080,
+        watch: {
+            // WSL: chokidar's native watcher doesn't see changes on /mnt/*
+            // drives (9p mount), so hot-reload silently serves stale code.
+            usePolling: true
+        }
     }
 });
