@@ -1,4 +1,4 @@
-import { Scene } from 'phaser';
+import { Scene, Input } from 'phaser';
 
 const BUTTON_ALPHA = 0.35;
 const BUTTON_RADIUS = 36;
@@ -51,6 +51,7 @@ export class UI extends Scene
         });
 
         this.createPeekPanel();
+        this.numberKeys = this.input.keyboard.addKeys('ONE,TWO,THREE');
 
         this.registry.events.on('changedata-cabinet:inInnerZone', (parent, value) => {
             this.setInteractButtonVisible(value && !this.registry.get('snack:collected'));
@@ -59,12 +60,25 @@ export class UI extends Scene
         this.registry.events.on('changedata-cabinet:peekOpen', (parent, value) => {
             if (value) {
                 this.openPeekPanel();
+            } else {
+                this.closePeekPanel();
             }
         });
 
         this.registry.events.on('changedata-snack:count', (parent, value) => {
             this.counterText.setText(`Snack: ${value}/1`);
         });
+    }
+
+    update ()
+    {
+        if (!this.peekPanel.visible) {
+            return;
+        }
+
+        if (Input.Keyboard.JustDown(this.numberKeys.ONE)) this.selectItemByIndex(0);
+        if (Input.Keyboard.JustDown(this.numberKeys.TWO)) this.selectItemByIndex(1);
+        if (Input.Keyboard.JustDown(this.numberKeys.THREE)) this.selectItemByIndex(2);
     }
 
     addHoldButton (x, y, label, registryKey)
@@ -109,6 +123,7 @@ export class UI extends Scene
         this.peekPanel.add(this.add.rectangle(0, 0, PANEL_WIDTH, PANEL_HEIGHT, PANEL_COLOR, PANEL_ALPHA));
 
         const startX = -ITEM_SPACING;
+        this.itemBoxes = [];
 
         ITEMS.forEach((item, i) => {
             const itemX = startX + i * ITEM_SPACING;
@@ -116,12 +131,28 @@ export class UI extends Scene
                 .setInteractive();
             const label = this.add.text(itemX, 55, item.label, { fontSize: '18px', color: '#ffffff' })
                 .setOrigin(0.5);
+            const numberHint = this.add.text(itemX - ITEM_SIZE / 2 + 4, -10 - ITEM_SIZE / 2 + 4, String(i + 1), {
+                fontSize: '14px',
+                color: '#ffffff',
+                backgroundColor: '#00000066'
+            }).setOrigin(0, 0);
 
             this.peekPanel.add(box);
             this.peekPanel.add(label);
+            this.peekPanel.add(numberHint);
 
             box.on('pointerdown', () => this.selectItem(item, box));
+            this.itemBoxes.push({ item, box });
         });
+    }
+
+    selectItemByIndex (index)
+    {
+        const entry = this.itemBoxes[index];
+
+        if (entry) {
+            this.selectItem(entry.item, entry.box);
+        }
     }
 
     selectItem (item, box)
@@ -130,7 +161,7 @@ export class UI extends Scene
             this.registry.set('snack:collected', true);
             this.registry.set('snack:count', 1);
             this.setInteractButtonVisible(false);
-            this.closePeekPanel();
+            this.registry.set('cabinet:peekOpen', false);
         } else {
             this.playNopeShake(box);
         }
@@ -163,6 +194,10 @@ export class UI extends Scene
         });
     }
 
+    // Purely the visual reaction to cabinet:peekOpen going false -- the
+    // registry is already the source of truth by the time this runs
+    // (LivingRoom on cancel, or selectItem() above on collecting the snack),
+    // so this doesn't set it again.
     closePeekPanel ()
     {
         this.tweens.add({
@@ -171,10 +206,7 @@ export class UI extends Scene
             alpha: 0,
             duration: PANEL_CLOSE_MS,
             ease: 'Quad.easeIn',
-            onComplete: () => {
-                this.peekPanel.setVisible(false);
-                this.registry.set('cabinet:peekOpen', false);
-            }
+            onComplete: () => this.peekPanel.setVisible(false)
         });
     }
 }
