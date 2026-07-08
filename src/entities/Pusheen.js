@@ -1,5 +1,5 @@
 import { GameObjects } from 'phaser';
-import { MOVE, JUMP, LAND_SQUASH, IDLE } from '../config/feel.js';
+import { MOVE, JUMP, LAND_SQUASH, IDLE, SNIFF_REACT } from '../config/feel.js';
 
 const WIDTH = 110;
 const HEIGHT = 78;
@@ -68,6 +68,18 @@ export class Pusheen extends GameObjects.Container
         }
 
         this.wasGrounded = grounded;
+    }
+
+    playSniffReact ()
+    {
+        this.scene.tweens.add({
+            targets: this.visual,
+            scaleY: SNIFF_REACT.scaleY,
+            scaleX: SNIFF_REACT.scaleX,
+            duration: SNIFF_REACT.ms,
+            yoyo: true,
+            ease: 'Sine.easeInOut'
+        });
     }
 
     playLandSquash ()

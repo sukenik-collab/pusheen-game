@@ -35,3 +35,9 @@ export const IDLE = {
     bobPx: 2.5,
     breatheScale: 0.02
 };
+
+export const SNIFF_REACT = {
+    scaleY: 0.95,
+    scaleX: 1.06,
+    ms: 90
+};
