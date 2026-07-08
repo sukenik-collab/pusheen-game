@@ -1,7 +1,9 @@
 import { Scene, Input } from 'phaser';
+import { NAP } from '../config/feel.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Cushion, CUSHION_HEIGHT } from '../entities/Cushion.js';
 import { Cabinet, CABINET_HEIGHT } from '../entities/Cabinet.js';
+import { Sunbeam } from '../entities/Sunbeam.js';
 
 const GROUND_HEIGHT = 40;
 const FLOOR_COLOR = 0xd7ccc0;
@@ -13,15 +15,6 @@ const COUCH_BASE_HEIGHT = 50;
 // Jump apex is v^2/(2g) = 480^2/(2*1400) =~ 82px -- keep the cushion surface
 // comfortably under that so a normal hop reaches it.
 const CUSHION_SURFACE_HEIGHT = 65;
-
-const WINDOW_COLOR = 0xdff1f7;
-const WINDOW_WIDTH = 120;
-const WINDOW_HEIGHT = 160;
-
-const SUNBEAM_COLOR = 0xfff2b2;
-const SUNBEAM_ALPHA = 0.55;
-const SUNBEAM_WIDTH = 200;
-const SUNBEAM_HEIGHT = 50;
 
 export class LivingRoom extends Scene
 {
@@ -40,10 +33,8 @@ export class LivingRoom extends Scene
         // Left -- cabinet with the sniff/peek radar
         this.cabinet = new Cabinet(this, 180, groundTop - CABINET_HEIGHT / 2);
 
-        // Right -- window + sunbeam (placeholder; nap trigger lands in Phase 4)
-        this.add.rectangle(1080, 150, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_COLOR);
-        this.add.rectangle(1080, groundTop - 10, SUNBEAM_WIDTH, SUNBEAM_HEIGHT, SUNBEAM_COLOR)
-            .setAlpha(SUNBEAM_ALPHA);
+        // Right -- window + sunbeam with the nap trigger
+        this.sunbeam = new Sunbeam(this, 1080, groundTop);
 
         // Center -- couch base + the one squashable cushion, reachable with a hop
         const couchBaseY = groundTop - COUCH_BASE_HEIGHT / 2;
@@ -66,10 +57,20 @@ export class LivingRoom extends Scene
         this.registry.set('snack:collected', false);
         this.registry.set('snack:count', 0);
         this.registry.set('input:interactPressed', false);
+        this.registry.set('nap:active', false);
+        this.registry.set('nap:showCard', false);
+        this.registry.set('nap:showPlayAgain', false);
+        this.registry.set('game:restartRequested', false);
     }
 
     update ()
     {
+        if (this.registry.get('game:restartRequested')) {
+            this.registry.set('game:restartRequested', false);
+            this.scene.restart();
+            return;
+        }
+
         this.cabinet.update(this.pusheen);
         this.registry.set('cabinet:inInnerZone', this.cabinet.inInnerZone);
 
@@ -77,12 +78,19 @@ export class LivingRoom extends Scene
         this.registry.set('input:interactPressed', false);
 
         const peekOpen = this.registry.get('cabinet:peekOpen');
+        const napActive = this.registry.get('nap:active');
 
         if (peekOpen) {
             this.pusheen.stopMoving();
 
             if (interactPressed) {
                 this.registry.set('cabinet:peekOpen', false);
+            }
+        } else if (napActive) {
+            this.pusheen.stopMoving();
+
+            if (this.registry.get('nap:showPlayAgain') && Input.Keyboard.JustDown(this.keys.SPACE)) {
+                this.registry.set('game:restartRequested', true);
             }
         } else {
             const left = this.cursors.left.isDown || this.keys.A.isDown || this.registry.get('input:left');
@@ -105,9 +113,29 @@ export class LivingRoom extends Scene
             if (interactPressed && this.cabinet.inInnerZone && !this.registry.get('snack:collected')) {
                 this.registry.set('cabinet:peekOpen', true);
             }
+
+            if (this.sunbeam.checkTrigger(this.pusheen, this.registry.get('snack:collected'))) {
+                this.startNapSequence();
+            }
         }
 
         this.pusheen.update();
         this.cushion.resolveContact();
+    }
+
+    startNapSequence ()
+    {
+        this.registry.set('nap:active', true);
+
+        this.time.delayedCall(NAP.settleMs, () => {
+            this.pusheen.playCurlUp(() => {
+                this.sunbeam.startDustMotes();
+                this.registry.set('nap:showCard', true);
+
+                this.time.delayedCall(NAP.cardHoldMs, () => {
+                    this.registry.set('nap:showPlayAgain', true);
+                });
+            });
+        });
     }
 }

@@ -48,3 +48,11 @@ export const SNIFF_CUE = {
     risePx: 40,
     ms: 700
 };
+
+export const NAP = {
+    settleMs: 500,
+    curlMs: 600,
+    curlScale: 0.72,
+    curlAngle: 8,
+    cardHoldMs: 2000
+};

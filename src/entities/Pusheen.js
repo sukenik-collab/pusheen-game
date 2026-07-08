@@ -1,5 +1,5 @@
 import { GameObjects } from 'phaser';
-import { MOVE, JUMP, LAND_SQUASH, IDLE, SNIFF_REACT } from '../config/feel.js';
+import { MOVE, JUMP, LAND_SQUASH, IDLE, SNIFF_REACT, NAP } from '../config/feel.js';
 
 const WIDTH = 110;
 const HEIGHT = 78;
@@ -79,6 +79,24 @@ export class Pusheen extends GameObjects.Container
             duration: SNIFF_REACT.ms,
             yoyo: true,
             ease: 'Sine.easeInOut'
+        });
+    }
+
+    // The nap payoff's curl-up beat. Deliberately does not resume the
+    // breathe tween afterward -- she stays curled and still for the "So
+    // Cozy!" beat rather than snapping back toward its scale-1 target.
+    playCurlUp (onComplete)
+    {
+        this.breatheTween.pause();
+
+        this.scene.tweens.add({
+            targets: this.visual,
+            scaleX: NAP.curlScale,
+            scaleY: NAP.curlScale,
+            angle: NAP.curlAngle,
+            duration: NAP.curlMs,
+            ease: 'Sine.easeInOut',
+            onComplete
         });
     }
 

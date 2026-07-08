@@ -22,6 +22,12 @@ const ITEMS = [
     { key: 'popcorn', label: 'Popcorn', color: 0xf6c453, isSnack: true }
 ];
 
+const CARD_FADE_MS = 500;
+const PLAY_AGAIN_FADE_MS = 400;
+const PLAY_AGAIN_WIDTH = 220;
+const PLAY_AGAIN_HEIGHT = 56;
+const PLAY_AGAIN_Y_OFFSET = 90;
+
 export class UI extends Scene
 {
     constructor ()
@@ -51,6 +57,7 @@ export class UI extends Scene
         });
 
         this.createPeekPanel();
+        this.createNapCard();
         this.numberKeys = this.input.keyboard.addKeys('ONE,TWO,THREE');
 
         this.registry.events.on('changedata-cabinet:inInnerZone', (parent, value) => {
@@ -67,6 +74,22 @@ export class UI extends Scene
 
         this.registry.events.on('changedata-snack:count', (parent, value) => {
             this.counterText.setText(`Snack: ${value}/1`);
+        });
+
+        this.registry.events.on('changedata-nap:showCard', (parent, value) => {
+            if (value) {
+                this.showNapCard();
+            } else {
+                this.hideNapCard();
+            }
+        });
+
+        this.registry.events.on('changedata-nap:showPlayAgain', (parent, value) => {
+            if (value) {
+                this.showPlayAgainButton();
+            } else {
+                this.hidePlayAgainButton();
+            }
         });
     }
 
@@ -208,5 +231,59 @@ export class UI extends Scene
             ease: 'Quad.easeIn',
             onComplete: () => this.peekPanel.setVisible(false)
         });
+    }
+
+    createNapCard ()
+    {
+        const { width, height } = this.scale;
+
+        this.napCard = this.add.text(width / 2, height / 2, 'So Cozy!', {
+            fontSize: '48px',
+            fontStyle: 'bold',
+            color: '#ffffff',
+            stroke: '#3e2c23',
+            strokeThickness: 6
+        }).setOrigin(0.5).setAlpha(0).setVisible(false);
+
+        this.playAgainBg = this.add.rectangle(width / 2, height / 2 + PLAY_AGAIN_Y_OFFSET, PLAY_AGAIN_WIDTH, PLAY_AGAIN_HEIGHT, 0x3e2c23, 0.9)
+            .setInteractive()
+            .setAlpha(0)
+            .setVisible(false);
+        this.playAgainText = this.add.text(width / 2, height / 2 + PLAY_AGAIN_Y_OFFSET, 'Play again!', {
+            fontSize: '20px',
+            color: '#ffffff'
+        }).setOrigin(0.5).setAlpha(0).setVisible(false);
+
+        this.playAgainBg.on('pointerdown', () => this.registry.set('game:restartRequested', true));
+    }
+
+    showNapCard ()
+    {
+        this.napCard.setVisible(true);
+        this.tweens.add({ targets: this.napCard, alpha: 1, duration: CARD_FADE_MS, ease: 'Sine.easeOut' });
+    }
+
+    hideNapCard ()
+    {
+        this.napCard.setVisible(false).setAlpha(0);
+    }
+
+    showPlayAgainButton ()
+    {
+        this.playAgainBg.setVisible(true);
+        this.playAgainText.setVisible(true);
+
+        this.tweens.add({
+            targets: [this.playAgainBg, this.playAgainText],
+            alpha: 1,
+            duration: PLAY_AGAIN_FADE_MS,
+            ease: 'Sine.easeOut'
+        });
+    }
+
+    hidePlayAgainButton ()
+    {
+        this.playAgainBg.setVisible(false).setAlpha(0);
+        this.playAgainText.setVisible(false).setAlpha(0);
     }
 }
