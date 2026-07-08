@@ -17,6 +17,7 @@ export class Pusheen extends GameObjects.Container
         this.add(this.visual);
 
         this.body.setSize(WIDTH, HEIGHT);
+        this.body.setOffset(-WIDTH / 2, -HEIGHT / 2);
         this.body.setGravityY(JUMP.gravity);
         this.body.setDragX(MOVE.drag);
         this.body.setMaxVelocity(MOVE.maxSpeed, 2000);
