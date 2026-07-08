@@ -49,7 +49,7 @@ export class UI extends Scene
         this.addHoldButton(width - BUTTON_RADIUS - MARGIN, buttonY, '^', 'input:jump');
 
         this.interactButton = this.addPressButton(width / 2, buttonY, 'E', 'input:interactPressed');
-        this.setInteractButtonVisible(false);
+        this.updateInteractButtonVisibility();
 
         this.counterText = this.add.text(20, 20, 'Snack: 0/1', {
             fontSize: '22px',
@@ -60,11 +60,18 @@ export class UI extends Scene
         this.createNapCard();
         this.numberKeys = this.input.keyboard.addKeys('ONE,TWO,THREE');
 
-        this.registry.events.on('changedata-cabinet:inInnerZone', (parent, value) => {
-            this.setInteractButtonVisible(value && !this.registry.get('snack:collected'));
+        // The E button is needed both to open the panel (in range) and to
+        // close it again (cancel) -- gating visibility on inInnerZone alone
+        // let it hide itself out from under a touch player mid-cancel if
+        // residual momentum carried her out of range while the panel was
+        // still open, so both signals feed the same recompute.
+        this.registry.events.on('changedata-cabinet:inInnerZone', () => {
+            this.updateInteractButtonVisibility();
         });
 
         this.registry.events.on('changedata-cabinet:peekOpen', (parent, value) => {
+            this.updateInteractButtonVisibility();
+
             if (value) {
                 this.openPeekPanel();
             } else {
@@ -104,12 +111,19 @@ export class UI extends Scene
         if (Input.Keyboard.JustDown(this.numberKeys.THREE)) this.selectItemByIndex(2);
     }
 
-    addHoldButton (x, y, label, registryKey)
+    createButtonVisual (x, y, label)
     {
         const circle = this.add.circle(x, y, BUTTON_RADIUS, 0x000000, BUTTON_ALPHA)
             .setInteractive();
-        this.add.text(x, y, label, { fontSize: '28px', color: '#ffffff' })
+        const text = this.add.text(x, y, label, { fontSize: '28px', color: '#ffffff' })
             .setOrigin(0.5);
+
+        return { circle, text };
+    }
+
+    addHoldButton (x, y, label, registryKey)
+    {
+        const { circle } = this.createButtonVisual(x, y, label);
 
         circle.on('pointerdown', () => this.registry.set(registryKey, true));
         circle.on('pointerup', () => this.registry.set(registryKey, false));
@@ -118,20 +132,22 @@ export class UI extends Scene
 
     addPressButton (x, y, label, registryKey)
     {
-        const circle = this.add.circle(x, y, BUTTON_RADIUS, 0x000000, BUTTON_ALPHA)
-            .setInteractive();
-        const text = this.add.text(x, y, label, { fontSize: '24px', color: '#ffffff' })
-            .setOrigin(0.5);
+        const button = this.createButtonVisual(x, y, label);
+        button.circle.on('pointerdown', () => this.registry.set(registryKey, true));
 
-        circle.on('pointerdown', () => this.registry.set(registryKey, true));
-
-        return { circle, text };
+        return button;
     }
 
     setInteractButtonVisible (visible)
     {
         this.interactButton.circle.setVisible(visible);
         this.interactButton.text.setVisible(visible);
+    }
+
+    updateInteractButtonVisibility ()
+    {
+        const inRange = this.registry.get('cabinet:inInnerZone') || this.registry.get('cabinet:peekOpen');
+        this.setInteractButtonVisible(inRange && !this.registry.get('snack:collected'));
     }
 
     createPeekPanel ()
@@ -181,9 +197,11 @@ export class UI extends Scene
     selectItem (item, box)
     {
         if (item.isSnack) {
+            // Order matters: snack:collected must already be true before
+            // cabinet:peekOpen flips false, since that triggers
+            // updateInteractButtonVisibility() which reads it.
             this.registry.set('snack:collected', true);
             this.registry.set('snack:count', 1);
-            this.setInteractButtonVisible(false);
             this.registry.set('cabinet:peekOpen', false);
         } else {
             this.playNopeShake(box);
@@ -259,17 +277,29 @@ export class UI extends Scene
 
     showNapCard ()
     {
+        this.tweens.killTweensOf(this.napCard);
         this.napCard.setVisible(true);
         this.tweens.add({ targets: this.napCard, alpha: 1, duration: CARD_FADE_MS, ease: 'Sine.easeOut' });
     }
 
+    // Symmetric with showNapCard rather than an instant snap, same as the
+    // peek panel's open/close -- this fires every time Play Again resets
+    // the scene, not just at some rare edge, so it's worth being consistent.
     hideNapCard ()
     {
-        this.napCard.setVisible(false).setAlpha(0);
+        this.tweens.killTweensOf(this.napCard);
+        this.tweens.add({
+            targets: this.napCard,
+            alpha: 0,
+            duration: CARD_FADE_MS,
+            ease: 'Sine.easeIn',
+            onComplete: () => this.napCard.setVisible(false)
+        });
     }
 
     showPlayAgainButton ()
     {
+        this.tweens.killTweensOf([this.playAgainBg, this.playAgainText]);
         this.playAgainBg.setVisible(true);
         this.playAgainText.setVisible(true);
 
@@ -283,7 +313,16 @@ export class UI extends Scene
 
     hidePlayAgainButton ()
     {
-        this.playAgainBg.setVisible(false).setAlpha(0);
-        this.playAgainText.setVisible(false).setAlpha(0);
+        this.tweens.killTweensOf([this.playAgainBg, this.playAgainText]);
+        this.tweens.add({
+            targets: [this.playAgainBg, this.playAgainText],
+            alpha: 0,
+            duration: PLAY_AGAIN_FADE_MS,
+            ease: 'Sine.easeIn',
+            onComplete: () => {
+                this.playAgainBg.setVisible(false);
+                this.playAgainText.setVisible(false);
+            }
+        });
     }
 }

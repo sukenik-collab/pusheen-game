@@ -33,7 +33,8 @@ export const RADAR = {
 
 export const IDLE = {
     bobPx: 2.5,
-    breatheScale: 0.02
+    breatheScale: 0.02,
+    breatheMs: 1400
 };
 
 export const SNIFF_REACT = {

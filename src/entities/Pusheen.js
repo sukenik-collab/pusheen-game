@@ -30,7 +30,7 @@ export class Pusheen extends GameObjects.Container
             scaleX: 1 + IDLE.breatheScale,
             scaleY: 1 - IDLE.breatheScale * 0.5,
             y: -IDLE.bobPx,
-            duration: 1400,
+            duration: IDLE.breatheMs,
             yoyo: true,
             repeat: -1,
             ease: 'Sine.easeInOut'
@@ -59,9 +59,14 @@ export class Pusheen extends GameObjects.Container
         }
     }
 
+    isGrounded ()
+    {
+        return this.body.blocked.down || this.body.touching.down;
+    }
+
     update ()
     {
-        const grounded = this.body.blocked.down || this.body.touching.down;
+        const grounded = this.isGrounded();
 
         if (grounded && !this.wasGrounded) {
             this.playLandSquash();
@@ -72,13 +77,18 @@ export class Pusheen extends GameObjects.Container
 
     playSniffReact ()
     {
+        this.breatheTween.pause();
+        this.visual.setScale(1, 1);
+        this.visual.y = 0;
+
         this.scene.tweens.add({
             targets: this.visual,
             scaleY: SNIFF_REACT.scaleY,
             scaleX: SNIFF_REACT.scaleX,
             duration: SNIFF_REACT.ms,
             yoyo: true,
-            ease: 'Sine.easeInOut'
+            ease: 'Sine.easeInOut',
+            onComplete: () => this.breatheTween.resume()
         });
     }
 
