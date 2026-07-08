@@ -15,6 +15,12 @@ const config = {
         mode: Scale.FIT,
         autoCenter: Scale.CENTER_BOTH
     },
+    physics: {
+        default: 'arcade',
+        arcade: {
+            debug: false
+        }
+    },
     scene: [
         Preloader,
         LivingRoom,
