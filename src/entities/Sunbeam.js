@@ -74,11 +74,15 @@ export class Sunbeam extends GameObjects.Container
         });
     }
 
-    // Arms only once the snack is collected; edge-triggered so it fires
-    // exactly once per approach, same pattern as the cabinet's zones.
+    // Arms only once the snack is collected and only while she's actually
+    // standing (not mid-jump-arc, which the zone's vertical padding would
+    // otherwise let overlap) -- otherwise a landing during the nap's settle
+    // window fires Pusheen's own land-squash mid-curl and undoes it. Edge-
+    // triggered so it fires exactly once per approach, same pattern as the
+    // cabinet's zones.
     checkTrigger (pusheen, snackCollected)
     {
-        if (this.triggered || !snackCollected) {
+        if (this.triggered || !snackCollected || !pusheen.isGrounded()) {
             return false;
         }
 

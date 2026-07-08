@@ -1,5 +1,5 @@
 import { Scene, Input } from 'phaser';
-import { NAP } from '../config/feel.js';
+import { NAP, JUMP } from '../config/feel.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Cushion, CUSHION_HEIGHT } from '../entities/Cushion.js';
 import { Cabinet, CABINET_HEIGHT } from '../entities/Cabinet.js';
@@ -12,9 +12,11 @@ const GROUND_COLOR = 0x8d6e63;
 const COUCH_COLOR = 0x8d6a53;
 const COUCH_WIDTH = 200;
 const COUCH_BASE_HEIGHT = 50;
-// Jump apex is v^2/(2g) = 480^2/(2*1400) =~ 82px -- keep the cushion surface
-// comfortably under that so a normal hop reaches it.
-const CUSHION_SURFACE_HEIGHT = 65;
+// Derived from feel.js's own JUMP values (apex = v^2/2g) rather than a
+// hand-copied comment, so retuning JUMP can't silently strand the cushion
+// out of reach (or make it trivial to clear) without this moving too.
+const JUMP_APEX_HEIGHT = (JUMP.velocity * JUMP.velocity) / (2 * JUMP.gravity);
+const CUSHION_SURFACE_HEIGHT = Math.round(JUMP_APEX_HEIGHT * 0.8);
 
 export class LivingRoom extends Scene
 {
@@ -90,7 +92,13 @@ export class LivingRoom extends Scene
         }
 
         this.cabinet.update(this.pusheen);
-        this.registry.set('cabinet:inInnerZone', this.cabinet.inInnerZone);
+
+        // Phaser's registry fires changedata on every set(), even when the
+        // value is unchanged -- guard so UI's listener only runs on the
+        // real transitions, not every frame regardless of zone state.
+        if (this.cabinet.inInnerZone !== this.registry.get('cabinet:inInnerZone')) {
+            this.registry.set('cabinet:inInnerZone', this.cabinet.inInnerZone);
+        }
 
         const interactPressed = Input.Keyboard.JustDown(this.keys.E) || this.registry.get('input:interactPressed');
         this.registry.set('input:interactPressed', false);
