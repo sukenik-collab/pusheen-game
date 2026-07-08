@@ -45,7 +45,9 @@ export class LivingRoom extends Scene
         this.ground = this.add.rectangle(width / 2, groundTop + GROUND_HEIGHT / 2, width, GROUND_HEIGHT, GROUND_COLOR);
         this.physics.add.existing(this.ground, true);
 
-        this.pusheen = new Pusheen(this, 300, height - 200);
+        // Start near the sunbeam (right), not the cabinet -- playtest moved
+        // the spawn; see the design doc's scene-layout note for why.
+        this.pusheen = new Pusheen(this, 950, height - 200);
         this.physics.add.collider(this.pusheen, this.ground);
         this.physics.add.collider(this.pusheen, this.cushion, () => this.cushion.onCollide());
 
