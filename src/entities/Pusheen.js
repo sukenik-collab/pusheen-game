@@ -1,5 +1,5 @@
 import { GameObjects } from 'phaser';
-import { MOVE, JUMP, LAND_SQUASH, IDLE } from '../config/feel.js';
+import { MOVE, JUMP, LAND_SQUASH, IDLE, SNIFF_REACT, NAP } from '../config/feel.js';
 
 const WIDTH = 110;
 const HEIGHT = 78;
@@ -30,7 +30,7 @@ export class Pusheen extends GameObjects.Container
             scaleX: 1 + IDLE.breatheScale,
             scaleY: 1 - IDLE.breatheScale * 0.5,
             y: -IDLE.bobPx,
-            duration: 1400,
+            duration: IDLE.breatheMs,
             yoyo: true,
             repeat: -1,
             ease: 'Sine.easeInOut'
@@ -59,15 +59,55 @@ export class Pusheen extends GameObjects.Container
         }
     }
 
+    isGrounded ()
+    {
+        return this.body.blocked.down || this.body.touching.down;
+    }
+
     update ()
     {
-        const grounded = this.body.blocked.down || this.body.touching.down;
+        const grounded = this.isGrounded();
 
         if (grounded && !this.wasGrounded) {
             this.playLandSquash();
         }
 
         this.wasGrounded = grounded;
+    }
+
+    playSniffReact ()
+    {
+        this.breatheTween.pause();
+        this.visual.setScale(1, 1);
+        this.visual.y = 0;
+
+        this.scene.tweens.add({
+            targets: this.visual,
+            scaleY: SNIFF_REACT.scaleY,
+            scaleX: SNIFF_REACT.scaleX,
+            duration: SNIFF_REACT.ms,
+            yoyo: true,
+            ease: 'Sine.easeInOut',
+            onComplete: () => this.breatheTween.resume()
+        });
+    }
+
+    // The nap payoff's curl-up beat. Deliberately does not resume the
+    // breathe tween afterward -- she stays curled and still for the "So
+    // Cozy!" beat rather than snapping back toward its scale-1 target.
+    playCurlUp (onComplete)
+    {
+        this.breatheTween.pause();
+
+        this.scene.tweens.add({
+            targets: this.visual,
+            scaleX: NAP.curlScale,
+            scaleY: NAP.curlScale,
+            angle: NAP.curlAngle,
+            duration: NAP.curlMs,
+            ease: 'Sine.easeInOut',
+            onComplete
+        });
     }
 
     playLandSquash ()

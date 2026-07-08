@@ -33,5 +33,27 @@ export const RADAR = {
 
 export const IDLE = {
     bobPx: 2.5,
-    breatheScale: 0.02
+    breatheScale: 0.02,
+    breatheMs: 1400
+};
+
+export const SNIFF_REACT = {
+    scaleY: 0.95,
+    scaleX: 1.06,
+    ms: 90
+};
+
+export const SNIFF_CUE = {
+    noteCount: 3,
+    staggerMs: 220,
+    risePx: 40,
+    ms: 700
+};
+
+export const NAP = {
+    settleMs: 500,
+    curlMs: 600,
+    curlScale: 0.72,
+    curlAngle: 8,
+    cardHoldMs: 2000
 };
