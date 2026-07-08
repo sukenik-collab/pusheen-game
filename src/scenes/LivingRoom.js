@@ -1,14 +1,11 @@
-import { Scene } from 'phaser';
+import { Scene, Input } from 'phaser';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Cushion, CUSHION_HEIGHT } from '../entities/Cushion.js';
+import { Cabinet, CABINET_HEIGHT } from '../entities/Cabinet.js';
 
 const GROUND_HEIGHT = 40;
 const FLOOR_COLOR = 0xd7ccc0;
 const GROUND_COLOR = 0x8d6e63;
-
-const CABINET_COLOR = 0x6d4c41;
-const CABINET_WIDTH = 140;
-const CABINET_HEIGHT = 160;
 
 const COUCH_COLOR = 0x8d6a53;
 const COUCH_WIDTH = 200;
@@ -40,8 +37,8 @@ export class LivingRoom extends Scene
 
         this.add.rectangle(width / 2, height / 2, width, height, FLOOR_COLOR);
 
-        // Left -- cabinet (placeholder; peek/radar interaction lands in Phase 3)
-        this.add.rectangle(180, groundTop - CABINET_HEIGHT / 2, CABINET_WIDTH, CABINET_HEIGHT, CABINET_COLOR);
+        // Left -- cabinet with the sniff/peek radar
+        this.cabinet = new Cabinet(this, 180, groundTop - CABINET_HEIGHT / 2);
 
         // Right -- window + sunbeam (placeholder; nap trigger lands in Phase 4)
         this.add.rectangle(1080, 150, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_COLOR);
@@ -62,26 +59,48 @@ export class LivingRoom extends Scene
         this.physics.add.collider(this.pusheen, this.cushion, () => this.cushion.onCollide());
 
         this.cursors = this.input.keyboard.createCursorKeys();
-        this.keys = this.input.keyboard.addKeys('W,A,S,D,SPACE');
+        this.keys = this.input.keyboard.addKeys('W,A,S,D,SPACE,E');
+
+        this.registry.set('cabinet:peekOpen', false);
+        this.registry.set('cabinet:inInnerZone', false);
+        this.registry.set('snack:collected', false);
+        this.registry.set('snack:count', 0);
+        this.registry.set('input:interactPressed', false);
     }
 
     update ()
     {
-        const left = this.cursors.left.isDown || this.keys.A.isDown || this.registry.get('input:left');
-        const right = this.cursors.right.isDown || this.keys.D.isDown || this.registry.get('input:right');
-        const jumpPressed = this.cursors.up.isDown || this.cursors.space.isDown ||
-            this.keys.W.isDown || this.keys.SPACE.isDown || this.registry.get('input:jump');
+        this.cabinet.update(this.pusheen);
+        this.registry.set('cabinet:inInnerZone', this.cabinet.inInnerZone);
 
-        if (left) {
-            this.pusheen.moveLeft();
-        } else if (right) {
-            this.pusheen.moveRight();
-        } else {
+        const interactPressed = Input.Keyboard.JustDown(this.keys.E) || this.registry.get('input:interactPressed');
+        this.registry.set('input:interactPressed', false);
+
+        const peekOpen = this.registry.get('cabinet:peekOpen');
+
+        if (peekOpen) {
             this.pusheen.stopMoving();
-        }
+        } else {
+            const left = this.cursors.left.isDown || this.keys.A.isDown || this.registry.get('input:left');
+            const right = this.cursors.right.isDown || this.keys.D.isDown || this.registry.get('input:right');
+            const jumpPressed = this.cursors.up.isDown || this.cursors.space.isDown ||
+                this.keys.W.isDown || this.keys.SPACE.isDown || this.registry.get('input:jump');
 
-        if (jumpPressed) {
-            this.pusheen.jump();
+            if (left) {
+                this.pusheen.moveLeft();
+            } else if (right) {
+                this.pusheen.moveRight();
+            } else {
+                this.pusheen.stopMoving();
+            }
+
+            if (jumpPressed) {
+                this.pusheen.jump();
+            }
+
+            if (interactPressed && this.cabinet.inInnerZone && !this.registry.get('snack:collected')) {
+                this.registry.set('cabinet:peekOpen', true);
+            }
         }
 
         this.pusheen.update();
