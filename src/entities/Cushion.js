@@ -3,7 +3,6 @@ import { CUSHION_SQUASH } from '../config/feel.js';
 
 const WIDTH = 140;
 const HEIGHT = 34;
-const COLOR = 0xc48a5a;
 
 export const CUSHION_HEIGHT = HEIGHT;
 
@@ -15,7 +14,7 @@ export class Cushion extends GameObjects.Container
         scene.add.existing(this);
         scene.physics.add.existing(this, true);
 
-        this.visual = scene.add.rectangle(0, 0, WIDTH, HEIGHT, COLOR);
+        this.visual = scene.add.image(0, 0, 'cushion');
         this.add(this.visual);
 
         this.audio = scene.registry.get('audio');
