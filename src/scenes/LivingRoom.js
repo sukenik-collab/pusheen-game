@@ -30,6 +30,11 @@ export class LivingRoom extends Scene
         const { width, height } = this.scale;
         const groundTop = height - GROUND_HEIGHT;
 
+        // Restart can happen mid-nap-swell (Play again) -- put the bed back to
+        // its base volume before the fresh loop begins.
+        this.audio = this.registry.get('audio');
+        this.audio?.resetMusicVolume();
+
         this.add.rectangle(width / 2, height / 2, width, height, FLOOR_COLOR);
 
         // Left -- cabinet with the sniff/peek radar
@@ -152,6 +157,7 @@ export class LivingRoom extends Scene
     startNapSequence ()
     {
         this.registry.set('nap:active', true);
+        this.audio?.duckForNap(this);
 
         this.time.delayedCall(NAP.settleMs, () => {
             this.pusheen.playCurlUp(() => {
