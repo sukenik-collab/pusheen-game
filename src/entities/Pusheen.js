@@ -21,6 +21,8 @@ export class Pusheen extends GameObjects.Container
         this.visual = scene.add.image(0, 0, 'pusheen');
         this.add(this.visual);
 
+        this.audio = scene.registry.get('audio');
+
         this.body.setSize(WIDTH, HEIGHT);
         this.body.setOffset(-WIDTH / 2, -HEIGHT / 2);
         this.body.setGravityY(JUMP.gravity);
@@ -63,6 +65,7 @@ export class Pusheen extends GameObjects.Container
     {
         if (this.body.blocked.down || this.body.touching.down) {
             this.body.setVelocityY(JUMP.velocity);
+            this.audio?.play('jump');
         }
     }
 
@@ -105,6 +108,7 @@ export class Pusheen extends GameObjects.Container
     playCurlUp (onComplete)
     {
         this.breatheTween.pause();
+        this.audio?.play('sigh');
 
         this.scene.tweens.add({
             targets: this.visual,
@@ -122,6 +126,7 @@ export class Pusheen extends GameObjects.Container
         this.breatheTween.pause();
         this.visual.setScale(1, 1);
         this.visual.y = 0;
+        this.audio?.play('land');
 
         this.scene.tweens.add({
             targets: this.visual,
