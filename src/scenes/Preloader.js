@@ -9,6 +9,8 @@ export class Preloader extends Scene
 
     preload ()
     {
+        this.load.image('pusheen', 'assets/sprites/pusheen.png');
+
         // A tiny soft dot, reused as the sunbeam's dust-mote particle texture.
         const g = this.add.graphics();
         g.fillStyle(0xffffff, 1);

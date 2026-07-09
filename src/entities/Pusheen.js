@@ -1,9 +1,14 @@
 import { GameObjects } from 'phaser';
 import { MOVE, JUMP, LAND_SQUASH, IDLE, SNIFF_REACT, NAP } from '../config/feel.js';
 
+// The physics footprint. The sprite itself is pre-cropped and pre-scaled
+// (see the asset-prep step) to already match this at its native pixel size,
+// so scale 1.0 == correct size -- every tween below assigns *absolute*
+// scaleX/scaleY, and two methods reset via setScale(1, 1), so any sizing
+// done here instead (setDisplaySize/setScale) would get silently blown
+// away by the first squash/sniff animation.
 const WIDTH = 110;
 const HEIGHT = 78;
-const COLOR = 0x9a9a9a;
 
 export class Pusheen extends GameObjects.Container
 {
@@ -13,7 +18,7 @@ export class Pusheen extends GameObjects.Container
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
-        this.visual = scene.add.ellipse(0, 0, WIDTH, HEIGHT, COLOR);
+        this.visual = scene.add.image(0, 0, 'pusheen');
         this.add(this.visual);
 
         this.body.setSize(WIDTH, HEIGHT);
@@ -40,11 +45,13 @@ export class Pusheen extends GameObjects.Container
     moveLeft ()
     {
         this.body.setAccelerationX(-MOVE.accel);
+        this.visual.setFlipX(false);
     }
 
     moveRight ()
     {
         this.body.setAccelerationX(MOVE.accel);
+        this.visual.setFlipX(true);
     }
 
     stopMoving ()
