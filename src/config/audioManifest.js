@@ -32,8 +32,13 @@ export const TRACKS = [
         name: 'Sneaky Adventure',
         file: `${BASE}music-sneaky.wav`,
         recommended: 'Kevin MacLeod - "Sneaky Adventure" (CC-BY 3.0)'
+    },
+    {
+        key: 'wallpaper',
+        name: 'Wallpaper',
+        file: `${BASE}music-wallpaper.wav`,
+        recommended: 'Kevin MacLeod - "Wallpaper" (CC-BY 3.0)'
     }
-    // 4th option to drop in later: Kevin MacLeod - "Wallpaper" (CC-BY 3.0)
 ];
 
 // SFX sets, in selector order. Each maps every SFX_EVENTS key to a file.

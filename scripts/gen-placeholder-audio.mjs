@@ -97,6 +97,7 @@ function musicLoop (rootHz, scale, { wave, rate, decay, padAmp }) {
 writeWav('music-carefree.wav', musicLoop(392.0, [0, 4, 7, 11, 12, 7], { wave: 'triangle', rate: 0.28, decay: 7, padAmp: 0.05 }));      // bright, bouncy
 writeWav('music-simple-trifle.wav', musicLoop(329.6, [0, 3, 7, 10, 12, 7], { wave: 'sine', rate: 0.42, decay: 5, padAmp: 0.08 }));   // softer, slower
 writeWav('music-sneaky.wav', musicLoop(293.7, [0, 2, 3, 7, 8, 7], { wave: 'saw', rate: 0.2, decay: 9, padAmp: 0.03 }));              // pizzicato, playful
+writeWav('music-wallpaper.wav', musicLoop(440.0, [0, 2, 4, 7, 9, 12], { wave: 'triangle', rate: 0.34, decay: 4, padAmp: 0.07 }));  // light contemporary, mellow
 
 // --- SFX sets: same 8 event keys, two timbres -------------------------------
 const EVENTS = {

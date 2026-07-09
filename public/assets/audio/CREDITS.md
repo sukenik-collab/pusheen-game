@@ -13,9 +13,7 @@ changes are needed.
 | Carefree | Kevin MacLeod — "Carefree" | CC-BY 4.0 (credit required) | https://freemusicarchive.org/music/Kevin_MacLeod/Calming/Carefree/ |
 | A Simple Trifle | OpenGameArt — "A Simple Trifle" | see the OGA page | https://opengameart.org/content/a-simple-trifle |
 | Sneaky Adventure | Kevin MacLeod — "Sneaky Adventure" | CC-BY 3.0 (credit required) | https://freemusicarchive.org/music/Kevin_MacLeod/ |
-
-4th option to drop in later: Kevin MacLeod — "Wallpaper" (CC-BY 3.0) —
-https://archive.org/details/kevin-macleod-w
+| Wallpaper | Kevin MacLeod — "Wallpaper" | CC-BY 3.0 (credit required) | https://archive.org/details/kevin-macleod-w |
 
 ## SFX sets
 
