@@ -18,6 +18,8 @@ export class Cabinet extends GameObjects.Container
         this.visual = scene.add.rectangle(0, 0, WIDTH, HEIGHT, COLOR);
         this.add(this.visual);
 
+        this.audio = scene.registry.get('audio');
+
         // Outer must be strictly larger than inner so the cue leads the
         // interaction -- the gap is the "ooh, what's over there?" beat.
         this.outerZone = new Geom.Circle(x, y, RADAR.sniffRadius);
@@ -45,6 +47,9 @@ export class Cabinet extends GameObjects.Container
     // fires a short flutter of notes rather than a lone instant one.
     playSniffCue ()
     {
+        // One sniff per approach, not one per fluttered note.
+        this.audio?.play('sniff');
+
         for (let i = 0; i < SNIFF_CUE.noteCount; i++) {
             this.scene.time.delayedCall(i * SNIFF_CUE.staggerMs, () => this.spawnNote());
         }
