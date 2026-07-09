@@ -4,10 +4,6 @@ const BUTTON_ALPHA = 0.35;
 const BUTTON_RADIUS = 36;
 const MARGIN = 24;
 
-const PANEL_WIDTH = 520;
-const PANEL_HEIGHT = 260;
-const PANEL_COLOR = 0x3e2c23;
-const PANEL_ALPHA = 0.94;
 const PANEL_OPEN_MS = 220;
 const PANEL_CLOSE_MS = 180;
 
@@ -17,9 +13,9 @@ const NOPE_SHAKE_PX = 8;
 const NOPE_SHAKE_MS = 55;
 
 const ITEMS = [
-    { key: 'socks', label: 'Socks', color: 0xe3e0d8, isSnack: false },
-    { key: 'tshirt', label: 'T-Shirt', color: 0x6fa8dc, isSnack: false },
-    { key: 'popcorn', label: 'Popcorn', color: 0xf6c453, isSnack: true }
+    { key: 'socks', label: 'Socks', sprite: 'itemSocks', isSnack: false },
+    { key: 'tshirt', label: 'T-Shirt', sprite: 'itemShirt', isSnack: false },
+    { key: 'popcorn', label: 'Popcorn', sprite: 'itemPopcorn', isSnack: true }
 ];
 
 const CARD_FADE_MS = 500;
@@ -162,14 +158,14 @@ export class UI extends Scene
             .setScale(0.8)
             .setAlpha(0);
 
-        this.peekPanel.add(this.add.rectangle(0, 0, PANEL_WIDTH, PANEL_HEIGHT, PANEL_COLOR, PANEL_ALPHA));
+        this.peekPanel.add(this.add.image(0, 0, 'drawer'));
 
         const startX = -ITEM_SPACING;
         this.itemBoxes = [];
 
         ITEMS.forEach((item, i) => {
             const itemX = startX + i * ITEM_SPACING;
-            const box = this.add.rectangle(itemX, -10, ITEM_SIZE, ITEM_SIZE, item.color)
+            const box = this.add.image(itemX, -10, item.sprite)
                 .setInteractive();
             const label = this.add.text(itemX, 55, item.label, { fontSize: '18px', color: '#ffffff' })
                 .setOrigin(0.5);
