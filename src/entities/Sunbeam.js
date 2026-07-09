@@ -1,6 +1,5 @@
 import { GameObjects, Geom } from 'phaser';
 
-const WINDOW_COLOR = 0xdff1f7;
 const WINDOW_WIDTH = 120;
 const WINDOW_HEIGHT = 160;
 const WINDOW_Y = 150;
@@ -30,7 +29,7 @@ export class Sunbeam extends GameObjects.Container
         super(scene, x, groundTop - PATCH_HEIGHT / 2 - 10);
         scene.add.existing(this);
 
-        scene.add.rectangle(x, WINDOW_Y, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_COLOR);
+        scene.add.image(x, WINDOW_Y, 'window');
 
         // A dim beam connecting the window to the floor patch, invisible
         // until illuminate() -- the visual cue that the nap is now armed.
