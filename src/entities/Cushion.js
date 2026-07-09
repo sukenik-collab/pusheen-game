@@ -18,6 +18,8 @@ export class Cushion extends GameObjects.Container
         this.visual = scene.add.rectangle(0, 0, WIDTH, HEIGHT, COLOR);
         this.add(this.visual);
 
+        this.audio = scene.registry.get('audio');
+
         // Static bodies derive their position from the game object's render
         // bounds (getTopLeft(), etc.), which Container doesn't implement --
         // setOffset()/reset()/updateFromGameObject() all throw or silently
@@ -55,6 +57,8 @@ export class Cushion extends GameObjects.Container
 
     playSquash ()
     {
+        this.audio?.play('squish');
+
         this.scene.tweens.add({
             targets: this.visual,
             scaleY: CUSHION_SQUASH.scaleY,

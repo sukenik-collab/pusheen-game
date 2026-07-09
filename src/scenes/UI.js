@@ -39,6 +39,8 @@ export class UI extends Scene
     {
         const { width, height } = this.scale;
 
+        this.audio = this.registry.get('audio');
+
         this.registry.set('input:left', false);
         this.registry.set('input:right', false);
         this.registry.set('input:jump', false);
@@ -58,6 +60,7 @@ export class UI extends Scene
 
         this.createPeekPanel();
         this.createNapCard();
+        this.createAudioMenu();
         this.numberKeys = this.input.keyboard.addKeys('ONE,TWO,THREE');
 
         // The E button is needed both to open the panel (in range) and to
@@ -197,6 +200,7 @@ export class UI extends Scene
     selectItem (item, box)
     {
         if (item.isSnack) {
+            this.audio?.play('collect');
             // Order matters: snack:collected must already be true before
             // cabinet:peekOpen flips false, since that triggers
             // updateInteractButtonVisibility() which reads it.
@@ -204,6 +208,7 @@ export class UI extends Scene
             this.registry.set('snack:count', 1);
             this.registry.set('cabinet:peekOpen', false);
         } else {
+            this.audio?.play('nope');
             this.playNopeShake(box);
         }
     }
@@ -225,6 +230,7 @@ export class UI extends Scene
 
     openPeekPanel ()
     {
+        this.audio?.play('peek');
         this.peekPanel.setVisible(true);
         this.tweens.add({
             targets: this.peekPanel,
@@ -324,5 +330,68 @@ export class UI extends Scene
                 this.playAgainText.setVisible(false);
             }
         });
+    }
+
+    // Part B: an unobtrusive in-game picker, top-right, collapsed to a single
+    // "♪" chip so it never clutters the cozy screen. Tap to reveal three rows:
+    // cycle music track, cycle SFX set, mute. Selection lives on the audio
+    // controller (registry), so it persists across Play again but not reload.
+    createAudioMenu ()
+    {
+        if (!this.audio) {
+            return;
+        }
+
+        const { width } = this.scale;
+        const ROW_W = 210;
+        const ROW_H = 38;
+        const GAP = 8;
+        const right = width - 20;
+        const rowX = right - ROW_W;
+        let y = 20 + 40 + GAP;
+
+        this.audioMenuOpen = false;
+        this.audioPanelParts = [];
+
+        this.musicRow = this.addMenuButton(rowX, y, ROW_W, ROW_H, `♪ ${this.audio.currentTrack.name}`, () => {
+            const track = this.audio.cycleTrack();
+            this.musicRow.text.setText(`♪ ${track.name}`);
+        });
+        y += ROW_H + GAP;
+
+        this.sfxRow = this.addMenuButton(rowX, y, ROW_W, ROW_H, `SFX: ${this.audio.currentSet.name}`, () => {
+            const set = this.audio.cycleSfxSet();
+            this.sfxRow.text.setText(`SFX: ${set.name}`);
+            this.audio.play('collect'); // audition the new set
+        });
+        y += ROW_H + GAP;
+
+        this.muteRow = this.addMenuButton(rowX, y, ROW_W, ROW_H, 'Sound: On', () => {
+            const muted = this.audio.toggleMute();
+            this.muteRow.text.setText(muted ? 'Sound: Off' : 'Sound: On');
+        });
+
+        this.setAudioMenuVisible(false);
+
+        // The always-visible toggle chip.
+        const toggleBg = this.add.rectangle(right, 20, 44, 40, 0x3e2c23, 0.6).setOrigin(1, 0).setInteractive();
+        this.add.text(right - 22, 40, '♪', { fontSize: '22px', color: '#ffffff' }).setOrigin(0.5);
+        toggleBg.on('pointerdown', () => this.setAudioMenuVisible(!this.audioMenuOpen));
+    }
+
+    addMenuButton (x, y, w, h, label, onClick)
+    {
+        const bg = this.add.rectangle(x, y, w, h, 0x3e2c23, 0.72).setOrigin(0, 0).setInteractive();
+        const text = this.add.text(x + 12, y + h / 2, label, { fontSize: '16px', color: '#ffffff' }).setOrigin(0, 0.5);
+        bg.on('pointerdown', onClick);
+
+        this.audioPanelParts.push(bg, text);
+        return { bg, text };
+    }
+
+    setAudioMenuVisible (visible)
+    {
+        this.audioMenuOpen = visible;
+        this.audioPanelParts.forEach((part) => part.setVisible(visible));
     }
 }
