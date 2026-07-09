@@ -16,6 +16,12 @@ export const SFX_EVENTS = ['land', 'jump', 'squish', 'sniff', 'peek', 'nope', 'c
 // repo now; `recommended` is the real track to swap in (keep the key stable).
 export const TRACKS = [
     {
+        key: 'wallpaper',
+        name: 'Wallpaper',
+        file: `${BASE}music-wallpaper.wav`,
+        recommended: 'Kevin MacLeod - "Wallpaper" (CC-BY 3.0)'
+    },
+	{
         key: 'carefree',
         name: 'Carefree',
         file: `${BASE}music-carefree.wav`,
@@ -32,12 +38,6 @@ export const TRACKS = [
         name: 'Sneaky Adventure',
         file: `${BASE}music-sneaky.wav`,
         recommended: 'Kevin MacLeod - "Sneaky Adventure" (CC-BY 3.0)'
-    },
-    {
-        key: 'wallpaper',
-        name: 'Wallpaper',
-        file: `${BASE}music-wallpaper.wav`,
-        recommended: 'Kevin MacLeod - "Wallpaper" (CC-BY 3.0)'
     }
 ];
 

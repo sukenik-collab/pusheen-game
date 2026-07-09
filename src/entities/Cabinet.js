@@ -1,9 +1,7 @@
 import { GameObjects, Geom } from 'phaser';
 import { RADAR, SNIFF_CUE } from '../config/feel.js';
 
-const WIDTH = 140;
 const HEIGHT = 160;
-const COLOR = 0x6d4c41;
 
 export const CABINET_HEIGHT = HEIGHT;
 const CUE_COLOR = '#fff6d8';
@@ -15,7 +13,7 @@ export class Cabinet extends GameObjects.Container
         super(scene, x, y);
         scene.add.existing(this);
 
-        this.visual = scene.add.rectangle(0, 0, WIDTH, HEIGHT, COLOR);
+        this.visual = scene.add.image(0, 0, 'cabinet');
         this.add(this.visual);
 
         this.audio = scene.registry.get('audio');

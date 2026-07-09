@@ -12,6 +12,14 @@ export class Preloader extends Scene
     preload ()
     {
         this.load.image('pusheen', 'assets/sprites/pusheen.png');
+        this.load.image('cabinet', 'assets/sprites/cabinet.png');
+        this.load.image('window', 'assets/sprites/window.png');
+        this.load.image('couchBase', 'assets/sprites/couch-base.png');
+        this.load.image('cushion', 'assets/sprites/cushion.png');
+        this.load.image('drawer', 'assets/sprites/drawer.png');
+        this.load.image('itemSocks', 'assets/sprites/item-socks.png');
+        this.load.image('itemShirt', 'assets/sprites/item-shirt.png');
+        this.load.image('itemPopcorn', 'assets/sprites/item-popcorn.png');
 
         // A tiny soft dot, reused as the sunbeam's dust-mote particle texture.
         const g = this.add.graphics();

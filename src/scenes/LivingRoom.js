@@ -9,8 +9,6 @@ const GROUND_HEIGHT = 40;
 const FLOOR_COLOR = 0xd7ccc0;
 const GROUND_COLOR = 0x8d6e63;
 
-const COUCH_COLOR = 0x8d6a53;
-const COUCH_WIDTH = 200;
 const COUCH_BASE_HEIGHT = 50;
 // Derived from feel.js's own JUMP values (apex = v^2/2g) rather than a
 // hand-copied comment, so retuning JUMP can't silently strand the cushion
@@ -43,9 +41,15 @@ export class LivingRoom extends Scene
         // Right -- window + sunbeam with the nap trigger
         this.sunbeam = new Sunbeam(this, 1080, groundTop);
 
-        // Center -- couch base + the one squashable cushion, reachable with a hop
+        // Center -- couch base + the one squashable cushion, reachable with a hop.
+        // The base gets its own solid static body (matching its real, wider
+        // footprint) so the couch reads as one continuous solid piece -- without
+        // it, only the narrower cushion above collided, and walking up to the
+        // couch meant bonking into that floating box from the side instead of
+        // being blocked by the couch itself.
         const couchBaseY = groundTop - COUCH_BASE_HEIGHT / 2;
-        this.add.rectangle(width / 2, couchBaseY, COUCH_WIDTH, COUCH_BASE_HEIGHT, COUCH_COLOR);
+        this.couchBase = this.add.image(width / 2, couchBaseY, 'couchBase');
+        this.physics.add.existing(this.couchBase, true);
         const cushionY = groundTop - CUSHION_SURFACE_HEIGHT + CUSHION_HEIGHT / 2;
         this.cushion = new Cushion(this, width / 2, cushionY);
 
@@ -56,6 +60,7 @@ export class LivingRoom extends Scene
         // the spawn; see the design doc's scene-layout note for why.
         this.pusheen = new Pusheen(this, 950, height - 200);
         this.physics.add.collider(this.pusheen, this.ground);
+        this.physics.add.collider(this.pusheen, this.couchBase);
         this.physics.add.collider(this.pusheen, this.cushion, () => this.cushion.onCollide());
 
         this.cursors = this.input.keyboard.createCursorKeys();
