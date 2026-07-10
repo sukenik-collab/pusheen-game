@@ -1,5 +1,5 @@
 import { GameObjects } from 'phaser';
-import { MOVE, JUMP, LAND_SQUASH, IDLE, SNIFF_REACT, NAP } from '../config/feel.js';
+import { MOVE, JUMP, LAND_SQUASH, IDLE, SNIFF_REACT, NAP, COSTUME } from '../config/feel.js';
 
 // The physics footprint. The sprite itself is pre-cropped and pre-scaled
 // (see the asset-prep step) to already match this at its native pixel size,
@@ -21,6 +21,12 @@ export class Pusheen extends GameObjects.Container
         this.visual = scene.add.image(0, 0, 'pusheen');
         this.add(this.visual);
 
+        // Pusheencorn horn, hidden until the costume box grants it. A plain
+        // container child, so the visual's squash tweens don't scale it --
+        // acceptable placeholder jank until real costume art exists.
+        this.horn = scene.add.image(0, -HEIGHT / 2 - 8, 'hornTri').setVisible(false);
+        this.add(this.horn);
+
         this.audio = scene.registry.get('audio');
 
         this.body.setSize(WIDTH, HEIGHT);
@@ -31,6 +37,13 @@ export class Pusheen extends GameObjects.Container
         this.body.setCollideWorldBounds(true);
 
         this.wasGrounded = false;
+
+        // Costume persists across rooms via the registry (reset by Play
+        // again), so a freshly-created Pusheen re-applies it herself.
+        this.costumed = false;
+        if (scene.registry.get('costume:pusheencorn')) {
+            this.setCostume(true);
+        }
 
         this.breatheTween = scene.tweens.add({
             targets: this.visual,
@@ -64,8 +77,26 @@ export class Pusheen extends GameObjects.Container
     jump ()
     {
         if (this.body.blocked.down || this.body.touching.down) {
-            this.body.setVelocityY(JUMP.velocity);
+            this.body.setVelocityY(this.costumed ? COSTUME.jumpVelocity : JUMP.velocity);
             this.audio?.play('jump');
+        }
+    }
+
+    // The Pusheencorn costume's one ability: a floatier, taller jump
+    // (lower gravity + stronger impulse). Look is placeholder: pink tint
+    // + the little horn.
+    setCostume (on)
+    {
+        this.costumed = on;
+        this.scene.registry.set('costume:pusheencorn', on);
+
+        this.body.setGravityY(on ? COSTUME.gravity : JUMP.gravity);
+        this.horn.setVisible(on);
+
+        if (on) {
+            this.visual.setTint(COSTUME.tint);
+        } else {
+            this.visual.clearTint();
         }
     }
 
