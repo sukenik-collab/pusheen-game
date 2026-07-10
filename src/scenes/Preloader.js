@@ -29,6 +29,20 @@ export class Preloader extends Scene
         g.generateTexture('dustMote', 8, 8);
         g.destroy();
 
+        // Placeholder yarn ball: a pink circle with two strand arcs.
+        const yarn = this.add.graphics();
+        yarn.fillStyle(0xe57390, 1);
+        yarn.fillCircle(14, 14, 14);
+        yarn.lineStyle(2, 0xc44f70, 1);
+        yarn.beginPath();
+        yarn.arc(14, 14, 9, 0.3, 2.2);
+        yarn.strokePath();
+        yarn.beginPath();
+        yarn.arc(14, 14, 5, 2.8, 5.0);
+        yarn.strokePath();
+        yarn.generateTexture('yarnBall', 28, 28);
+        yarn.destroy();
+
         // Audio: every selectable track + every SFX set's clips. The file path
         // doubles as the load key, so the manifest is the only place paths live.
         TRACKS.forEach((track) => this.load.audio(track.file, track.file));

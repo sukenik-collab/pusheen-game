@@ -54,6 +54,39 @@ export const DOOR = {
     fadeMs: 260
 };
 
+// Yarn balls sit flush against furniture, so both radii are wider than the
+// cabinet's 140/64: Pusheen's body half-width (55) plus her coast-to-a-stop
+// keeps her center ~75-90px from a tucked-in ball, and pickup should feel
+// forgiving, not pixel-perfect. Outer still leads inner.
+export const YARN_RADAR = {
+    sniffRadius: 150,
+    interactRadius: 95
+};
+
+export const YARN_POP = {
+    risePx: 46,
+    ms: 450
+};
+
+// Wider than the cabinet's zones: talking should work standing *beside*
+// her (not overlapping her sprite), and the inner zone must still contain
+// a Pusheen who pressed E mid-hop (~95px above ground at the apex).
+export const STORMY_RADAR = {
+    sniffRadius: 170,
+    interactRadius: 110
+};
+
+export const STORMY = {
+    bubbleHoldMs: 2800,
+    hopPx: 30,
+    hopMs: 240,
+    hopCount: 3,
+    heartCount: 6,
+    heartStaggerMs: 130,
+    heartRisePx: 60,
+    heartMs: 900
+};
+
 export const NAP = {
     settleMs: 500,
     curlMs: 600,

@@ -6,6 +6,8 @@ import { Cushion, CUSHION_HEIGHT } from '../entities/Cushion.js';
 import { Cabinet, CABINET_HEIGHT } from '../entities/Cabinet.js';
 import { Sunbeam } from '../entities/Sunbeam.js';
 import { Door } from '../entities/Door.js';
+import { Stormy } from '../entities/Stormy.js';
+import { YarnBall } from '../entities/YarnBall.js';
 import { fadeToRoom, fadeInRoom } from './roomTransition.js';
 
 const GROUND_HEIGHT = 40;
@@ -57,6 +59,11 @@ export class LivingRoom extends Scene
         // it, only the narrower cushion above collided, and walking up to the
         // couch meant bonking into that floating box from the side instead of
         // being blocked by the couch itself.
+        // Quest: one yarn ball hides behind the couch's left arm -- created
+        // before the couch so it renders tucked behind it, edge peeking out.
+        this.yarnBalls = [];
+        this.spawnYarn('couch', 550, groundTop - 14);
+
         const couchBaseY = groundTop - COUCH_BASE_HEIGHT / 2;
         this.couchBase = this.add.image(width / 2, couchBaseY, 'couchBase');
         this.physics.add.existing(this.couchBase, true);
@@ -65,6 +72,10 @@ export class LivingRoom extends Scene
 
         this.ground = this.add.rectangle(width / 2, groundTop + GROUND_HEIGHT / 2, width, GROUND_HEIGHT, GROUND_COLOR);
         this.physics.add.existing(this.ground, true);
+
+        // Stormy waits between the couch and the sunbeam, near the spawn,
+        // so a fresh lap meets her (and hears about the yarn) right away.
+        this.stormy = new Stormy(this, 820, groundTop);
 
         // Start near the sunbeam (right), not the cabinet -- playtest moved
         // the spawn; see the design doc's scene-layout note for why.
@@ -79,7 +90,7 @@ export class LivingRoom extends Scene
         // Visit-scoped keys only -- run progress (snack, quest) lives in
         // gameState.js so a room transition back here can't wipe it.
         this.registry.set('cabinet:peekOpen', false);
-        this.registry.set('cabinet:inInnerZone', false);
+        this.registry.set('interact:available', false);
         this.registry.set('input:interactPressed', false);
         this.registry.set('nap:active', false);
         this.registry.set('nap:showCard', false);
@@ -131,12 +142,19 @@ export class LivingRoom extends Scene
         }
 
         this.cabinet.update(this.pusheen);
+        this.stormy.update(this.pusheen);
+        this.yarnBalls.forEach((ball) => ball.update(this.pusheen));
 
         // Phaser's registry fires changedata on every set(), even when the
         // value is unchanged -- guard so UI's listener only runs on the
         // real transitions, not every frame regardless of zone state.
-        if (this.cabinet.inInnerZone !== this.registry.get('cabinet:inInnerZone')) {
-            this.registry.set('cabinet:inInnerZone', this.cabinet.inInnerZone);
+        const interactAvailable = !this.registry.get('nap:active') && (
+            (this.cabinet.inInnerZone && !this.registry.get('snack:collected')) ||
+            this.stormy.inInnerZone ||
+            this.yarnBalls.some((ball) => ball.inInnerZone)
+        );
+        if (interactAvailable !== this.registry.get('interact:available')) {
+            this.registry.set('interact:available', interactAvailable);
         }
 
         const interactPressed = Input.Keyboard.JustDown(this.keys.E) || this.registry.get('input:interactPressed');
@@ -175,8 +193,14 @@ export class LivingRoom extends Scene
                 this.pusheen.jump();
             }
 
-            if (interactPressed && this.cabinet.inInnerZone && !this.registry.get('snack:collected')) {
-                this.registry.set('cabinet:peekOpen', true);
+            if (interactPressed) {
+                if (this.cabinet.inInnerZone && !this.registry.get('snack:collected')) {
+                    this.registry.set('cabinet:peekOpen', true);
+                } else if (this.stormy.inInnerZone) {
+                    this.stormy.interact();
+                } else {
+                    this.yarnBalls.find((ball) => ball.inInnerZone)?.collect();
+                }
             }
 
             if (this.sunbeam.checkTrigger(this.pusheen, this.registry.get('snack:collected'))) {
@@ -190,6 +214,13 @@ export class LivingRoom extends Scene
 
         this.pusheen.update();
         this.cushion.resolveContact();
+    }
+
+    spawnYarn (id, x, y)
+    {
+        if (!this.registry.get(`yarn:collected:${id}`)) {
+            this.yarnBalls.push(new YarnBall(this, x, y, id));
+        }
     }
 
     startNapSequence ()
