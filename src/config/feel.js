@@ -50,6 +50,10 @@ export const SNIFF_CUE = {
     ms: 700
 };
 
+export const DOOR = {
+    fadeMs: 260
+};
+
 export const NAP = {
     settleMs: 500,
     curlMs: 600,

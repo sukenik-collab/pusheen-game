@@ -1,5 +1,6 @@
 import { Scene } from 'phaser';
 import { TRACKS, SFX_SETS } from '../config/audioManifest.js';
+import { resetRunState } from '../config/gameState.js';
 import { AudioController } from '../audio/AudioController.js';
 
 export class Preloader extends Scene
@@ -44,6 +45,8 @@ export class Preloader extends Scene
         const audio = new AudioController(this.game);
         this.registry.set('audio', audio);
         audio.startMusic();
+
+        resetRunState(this.registry);
 
         this.scene.start('LivingRoom');
         this.scene.launch('UI');

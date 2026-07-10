@@ -1,6 +1,7 @@
 import { AUTO, Game, Scale } from 'phaser';
 import { Preloader } from './scenes/Preloader';
 import { LivingRoom } from './scenes/LivingRoom';
+import { Bedroom } from './scenes/Bedroom';
 import { UI } from './scenes/UI';
 
 // Find out more information about the Game Config at:
@@ -31,6 +32,7 @@ const config = {
     scene: [
         Preloader,
         LivingRoom,
+        Bedroom,
         UI
     ]
 };
