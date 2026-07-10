@@ -1,7 +1,9 @@
 import { Scene, Input } from 'phaser';
+import { JUMP, COSTUME } from '../config/feel.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Door } from '../entities/Door.js';
 import { YarnBall } from '../entities/YarnBall.js';
+import { CostumeBox } from '../entities/CostumeBox.js';
 import { fadeToRoom, fadeInRoom } from './roomTransition.js';
 
 const GROUND_HEIGHT = 40;
@@ -11,6 +13,16 @@ const GROUND_COLOR = 0x46394f;
 // Where she appears when walking in from the living room (just inside the
 // right-wall door, clear of its trigger zone so it can't instantly re-fire).
 const SPAWN_X_FROM_LIVING_ROOM = 1130;
+
+// The shelf is the one costume-gated spot: its surface sits above what a
+// normal hop can reach even from the bed top (64 + ~82px apex = 146), but
+// comfortably under the Pusheencorn jump's ~192px apex. Derived from the
+// feel values, same as the living room's cushion height, so retuning
+// either jump moves the shelf with it.
+const NORMAL_APEX = (JUMP.velocity * JUMP.velocity) / (2 * JUMP.gravity);
+const COSTUME_APEX = (COSTUME.jumpVelocity * COSTUME.jumpVelocity) / (2 * COSTUME.gravity);
+const SHELF_SURFACE_HEIGHT = Math.round((NORMAL_APEX + 64 + COSTUME_APEX) / 2);
+const SHELF_THICKNESS = 16;
 
 // The room's furniture, declared as data and built by one small loop.
 // Roles:
@@ -27,7 +39,10 @@ const LAYOUT = [
     { name: 'pillow', role: 'background', x: 300, w: 90, h: 26, yFromGround: 77, color: 0xe8eaf6 },
     // Low enough (< the ~82px jump apex) to hop over -- it sits mid-room and
     // must never wall off the left half.
-    { name: 'dresser', role: 'solid', x: 780, w: 120, h: 70, color: 0x8d6e63 }
+    { name: 'dresser', role: 'solid', x: 780, w: 120, h: 70, color: 0x8d6e63 },
+    // The costume-gated high shelf, one-way so she floats up through it and
+    // lands on top. Kept horizontally clear of anything standable.
+    { name: 'shelf', role: 'standable', oneWay: true, x: 130, w: 180, h: SHELF_THICKNESS, yFromGround: SHELF_SURFACE_HEIGHT - SHELF_THICKNESS / 2, color: 0x6d5b63 }
 ];
 
 export class Bedroom extends Scene
@@ -44,17 +59,21 @@ export class Bedroom extends Scene
 
         this.add.rectangle(width / 2, height / 2, width, height, WALL_COLOR);
 
-        // Quest: yarn balls hide behind the furniture -- created before the
-        // layout so they render tucked behind it, edges peeking out.
+        // Quest: one yarn ball hides behind the bed (created before the
+        // layout so it renders tucked behind it, edge peeking out); the
+        // last one sits up on the costume-gated shelf, visible from below
+        // but only reachable with the Pusheencorn jump.
         this.yarnBalls = [];
         this.spawnYarn('bed', 262, groundTop - 14);
-        // TODO(costume checkpoint): moves up onto the Pusheencorn-gated shelf.
-        this.spawnYarn('shelf', 730, groundTop - 16);
+        this.spawnYarn('shelf', 130, groundTop - SHELF_SURFACE_HEIGHT - 14);
 
         this.solids = [];
         LAYOUT.forEach((item) => this.buildLayoutItem(item, groundTop));
 
         this.doorToLivingRoom = new Door(this, 1240, groundTop, 'left');
+
+        // The Pusheencorn box, between the dresser and the door.
+        this.costumeBox = new CostumeBox(this, 970, groundTop);
 
         this.ground = this.add.rectangle(width / 2, groundTop + GROUND_HEIGHT / 2, width, GROUND_HEIGHT, GROUND_COLOR);
         this.physics.add.existing(this.ground, true);
@@ -109,9 +128,17 @@ export class Bedroom extends Scene
             return;
         }
 
-        this.yarnBalls.forEach((ball) => ball.update(this.pusheen));
+        // While the box beat runs, tweens own Pusheen (her body is off) --
+        // no input, no zone updates, no land-squash detection.
+        if (this.costumeBox.busy) {
+            return;
+        }
 
-        const interactAvailable = this.yarnBalls.some((ball) => ball.inInnerZone);
+        this.yarnBalls.forEach((ball) => ball.update(this.pusheen));
+        this.costumeBox.update(this.pusheen);
+
+        const interactAvailable = this.yarnBalls.some((ball) => ball.inInnerZone) ||
+            this.costumeBox.inInnerZone;
         if (interactAvailable !== this.registry.get('interact:available')) {
             this.registry.set('interact:available', interactAvailable);
         }
@@ -137,7 +164,13 @@ export class Bedroom extends Scene
         }
 
         if (interactPressed) {
-            this.yarnBalls.find((ball) => ball.inInnerZone)?.collect();
+            const ball = this.yarnBalls.find((b) => b.inInnerZone);
+
+            if (ball) {
+                ball.collect();
+            } else if (this.costumeBox.inInnerZone) {
+                this.costumeBox.interact(this.pusheen);
+            }
         }
 
         if (this.doorToLivingRoom.checkTrigger(this.pusheen)) {

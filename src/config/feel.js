@@ -87,6 +87,25 @@ export const STORMY = {
     heartMs: 900
 };
 
+export const BOX_RADAR = {
+    sniffRadius: 150,
+    interactRadius: 100
+};
+
+// The one costume ability: a floatier, taller Pusheencorn jump.
+// Apex = v^2/2g: ~192px vs the normal ~82px -- enough to reach the
+// bedroom's high shelf, which the normal hop can't.
+export const COSTUME = {
+    gravity: 1000,
+    jumpVelocity: -620,
+    tint: 0xffd9f0,
+    hopInMs: 280,
+    holdMs: 450,
+    popOutMs: 340,
+    wobbleDeg: 4,
+    wobbleMs: 90
+};
+
 export const NAP = {
     settleMs: 500,
     curlMs: 600,

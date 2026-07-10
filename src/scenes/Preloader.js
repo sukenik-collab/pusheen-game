@@ -43,6 +43,13 @@ export class Preloader extends Scene
         yarn.generateTexture('yarnBall', 28, 28);
         yarn.destroy();
 
+        // Placeholder Pusheencorn horn: a little golden triangle.
+        const horn = this.add.graphics();
+        horn.fillStyle(0xffd166, 1);
+        horn.fillTriangle(8, 0, 0, 22, 16, 22);
+        horn.generateTexture('hornTri', 16, 22);
+        horn.destroy();
+
         // Audio: every selectable track + every SFX set's clips. The file path
         // doubles as the load key, so the manifest is the only place paths live.
         TRACKS.forEach((track) => this.load.audio(track.file, track.file));

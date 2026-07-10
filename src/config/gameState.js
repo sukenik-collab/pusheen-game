@@ -15,4 +15,6 @@ export function resetRunState (registry)
     registry.set('yarn:count', 0);
     YARN_IDS.forEach((id) => registry.set(`yarn:collected:${id}`, false));
     registry.set('quest:complete', false);
+
+    registry.set('costume:pusheencorn', false);
 }
