@@ -2,11 +2,8 @@ import { GameObjects, Geom } from 'phaser';
 import { IDLE, STORMY, STORMY_RADAR } from '../config/feel.js';
 import { YARN_IDS } from '../config/gameState.js';
 
-// Placeholder Stormy: Pusheen's sprite, smaller and paler. Grows into her
-// own art later, same as every other placeholder.
-const SCALE = 0.72;
-const TINT = 0xdbe6f2;
-const VISUAL_HALF_HEIGHT = 36 * SCALE;
+// stormy.png is 80x54, drawn at its native size.
+const VISUAL_HALF_HEIGHT = 27;
 
 const HEART_COLOR = '#f8bbd0';
 const BUBBLE_OFFSET_Y = -70;
@@ -32,17 +29,14 @@ export class Stormy extends GameObjects.Container
 
         this.audio = scene.registry.get('audio');
 
-        this.visual = scene.add.image(0, 0, 'pusheen')
-            .setScale(SCALE)
-            .setTint(TINT);
+        this.visual = scene.add.image(0, 0, 'stormy');
         this.add(this.visual);
 
-        // Idle breathing like Pusheen's, multiplied around her smaller base
-        // scale so pausing/resuming never snaps her to full size.
+        // Idle breathing, same as Pusheen's.
         this.breatheTween = scene.tweens.add({
             targets: this.visual,
-            scaleX: SCALE * (1 + IDLE.breatheScale),
-            scaleY: SCALE * (1 - IDLE.breatheScale * 0.5),
+            scaleX: 1 + IDLE.breatheScale,
+            scaleY: 1 - IDLE.breatheScale * 0.5,
             y: -IDLE.bobPx,
             duration: IDLE.breatheMs,
             yoyo: true,

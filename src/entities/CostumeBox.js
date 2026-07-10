@@ -3,8 +3,9 @@ import { BOX_RADAR, COSTUME, SNIFF_CUE } from '../config/feel.js';
 
 const WIDTH = 120;
 const HEIGHT = 90;
-const CARDBOARD = 0xb98a5e;
-const CARDBOARD_DARK = 0x9c7048;
+// costume-box.png is 120x102: the box body is the lower 90px, the open
+// flaps poke 12px above it, so the image rides 6px high of the body center.
+const ART_OFFSET_Y = -6;
 const CUE_COLOR = '#ffe9a8';
 
 // The Pusheencorn box: a themed cardboard box she climbs into and pops out
@@ -20,16 +21,7 @@ export class CostumeBox extends GameObjects.Container
 
         this.audio = scene.registry.get('audio');
 
-        this.boxVisual = scene.add.container(0, 0, [
-            scene.add.rectangle(0, 0, WIDTH, HEIGHT, CARDBOARD),
-            // open flaps peeking over the rim
-            scene.add.rectangle(-WIDTH / 2 + 14, -HEIGHT / 2 - 5, 28, 10, CARDBOARD_DARK),
-            scene.add.rectangle(WIDTH / 2 - 14, -HEIGHT / 2 - 5, 28, 10, CARDBOARD_DARK),
-            // the "this one's the unicorn box" markings: a horn doodle + stripe
-            scene.add.image(0, -10, 'hornTri'),
-            scene.add.rectangle(0, 22, WIDTH - 24, 6, 0xf48fb1),
-            scene.add.rectangle(0, 30, WIDTH - 24, 6, 0x81d4fa)
-        ]);
+        this.boxVisual = scene.add.image(0, ART_OFFSET_Y, 'costumeBox');
         this.add(this.boxVisual);
 
         this.outerZone = new Geom.Circle(x, this.y, BOX_RADAR.sniffRadius);
@@ -138,6 +130,7 @@ export class CostumeBox extends GameObjects.Container
 
         this.scene.tweens.add({
             targets: pusheen,
+            x: this.x + COSTUME.popOutOffsetX,
             y: this.y - HEIGHT - 30,
             scaleX: 1,
             scaleY: 1,

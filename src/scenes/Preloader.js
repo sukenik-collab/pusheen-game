@@ -22,33 +22,26 @@ export class Preloader extends Scene
         this.load.image('itemShirt', 'assets/sprites/item-shirt.png');
         this.load.image('itemPopcorn', 'assets/sprites/item-popcorn.png');
 
+        // Bedroom + quest + costume art (sized to match their physics
+        // footprints exactly, same convention as the furniture above).
+        this.load.image('door', 'assets/sprites/door.png');
+        this.load.image('bed', 'assets/sprites/bed.png');
+        this.load.image('pillow', 'assets/sprites/pillow.png');
+        this.load.image('dresser', 'assets/sprites/dresser.png');
+        this.load.image('shelf', 'assets/sprites/shelf.png');
+        this.load.image('rug', 'assets/sprites/rug.png');
+        this.load.image('moonWindow', 'assets/sprites/moon-window.png');
+        this.load.image('stormy', 'assets/sprites/stormy.png');
+        this.load.image('yarnBall', 'assets/sprites/yarn-ball.png');
+        this.load.image('costumeBox', 'assets/sprites/costume-box.png');
+        this.load.image('horn', 'assets/sprites/horn.png');
+
         // A tiny soft dot, reused as the sunbeam's dust-mote particle texture.
         const g = this.add.graphics();
         g.fillStyle(0xffffff, 1);
         g.fillCircle(4, 4, 4);
         g.generateTexture('dustMote', 8, 8);
         g.destroy();
-
-        // Placeholder yarn ball: a pink circle with two strand arcs.
-        const yarn = this.add.graphics();
-        yarn.fillStyle(0xe57390, 1);
-        yarn.fillCircle(14, 14, 14);
-        yarn.lineStyle(2, 0xc44f70, 1);
-        yarn.beginPath();
-        yarn.arc(14, 14, 9, 0.3, 2.2);
-        yarn.strokePath();
-        yarn.beginPath();
-        yarn.arc(14, 14, 5, 2.8, 5.0);
-        yarn.strokePath();
-        yarn.generateTexture('yarnBall', 28, 28);
-        yarn.destroy();
-
-        // Placeholder Pusheencorn horn: a little golden triangle.
-        const horn = this.add.graphics();
-        horn.fillStyle(0xffd166, 1);
-        horn.fillTriangle(8, 0, 0, 22, 16, 22);
-        horn.generateTexture('hornTri', 16, 22);
-        horn.destroy();
 
         // Audio: every selectable track + every SFX set's clips. The file path
         // doubles as the load key, so the manifest is the only place paths live.
