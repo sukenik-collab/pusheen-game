@@ -1,15 +1,22 @@
 import { Scene, Input } from 'phaser';
 import { NAP, JUMP } from '../config/feel.js';
+import { resetRunState } from '../config/gameState.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Cushion, CUSHION_HEIGHT } from '../entities/Cushion.js';
 import { Cabinet, CABINET_HEIGHT } from '../entities/Cabinet.js';
 import { Sunbeam } from '../entities/Sunbeam.js';
+import { Door } from '../entities/Door.js';
+import { fadeToRoom, fadeInRoom } from './roomTransition.js';
 
 const GROUND_HEIGHT = 40;
 const FLOOR_COLOR = 0xd7ccc0;
 const GROUND_COLOR = 0x8d6e63;
 
 const COUCH_BASE_HEIGHT = 50;
+// Fresh-lap spawn (near the sunbeam); walking in from the bedroom instead
+// spawns just inside the left-wall door, clear of its trigger zone.
+const SPAWN_X_DEFAULT = 950;
+const SPAWN_X_FROM_BEDROOM = 150;
 // Derived from feel.js's own JUMP values (apex = v^2/2g) rather than a
 // hand-copied comment, so retuning JUMP can't silently strand the cushion
 // out of reach (or make it trivial to clear) without this moving too.
@@ -23,7 +30,7 @@ export class LivingRoom extends Scene
         super('LivingRoom');
     }
 
-    create ()
+    create (data)
     {
         const { width, height } = this.scale;
         const groundTop = height - GROUND_HEIGHT;
@@ -40,6 +47,9 @@ export class LivingRoom extends Scene
 
         // Right -- window + sunbeam with the nap trigger
         this.sunbeam = new Sunbeam(this, 1080, groundTop);
+
+        // Far left -- doorway to the bedroom
+        this.doorToBedroom = new Door(this, 40, groundTop, 'right');
 
         // Center -- couch base + the one squashable cushion, reachable with a hop.
         // The base gets its own solid static body (matching its real, wider
@@ -58,7 +68,7 @@ export class LivingRoom extends Scene
 
         // Start near the sunbeam (right), not the cabinet -- playtest moved
         // the spawn; see the design doc's scene-layout note for why.
-        this.pusheen = new Pusheen(this, 950, height - 200);
+        this.pusheen = new Pusheen(this, data?.spawnX ?? SPAWN_X_DEFAULT, height - 200);
         this.physics.add.collider(this.pusheen, this.ground);
         this.physics.add.collider(this.pusheen, this.couchBase);
         this.physics.add.collider(this.pusheen, this.cushion, () => this.cushion.onCollide());
@@ -66,10 +76,10 @@ export class LivingRoom extends Scene
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keys = this.input.keyboard.addKeys('W,A,S,D,SPACE,E');
 
+        // Visit-scoped keys only -- run progress (snack, quest) lives in
+        // gameState.js so a room transition back here can't wipe it.
         this.registry.set('cabinet:peekOpen', false);
         this.registry.set('cabinet:inInnerZone', false);
-        this.registry.set('snack:collected', false);
-        this.registry.set('snack:count', 0);
         this.registry.set('input:interactPressed', false);
         this.registry.set('nap:active', false);
         this.registry.set('nap:showCard', false);
@@ -91,13 +101,32 @@ export class LivingRoom extends Scene
         this.events.once('shutdown', () => {
             this.registry.events.off('changedata-snack:collected', onSnackCollected);
         });
+
+        // Returning from the bedroom with the snack already found: re-light
+        // the beam immediately so the room still points at the nap spot.
+        if (this.registry.get('snack:collected')) {
+            this.sunbeam.illuminate();
+        }
+
+        this.transitioning = false;
+
+        if (data?.fadeIn) {
+            fadeInRoom(this);
+        }
     }
 
     update ()
     {
         if (this.registry.get('game:restartRequested')) {
             this.registry.set('game:restartRequested', false);
-            this.scene.restart();
+            resetRunState(this.registry);
+            this.scene.restart({ spawnX: SPAWN_X_DEFAULT, fadeIn: false });
+            return;
+        }
+
+        if (this.transitioning) {
+            this.pusheen.stopMoving();
+            this.pusheen.update();
             return;
         }
 
@@ -152,6 +181,10 @@ export class LivingRoom extends Scene
 
             if (this.sunbeam.checkTrigger(this.pusheen, this.registry.get('snack:collected'))) {
                 this.startNapSequence();
+            }
+
+            if (this.doorToBedroom.checkTrigger(this.pusheen)) {
+                fadeToRoom(this, 'Bedroom', { fadeIn: true });
             }
         }
 
