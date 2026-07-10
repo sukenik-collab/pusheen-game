@@ -1,6 +1,7 @@
 import { Scene, Input } from 'phaser';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Door } from '../entities/Door.js';
+import { YarnBall } from '../entities/YarnBall.js';
 import { fadeToRoom, fadeInRoom } from './roomTransition.js';
 
 const GROUND_HEIGHT = 40;
@@ -24,7 +25,9 @@ const LAYOUT = [
     { name: 'moon', role: 'background', shape: 'circle', x: 660, r: 24, yFromGround: 530, color: 0xf4eecb },
     { name: 'bed', role: 'standable', x: 400, w: 280, h: 64, color: 0x7986cb },
     { name: 'pillow', role: 'background', x: 300, w: 90, h: 26, yFromGround: 77, color: 0xe8eaf6 },
-    { name: 'dresser', role: 'solid', x: 780, w: 120, h: 120, color: 0x8d6e63 }
+    // Low enough (< the ~82px jump apex) to hop over -- it sits mid-room and
+    // must never wall off the left half.
+    { name: 'dresser', role: 'solid', x: 780, w: 120, h: 70, color: 0x8d6e63 }
 ];
 
 export class Bedroom extends Scene
@@ -41,6 +44,13 @@ export class Bedroom extends Scene
 
         this.add.rectangle(width / 2, height / 2, width, height, WALL_COLOR);
 
+        // Quest: yarn balls hide behind the furniture -- created before the
+        // layout so they render tucked behind it, edges peeking out.
+        this.yarnBalls = [];
+        this.spawnYarn('bed', 262, groundTop - 14);
+        // TODO(costume checkpoint): moves up onto the Pusheencorn-gated shelf.
+        this.spawnYarn('shelf', 730, groundTop - 16);
+
         this.solids = [];
         LAYOUT.forEach((item) => this.buildLayoutItem(item, groundTop));
 
@@ -56,9 +66,17 @@ export class Bedroom extends Scene
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keys = this.input.keyboard.addKeys('W,A,S,D,SPACE,E');
         this.registry.set('input:interactPressed', false);
+        this.registry.set('interact:available', false);
 
         this.transitioning = false;
         fadeInRoom(this);
+    }
+
+    spawnYarn (id, x, y)
+    {
+        if (!this.registry.get(`yarn:collected:${id}`)) {
+            this.yarnBalls.push(new YarnBall(this, x, y, id));
+        }
     }
 
     buildLayoutItem (item, groundTop)
@@ -91,6 +109,13 @@ export class Bedroom extends Scene
             return;
         }
 
+        this.yarnBalls.forEach((ball) => ball.update(this.pusheen));
+
+        const interactAvailable = this.yarnBalls.some((ball) => ball.inInnerZone);
+        if (interactAvailable !== this.registry.get('interact:available')) {
+            this.registry.set('interact:available', interactAvailable);
+        }
+
         const interactPressed = Input.Keyboard.JustDown(this.keys.E) || this.registry.get('input:interactPressed');
         this.registry.set('input:interactPressed', false);
 
@@ -109,6 +134,10 @@ export class Bedroom extends Scene
 
         if (jumpPressed) {
             this.pusheen.jump();
+        }
+
+        if (interactPressed) {
+            this.yarnBalls.find((ball) => ball.inInnerZone)?.collect();
         }
 
         if (this.doorToLivingRoom.checkTrigger(this.pusheen)) {

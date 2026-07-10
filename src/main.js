@@ -38,5 +38,7 @@ const config = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    new Game(config);
+    // Exposed so playtests can poke feel values / registry state from the
+    // browser console without a rebuild.
+    window.__pusheen = new Game(config);
 });
