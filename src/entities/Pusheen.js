@@ -32,6 +32,12 @@ export class Pusheen extends GameObjects.Container
 
         this.wasGrounded = false;
 
+        // A composable multiplier on whatever the current jump is -- the seam
+        // for v2's held item, which scales jump height while carrying. Stays 1
+        // in v1.5 (no behavior change). Independent of the costume: see
+        // resolveJumpVelocity().
+        this.jumpVelocityMultiplier = 1;
+
         // Costume persists across rooms via the registry (reset by Play
         // again), so a freshly-created Pusheen re-applies it herself.
         this.costumed = false;
@@ -68,10 +74,20 @@ export class Pusheen extends GameObjects.Container
         this.body.setAccelerationX(0);
     }
 
+    // Costume = an absolute swap of the base jump (velocity + gravity); the
+    // held-item multiplier (v2) then scales whatever that base is. Two
+    // independent systems that only compose here, at jump time -- neither reads
+    // the other. Multiplier is 1 in v1.5, so this is exactly the old value.
+    resolveJumpVelocity ()
+    {
+        const base = this.costumed ? COSTUME.jumpVelocity : JUMP.velocity;
+        return base * this.jumpVelocityMultiplier;
+    }
+
     jump ()
     {
         if (this.body.blocked.down || this.body.touching.down) {
-            this.body.setVelocityY(this.costumed ? COSTUME.jumpVelocity : JUMP.velocity);
+            this.body.setVelocityY(this.resolveJumpVelocity());
             this.audio?.play('jump');
         }
     }
