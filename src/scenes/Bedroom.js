@@ -35,19 +35,20 @@ const SHELF_THICKNESS = 16;
 //   standable  -- static body meant to be hopped onto (oneWay: top face only)
 // Interactive things (doors, yarn, the costume box) are entities, not layout.
 // `yFromGround` = center height above the floor top; omitted = sits on it.
+// `sprite` art is sized to match w/h exactly, so the static body a sprite
+// gets from its image bounds equals the declared footprint.
 const LAYOUT = [
-    { name: 'rug', role: 'background', x: 400, w: 340, h: 14, yFromGround: 7, color: 0x8e6b7f },
-    { name: 'moonWindow', role: 'background', x: 640, w: 110, h: 140, yFromGround: 510, color: 0x2f2a3d },
-    { name: 'moon', role: 'background', shape: 'circle', x: 660, r: 24, yFromGround: 530, color: 0xf4eecb },
-    { name: 'bed', role: 'standable', x: 400, w: 280, h: 64, color: 0x7986cb },
+    { name: 'rug', role: 'background', sprite: 'rug', x: 400, w: 340, h: 14, yFromGround: 7 },
+    { name: 'moonWindow', role: 'background', sprite: 'moonWindow', x: 640, w: 110, h: 140, yFromGround: 510 },
+    { name: 'bed', role: 'standable', sprite: 'bed', x: 400, w: 280, h: 64 },
     // Pillow is not layout -- it's the squishy Pillow entity, created after
     // the bed so it renders on top of it (see create()).
     // Low enough (< the ~82px jump apex) to hop over -- it sits mid-room and
     // must never wall off the left half.
-    { name: 'dresser', role: 'solid', x: 780, w: 120, h: 70, color: 0x8d6e63 },
+    { name: 'dresser', role: 'solid', sprite: 'dresser', x: 780, w: 120, h: 70 },
     // The costume-gated high shelf, one-way so she floats up through it and
     // lands on top. Kept horizontally clear of anything standable.
-    { name: 'shelf', role: 'standable', oneWay: true, x: 130, w: 180, h: SHELF_THICKNESS, yFromGround: SHELF_SURFACE_HEIGHT - SHELF_THICKNESS / 2, color: 0x6d5b63 }
+    { name: 'shelf', role: 'standable', sprite: 'shelf', oneWay: true, x: 130, w: 180, h: SHELF_THICKNESS, yFromGround: SHELF_SURFACE_HEIGHT - SHELF_THICKNESS / 2 }
 ];
 
 export class Bedroom extends Scene
@@ -77,8 +78,8 @@ export class Bedroom extends Scene
         LAYOUT.forEach((item) => this.buildLayoutItem(item, groundTop));
 
         // Squishy pillow, on top of the bed -- built after the layout so it
-        // renders over the bed's fill.
-        this.pillow = new Pillow(this, 300, groundTop - 77, 90, 26, 0xe8eaf6);
+        // renders over the bed's art.
+        this.pillow = new Pillow(this, 300, groundTop - 77);
 
         this.doorToLivingRoom = new Door(this, 1240, groundTop, 'left');
 
@@ -111,8 +112,8 @@ export class Bedroom extends Scene
     buildLayoutItem (item, groundTop)
     {
         const y = groundTop - (item.yFromGround ?? item.h / 2);
-        const obj = item.shape === 'circle'
-            ? this.add.circle(item.x, y, item.r, item.color)
+        const obj = item.sprite
+            ? this.add.image(item.x, y, item.sprite)
             : this.add.rectangle(item.x, y, item.w, item.h, item.color);
 
         if (item.role === 'solid' || item.role === 'standable') {

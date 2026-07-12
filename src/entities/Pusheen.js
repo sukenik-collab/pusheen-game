@@ -23,8 +23,8 @@ export class Pusheen extends GameObjects.Container
 
         // Pusheencorn horn, hidden until the costume box grants it. A plain
         // container child, so the visual's squash tweens don't scale it --
-        // acceptable placeholder jank until real costume art exists.
-        this.horn = scene.add.image(0, -HEIGHT / 2 - 8, 'hornTri').setVisible(false);
+        // acceptable jank until a full costume spritesheet exists.
+        this.horn = scene.add.image(0, -HEIGHT / 2 - 10, 'horn').setVisible(false);
         this.add(this.horn);
 
         this.audio = scene.registry.get('audio');

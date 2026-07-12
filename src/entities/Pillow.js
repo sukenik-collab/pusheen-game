@@ -4,20 +4,20 @@ import { CUSHION_SQUASH } from '../config/feel.js';
 // A soft spot on the bed. Unlike the couch cushion it has no body -- she
 // stands on the bed itself -- so it isn't a landing platform; it just gives
 // the same volume-conserving squish when she settles onto it, so the bed
-// reads as plush rather than a plank. Placeholder art is a plain rectangle.
+// reads as plush rather than a plank.
 export class Pillow extends GameObjects.Container
 {
-    constructor (scene, x, y, w, h, color)
+    constructor (scene, x, y)
     {
         super(scene, x, y);
         scene.add.existing(this);
 
-        this.visual = scene.add.rectangle(0, 0, w, h, color);
+        this.visual = scene.add.image(0, 0, 'pillow');
         this.add(this.visual);
 
         this.audio = scene.registry.get('audio');
 
-        this.halfW = w / 2;
+        this.halfW = this.visual.width / 2;
         this.wasResting = false;
     }
 
