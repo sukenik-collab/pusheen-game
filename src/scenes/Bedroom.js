@@ -7,15 +7,19 @@ import { Pillow, PILLOW_HEIGHT } from '../entities/Pillow.js';
 import { CostumeBox } from '../entities/CostumeBox.js';
 import { buildLayout } from '../systems/roomBuilder.js';
 import { InteractionController } from '../systems/InteractionController.js';
-import { fadeToRoom, fadeInRoom } from './roomTransition.js';
+import { fadeToRoom, fadeInRoom, resolveSpawn } from './roomTransition.js';
 
 const GROUND_HEIGHT = 40;
 const WALL_COLOR = 0x55486b;   // dusky lavender -- night-time contrast to the living room
 const GROUND_COLOR = 0x46394f;
 
-// Where she appears when walking in from the living room (just inside the
-// right-wall door, clear of its trigger zone so it can't instantly re-fire).
-const SPAWN_X_FROM_LIVING_ROOM = 1130;
+// Named entry points. Bedroom is only reached from the living room (and is
+// never the boot room), so default == fromLivingRoom: just inside the right-
+// wall door, clear of its trigger zone so it can't instantly re-fire.
+const SPAWN_POINTS = {
+    default: { x: 1130 },
+    fromLivingRoom: { x: 1130 }
+};
 
 // The bed's *mattress* surface -- where she actually stands -- is not the top
 // of the bed sprite. The sprite is 64 tall but its mattress top sits at the
@@ -118,7 +122,7 @@ export class Bedroom extends Scene
         // hops onto. Built after the layout so it renders over the bed's art.
         this.pillow = new Pillow(this, 330, groundTop - PILLOW_SURFACE_HEIGHT + PILLOW_HEIGHT / 2);
 
-        this.doorToLivingRoom = new Door(this, 1240, groundTop, 'left');
+        this.doorToLivingRoom = new Door(this, 1240, groundTop, { side: 'left', to: 'LivingRoom', enterAt: 'fromBedroom' });
 
         // The Pusheencorn box, between the dresser and the door.
         this.costumeBox = new CostumeBox(this, 970, groundTop);
@@ -134,7 +138,8 @@ export class Bedroom extends Scene
         this.ground = this.add.rectangle(width / 2, groundTop + GROUND_HEIGHT / 2, width, GROUND_HEIGHT, GROUND_COLOR);
         this.physics.add.existing(this.ground, true);
 
-        this.pusheen = new Pusheen(this, data?.spawnX ?? SPAWN_X_FROM_LIVING_ROOM, height - 200);
+        const spawn = resolveSpawn(SPAWN_POINTS, data);
+        this.pusheen = new Pusheen(this, spawn.x, height - 200);
         this.physics.add.collider(this.pusheen, this.ground);
         this.solids.forEach((solid) => this.physics.add.collider(this.pusheen, solid));
         this.physics.add.collider(this.pusheen, this.pillow, () => this.pillow.onCollide());
@@ -200,7 +205,7 @@ export class Bedroom extends Scene
         // The door is a walk-into trigger, handled here rather than through the
         // interaction controller (see the controller's note on triggers).
         if (this.doorToLivingRoom.checkTrigger(this.pusheen)) {
-            fadeToRoom(this, 'LivingRoom', { spawnX: 150, fadeIn: true });
+            fadeToRoom(this, this.doorToLivingRoom.to, { spawn: this.doorToLivingRoom.enterAt, fadeIn: true });
         }
 
         this.pusheen.update();
