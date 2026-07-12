@@ -20,6 +20,7 @@ export class CostumeBox extends GameObjects.Container
         scene.add.existing(this);
 
         this.audio = scene.registry.get('audio');
+        this.verb = 'peek';
 
         this.boxVisual = scene.add.image(0, ART_OFFSET_Y, 'costumeBox');
         this.add(this.boxVisual);
@@ -42,6 +43,14 @@ export class CostumeBox extends GameObjects.Container
         }
 
         this.inOuterZone = nowOuter;
+    }
+
+    // Contract gate for the InteractionController: no re-entry mid-beat. (The
+    // scene also freezes its whole update() while busy, so the controller
+    // won't even run then -- this keeps the entity honest on its own.)
+    isActionable ()
+    {
+        return !this.busy;
     }
 
     playSparkleCue ()

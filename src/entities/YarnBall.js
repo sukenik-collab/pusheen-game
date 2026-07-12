@@ -15,6 +15,7 @@ export class YarnBall extends GameObjects.Container
 
         this.id = id;
         this.audio = scene.registry.get('audio');
+        this.verb = 'take';
 
         this.visual = scene.add.image(0, 0, 'yarnBall');
         this.add(this.visual);
@@ -47,6 +48,19 @@ export class YarnBall extends GameObjects.Container
         }
 
         this.inOuterZone = nowOuter;
+    }
+
+    // Contract hooks for the InteractionController. inInnerZone already bakes
+    // in the grounded check; this is the semantic gate (a collected ball is
+    // inert, though it also stops reporting inInnerZone once collected).
+    isActionable ()
+    {
+        return !this.collected;
+    }
+
+    interact ()
+    {
+        this.collect();
     }
 
     playSniffCue (pusheen)
