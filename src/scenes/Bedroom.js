@@ -3,6 +3,7 @@ import { JUMP, COSTUME } from '../config/feel.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Door } from '../entities/Door.js';
 import { YarnBall } from '../entities/YarnBall.js';
+import { Pillow } from '../entities/Pillow.js';
 import { CostumeBox } from '../entities/CostumeBox.js';
 import { fadeToRoom, fadeInRoom } from './roomTransition.js';
 
@@ -16,12 +17,15 @@ const SPAWN_X_FROM_LIVING_ROOM = 1130;
 
 // The shelf is the one costume-gated spot: its surface sits above what a
 // normal hop can reach even from the bed top (64 + ~82px apex = 146), but
-// comfortably under the Pusheencorn jump's ~192px apex. Derived from the
-// feel values, same as the living room's cushion height, so retuning
-// either jump moves the shelf with it.
-const NORMAL_APEX = (JUMP.velocity * JUMP.velocity) / (2 * JUMP.gravity);
+// comfortably under the Pusheencorn jump's ~192px apex. Sit it 70% of the
+// way up that gap -- a little higher than dead-center so a normal hop lands
+// definitively short, while the costume jump still clears it with room to
+// settle. Derived from the feel values so retuning either jump moves it.
+const NORMAL_REACH_FROM_BED = (JUMP.velocity * JUMP.velocity) / (2 * JUMP.gravity) + 64;
 const COSTUME_APEX = (COSTUME.jumpVelocity * COSTUME.jumpVelocity) / (2 * COSTUME.gravity);
-const SHELF_SURFACE_HEIGHT = Math.round((NORMAL_APEX + 64 + COSTUME_APEX) / 2);
+const SHELF_SURFACE_HEIGHT = Math.round(
+    NORMAL_REACH_FROM_BED + (COSTUME_APEX - NORMAL_REACH_FROM_BED) * 0.7
+);
 const SHELF_THICKNESS = 16;
 
 // The room's furniture, declared as data and built by one small loop.
@@ -36,7 +40,8 @@ const LAYOUT = [
     { name: 'moonWindow', role: 'background', x: 640, w: 110, h: 140, yFromGround: 510, color: 0x2f2a3d },
     { name: 'moon', role: 'background', shape: 'circle', x: 660, r: 24, yFromGround: 530, color: 0xf4eecb },
     { name: 'bed', role: 'standable', x: 400, w: 280, h: 64, color: 0x7986cb },
-    { name: 'pillow', role: 'background', x: 300, w: 90, h: 26, yFromGround: 77, color: 0xe8eaf6 },
+    // Pillow is not layout -- it's the squishy Pillow entity, created after
+    // the bed so it renders on top of it (see create()).
     // Low enough (< the ~82px jump apex) to hop over -- it sits mid-room and
     // must never wall off the left half.
     { name: 'dresser', role: 'solid', x: 780, w: 120, h: 70, color: 0x8d6e63 },
@@ -65,10 +70,15 @@ export class Bedroom extends Scene
         // but only reachable with the Pusheencorn jump.
         this.yarnBalls = [];
         this.spawnYarn('bed', 262, groundTop - 14);
-        this.spawnYarn('shelf', 130, groundTop - SHELF_SURFACE_HEIGHT - 14);
+        // Tucked toward the left end of the shelf, clear of the bed below.
+        this.spawnYarn('shelf', 70, groundTop - SHELF_SURFACE_HEIGHT - 14);
 
         this.solids = [];
         LAYOUT.forEach((item) => this.buildLayoutItem(item, groundTop));
+
+        // Squishy pillow, on top of the bed -- built after the layout so it
+        // renders over the bed's fill.
+        this.pillow = new Pillow(this, 300, groundTop - 77, 90, 26, 0xe8eaf6);
 
         this.doorToLivingRoom = new Door(this, 1240, groundTop, 'left');
 
@@ -135,6 +145,7 @@ export class Bedroom extends Scene
         }
 
         this.yarnBalls.forEach((ball) => ball.update(this.pusheen));
+        this.pillow.update(this.pusheen);
         this.costumeBox.update(this.pusheen);
 
         const interactAvailable = this.yarnBalls.some((ball) => ball.inInnerZone) ||

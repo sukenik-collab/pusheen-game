@@ -34,7 +34,13 @@ export class YarnBall extends GameObjects.Container
         }
 
         const nowOuter = Geom.Circle.Contains(this.outerZone, pusheen.x, pusheen.y);
-        this.inInnerZone = Geom.Circle.Contains(this.innerZone, pusheen.x, pusheen.y);
+
+        // Pickup wants her feet planted -- standing on the floor beside a
+        // tucked ball, or up on the shelf. Never snatched at a jump apex:
+        // the generous interact radius otherwise lets a normal hop grab the
+        // shelf ball from directly below, defeating its costume gate.
+        this.inInnerZone = pusheen.isGrounded() &&
+            Geom.Circle.Contains(this.innerZone, pusheen.x, pusheen.y);
 
         if (nowOuter && !this.inOuterZone) {
             this.playSniffCue(pusheen);

@@ -32,7 +32,12 @@ export class Cabinet extends GameObjects.Container
         const nowOuter = Geom.Circle.Contains(this.outerZone, pusheen.x, pusheen.y);
         const nowInner = Geom.Circle.Contains(this.innerZone, pusheen.x, pusheen.y);
 
-        if (nowOuter && !this.inOuterZone) {
+        // The cat-sense cue is tied to the snack, not to this spot: once it's
+        // been found, re-entering the room (a fresh scene, so inOuterZone has
+        // reset) must not make the dresser call out again.
+        const snackFound = this.scene.registry.get('snack:collected');
+
+        if (nowOuter && !this.inOuterZone && !snackFound) {
             this.playSniffCue();
             pusheen.playSniffReact();
         }
