@@ -8,6 +8,8 @@ import { Sunbeam } from '../entities/Sunbeam.js';
 import { Door } from '../entities/Door.js';
 import { Stormy } from '../entities/Stormy.js';
 import { YarnBall } from '../entities/YarnBall.js';
+import { buildLayout } from '../systems/roomBuilder.js';
+import { InteractionController } from '../systems/InteractionController.js';
 import { subscribeRegistry } from '../systems/registryHelpers.js';
 import { fadeToRoom, fadeInRoom } from './roomTransition.js';
 
@@ -25,6 +27,18 @@ const SPAWN_X_FROM_BEDROOM = 150;
 // out of reach (or make it trivial to clear) without this moving too.
 const JUMP_APEX_HEIGHT = (JUMP.velocity * JUMP.velocity) / (2 * JUMP.gravity);
 const CUSHION_SURFACE_HEIGHT = Math.round(JUMP_APEX_HEIGHT * 0.8);
+
+// The room's one piece of solid furniture, as data built by the shared
+// roomBuilder (same construction path as the Bedroom). Its own solid body,
+// wider than the cushion above, makes the couch read as one continuous piece
+// -- without it, only the narrower cushion collided and walking up meant
+// bonking a floating box from the side. The cabinet, cushion, yarn, sunbeam,
+// and door are entities, not layout. The couch yarn is spawned in create()
+// *before* this runs so it renders tucked behind the couch's left arm -- that
+// render-order nuance stays in create() (see roomBuilder's note).
+const LAYOUT = [
+    { name: 'couchBase', role: 'solid', sprite: 'couchBase', x: 640, yFromGround: COUCH_BASE_HEIGHT / 2 }
+];
 
 export class LivingRoom extends Scene
 {
@@ -54,20 +68,15 @@ export class LivingRoom extends Scene
         // Far left -- doorway to the bedroom
         this.doorToBedroom = new Door(this, 40, groundTop, 'right');
 
-        // Center -- couch base + the one squashable cushion, reachable with a hop.
-        // The base gets its own solid static body (matching its real, wider
-        // footprint) so the couch reads as one continuous solid piece -- without
-        // it, only the narrower cushion above collided, and walking up to the
-        // couch meant bonking into that floating box from the side instead of
-        // being blocked by the couch itself.
-        // Quest: one yarn ball hides behind the couch's left arm -- created
-        // before the couch so it renders tucked behind it, edge peeking out.
+        // Center -- couch base (built from LAYOUT below) + the one squashable
+        // cushion, reachable with a hop. Quest: one yarn ball hides behind the
+        // couch's left arm -- spawned before the couch is built so it renders
+        // tucked behind it, edge peeking out (render-order nuance kept here).
         this.yarnBalls = [];
         this.spawnYarn('couch', 550, groundTop - 14);
 
-        const couchBaseY = groundTop - COUCH_BASE_HEIGHT / 2;
-        this.couchBase = this.add.image(width / 2, couchBaseY, 'couchBase');
-        this.physics.add.existing(this.couchBase, true);
+        this.solids = buildLayout(this, LAYOUT, groundTop);
+
         const cushionY = groundTop - CUSHION_SURFACE_HEIGHT + CUSHION_HEIGHT / 2;
         this.cushion = new Cushion(this, width / 2, cushionY);
 
@@ -78,11 +87,19 @@ export class LivingRoom extends Scene
         // so a fresh lap meets her (and hears about the yarn) right away.
         this.stormy = new Stormy(this, 820, groundTop);
 
+        // One dispatcher for every E-press interaction here, registered in the
+        // old positional priority order (cabinet > Stormy > yarn) as the
+        // tie-break. Today the zones don't overlap, so nearest-dispatch already
+        // reproduces that priority. The door + sunbeam are walk-into triggers
+        // and stay out of the controller (see its note on triggers).
+        this.interactions = new InteractionController(this);
+        [this.cabinet, this.stormy, ...this.yarnBalls].forEach((item) => this.interactions.register(item));
+
         // Start near the sunbeam (right), not the cabinet -- playtest moved
         // the spawn; see the design doc's scene-layout note for why.
         this.pusheen = new Pusheen(this, data?.spawnX ?? SPAWN_X_DEFAULT, height - 200);
         this.physics.add.collider(this.pusheen, this.ground);
-        this.physics.add.collider(this.pusheen, this.couchBase);
+        this.solids.forEach((solid) => this.physics.add.collider(this.pusheen, solid));
         this.physics.add.collider(this.pusheen, this.cushion, () => this.cushion.onCollide());
 
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -138,21 +155,10 @@ export class LivingRoom extends Scene
             return;
         }
 
-        this.cabinet.update(this.pusheen);
-        this.stormy.update(this.pusheen);
-        this.yarnBalls.forEach((ball) => ball.update(this.pusheen));
-
-        // Phaser's registry fires changedata on every set(), even when the
-        // value is unchanged -- guard so UI's listener only runs on the
-        // real transitions, not every frame regardless of zone state.
-        const interactAvailable = !this.registry.get('nap:active') && (
-            (this.cabinet.inInnerZone && !this.registry.get('snack:collected')) ||
-            this.stormy.inInnerZone ||
-            this.yarnBalls.some((ball) => ball.inInnerZone)
-        );
-        if (interactAvailable !== this.registry.get('interact:available')) {
-            this.registry.set('interact:available', interactAvailable);
-        }
+        // Updates every registered interactable's zones/cues and publishes
+        // interact:available (guarded). Suppressed during the nap so the
+        // button can't reappear mid-payoff -- the old !nap:active guard.
+        this.interactions.update(this.pusheen, { suppress: this.registry.get('nap:active') });
 
         const interactPressed = Input.Keyboard.JustDown(this.keys.E) || this.registry.get('input:interactPressed');
         this.registry.set('input:interactPressed', false);
@@ -191,13 +197,7 @@ export class LivingRoom extends Scene
             }
 
             if (interactPressed) {
-                if (this.cabinet.inInnerZone && !this.registry.get('snack:collected')) {
-                    this.registry.set('cabinet:peekOpen', true);
-                } else if (this.stormy.inInnerZone) {
-                    this.stormy.interact();
-                } else {
-                    this.yarnBalls.find((ball) => ball.inInnerZone)?.collect();
-                }
+                this.interactions.pressInteract(this.pusheen);
             }
 
             if (this.sunbeam.checkTrigger(this.pusheen, this.registry.get('snack:collected'))) {

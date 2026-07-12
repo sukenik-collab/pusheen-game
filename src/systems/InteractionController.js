@@ -35,11 +35,16 @@ export class InteractionController
 
     // Recompute every entity's zones/cues, then publish whether any actionable
     // interaction is currently in range. Guarded (only set on change).
-    update (pusheen)
+    //
+    // `suppress` forces availability false regardless of zones -- for a scene
+    // that owns the screen with a modal beat (e.g. LivingRoom during the nap)
+    // and must not let the interact button reappear underneath it. Entities
+    // still update every frame; only the publish is forced off.
+    update (pusheen, { suppress = false } = {})
     {
         this.items.forEach((item) => item.update(pusheen));
 
-        const available = this.items.some((item) => item.inInnerZone && this.isActionable(item));
+        const available = !suppress && this.items.some((item) => item.inInnerZone && this.isActionable(item));
         if (available !== this.scene.registry.get('interact:available')) {
             this.scene.registry.set('interact:available', available);
         }

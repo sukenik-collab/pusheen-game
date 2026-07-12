@@ -17,6 +17,7 @@ export class Cabinet extends GameObjects.Container
         this.add(this.visual);
 
         this.audio = scene.registry.get('audio');
+        this.verb = 'peek';
 
         // Outer must be strictly larger than inner so the cue leads the
         // interaction -- the gap is the "ooh, what's over there?" beat.
@@ -44,6 +45,20 @@ export class Cabinet extends GameObjects.Container
 
         this.inOuterZone = nowOuter;
         this.inInnerZone = nowInner;
+    }
+
+    // Contract hooks for the InteractionController. Semantic gate: the cabinet
+    // is only actionable while the snack is unfound (once collected there's
+    // nothing to peek at). Interacting opens the peek panel via the registry;
+    // the modal's E-to-cancel and item selection live in the scene/UI.
+    isActionable (scene)
+    {
+        return !scene.registry.get('snack:collected');
+    }
+
+    interact (pusheen, scene)
+    {
+        scene.registry.set('cabinet:peekOpen', true);
     }
 
     // A single note reads as a blink-and-you-miss-it flicker, so one sniff
