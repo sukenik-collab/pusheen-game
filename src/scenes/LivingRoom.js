@@ -8,6 +8,7 @@ import { Sunbeam } from '../entities/Sunbeam.js';
 import { Door } from '../entities/Door.js';
 import { Stormy } from '../entities/Stormy.js';
 import { YarnBall } from '../entities/YarnBall.js';
+import { subscribeRegistry } from '../systems/registryHelpers.js';
 import { fadeToRoom, fadeInRoom } from './roomTransition.js';
 
 const GROUND_HEIGHT = 40;
@@ -97,20 +98,16 @@ export class LivingRoom extends Scene
         this.registry.set('nap:showPlayAgain', false);
         this.registry.set('game:restartRequested', false);
 
-        // The registry's event emitter is global and outlives any one
-        // LivingRoom instance, so a listener added on every create() (every
-        // restart) would accumulate and pile up stale closures over stale
-        // scene instances -- explicitly drop it on shutdown, unlike UI's
-        // registry listeners, which only ever run through create() once
-        // since UI itself is never restarted.
-        const onSnackCollected = (parent, value) => {
+        // Light the beam the moment the snack is found. subscribeRegistry
+        // drops the listener on shutdown -- the registry emitter outlives any
+        // one LivingRoom instance, so a listener re-added on every create()
+        // (every restart) would otherwise pile up stale closures over dead
+        // scenes. (UI's registry listeners don't need this: UI is never
+        // restarted, so its create() runs exactly once.)
+        subscribeRegistry(this, 'snack:collected', (parent, value) => {
             if (value) {
                 this.sunbeam.illuminate();
             }
-        };
-        this.registry.events.on('changedata-snack:collected', onSnackCollected);
-        this.events.once('shutdown', () => {
-            this.registry.events.off('changedata-snack:collected', onSnackCollected);
         });
 
         // Returning from the bedroom with the snack already found: re-light
