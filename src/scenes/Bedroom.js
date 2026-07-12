@@ -88,13 +88,30 @@ export class Bedroom extends Scene
 
         // The bed's standable surface: a solid body whose top is the mattress
         // (not the sprite top), so she stands on the sheets instead of floating
-        // at the headboard-post height. Full-height so she can't walk through
-        // the frame; invisible (the bed sprite draws the bed).
+        // at the headboard-post height. Inset and only mattress-high on purpose;
+        // the raised end frame is handled by the posts below. Invisible (the
+        // bed sprite draws the bed).
         const mattressTop = groundTop - BED_SURFACE_HEIGHT;
         this.bedBody = this.add.rectangle(400, (mattressTop + groundTop) / 2, 240, BED_SURFACE_HEIGHT)
             .setVisible(false);
         this.physics.add.existing(this.bedBody, true);
         this.solids.push(this.bedBody);
+
+        // Headboard + footboard: the frame's end posts rise above the mattress,
+        // so they should stop her -- both walking in at floor level and walking
+        // off the ends while up on the sheets. The mattress body is inset and
+        // only mattress-high, so without these she clips into the drawn frame
+        // and walks straight through the posts. Full sprite height; she still
+        // mounts the bed by hopping onto the mattress (apex clears the posts).
+        const BED_FRAME_HEIGHT = 64;   // matches the bed sprite's height
+        const POST_W = 20;             // frame inset: (spriteW 280 - mattress 240) / 2
+        const frameTop = groundTop - BED_FRAME_HEIGHT;
+        [270, 530].forEach((postX) => {   // sprite ends at 260 / 540
+            const post = this.add.rectangle(postX, (frameTop + groundTop) / 2, POST_W, BED_FRAME_HEIGHT)
+                .setVisible(false);
+            this.physics.add.existing(post, true);
+            this.solids.push(post);
+        });
 
         // Squishy pillow -- a small raised step on the left of the mattress she
         // hops onto. Built after the layout so it renders over the bed's art.
