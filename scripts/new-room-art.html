@@ -103,91 +103,18 @@
 </svg>
 </div>
 
-<!-- Stormy: Pusheen's little sister -- a fluffy Persian sitting up, ~2/3
-     Pusheen's size so her body reads about Pusheen's walking-sprite height,
-     with a big fluffy tail below that crosses the floor line for depth. Two
-     faces: sad (lost her yarn) until the quest is done, then happy. The body
-     + tail markup is identical between them; only the face group differs. -->
-<div class="row">
-<svg data-out="stormy-sad" width="108" height="118" viewBox="0 0 108 118">
-  <!-- tail: fluffy cloud tucked under the body, crossing the floor line -->
-  <g transform="translate(-5,-3)">
-    <path d="M58 76 C 71 70 86 74 88 85 C 98 87 98 100 89 104 C 91 113 79 117 71 110 C 64 116 54 111 57 100 C 49 98 51 88 61 89 Z"
-          fill="#d8d2ce" stroke="#442001" stroke-width="3" stroke-linejoin="round"/>
-    <path d="M74 82 q3 6 1 11 M82 85 q2 5 0 9" fill="none" stroke="#b9b0a7" stroke-width="2.4" stroke-linecap="round"/>
-  </g>
-  <!-- ears -->
-  <path d="M28 32 L23 8 L45 26 Z" fill="#d8d2ce" stroke="#442001" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M60 26 L66 8 L82 34 Z" fill="#d8d2ce" stroke="#442001" stroke-width="3" stroke-linejoin="round"/>
-  <!-- fluffy sitting body -->
-  <path d="M40 22 C 27 19 20 33 21 44 C 11 47 12 62 21 65 C 12 71 17 87 30 84 C 32 95 47 95 49 86 C 55 96 69 92 66 81 C 78 85 87 73 78 65 C 89 61 88 47 76 46 C 79 34 71 19 57 23 C 53 17 44 17 40 22 Z"
-        fill="#d8d2ce" stroke="#442001" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M36 22 q1 5 0 9 M44 21 q1 5 0 10 M52 23 q1 5 0 8" fill="none" stroke="#b9b0a7" stroke-width="3" stroke-linecap="round"/>
-  <path d="M41 87 v5 M49 87 v5" fill="none" stroke="#442001" stroke-width="2" stroke-linecap="round"/>
-  <!-- sad face: worried brows + tears -->
-  <path d="M31 39 q4 -4 9 -2 M53 37 q5 -2 9 2" fill="none" stroke="#3a2d22" stroke-width="2" stroke-linecap="round"/>
-  <circle cx="35" cy="44" r="3" fill="#3a2d22"/><circle cx="53" cy="44" r="3" fill="#3a2d22"/>
-  <path d="M34 48 q-3 5 0 7 q3 -2 0 -7 Z" fill="#8fd3e0" stroke="#5aa9bb" stroke-width="0.7"/>
-  <path d="M52 48 q-3 5 0 7 q3 -2 0 -7 Z" fill="#8fd3e0" stroke="#5aa9bb" stroke-width="0.7"/>
-  <path d="M40 56 q4 -4 8 0" fill="none" stroke="#3a2d22" stroke-width="2" stroke-linecap="round"/>
-  <ellipse cx="27" cy="51" rx="4" ry="2.3" fill="#f2b8c2" opacity="0.85"/>
-  <ellipse cx="61" cy="51" rx="4" ry="2.3" fill="#f2b8c2" opacity="0.85"/>
-</svg>
-</div>
+<!-- Stormy (stormy-sad.png / stormy-happy.png) is NOT generated from here.
+     Her sprites are made externally in an image generator and fitted to the
+     108x118 game canvas (background removed, scaled, and aligned on the
+     sitting baseline). So there's no data-out="stormy-*" here on purpose --
+     re-running this file must not overwrite that hand-made art. -->
 
-<div class="row">
-<svg data-out="stormy-happy" width="108" height="118" viewBox="0 0 108 118">
-  <g transform="translate(-5,-3)">
-    <path d="M58 76 C 71 70 86 74 88 85 C 98 87 98 100 89 104 C 91 113 79 117 71 110 C 64 116 54 111 57 100 C 49 98 51 88 61 89 Z"
-          fill="#d8d2ce" stroke="#442001" stroke-width="3" stroke-linejoin="round"/>
-    <path d="M74 82 q3 6 1 11 M82 85 q2 5 0 9" fill="none" stroke="#b9b0a7" stroke-width="2.4" stroke-linecap="round"/>
-  </g>
-  <path d="M28 32 L23 8 L45 26 Z" fill="#d8d2ce" stroke="#442001" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M60 26 L66 8 L82 34 Z" fill="#d8d2ce" stroke="#442001" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M40 22 C 27 19 20 33 21 44 C 11 47 12 62 21 65 C 12 71 17 87 30 84 C 32 95 47 95 49 86 C 55 96 69 92 66 81 C 78 85 87 73 78 65 C 89 61 88 47 76 46 C 79 34 71 19 57 23 C 53 17 44 17 40 22 Z"
-        fill="#d8d2ce" stroke="#442001" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M36 22 q1 5 0 9 M44 21 q1 5 0 10 M52 23 q1 5 0 8" fill="none" stroke="#b9b0a7" stroke-width="3" stroke-linecap="round"/>
-  <path d="M41 87 v5 M49 87 v5" fill="none" stroke="#442001" stroke-width="2" stroke-linecap="round"/>
-  <!-- happy face: dot eyes + nose + smile -->
-  <circle cx="35" cy="43" r="3" fill="#3a2d22"/><circle cx="53" cy="43" r="3" fill="#3a2d22"/>
-  <path d="M42.5 47 h4 l-2 2 z" fill="#d98a9a"/>
-  <path d="M39 50 q3 4 5 1 q2 3 5 -1" fill="none" stroke="#3a2d22" stroke-width="1.8" stroke-linecap="round"/>
-  <ellipse cx="27" cy="50" rx="4.2" ry="2.4" fill="#f2b8c2" opacity="0.9"/>
-  <ellipse cx="61" cy="50" rx="4.2" ry="2.4" fill="#f2b8c2" opacity="0.9"/>
-</svg>
-</div>
-
-<!-- Pusheencorn: the costumed Pusheen. Same gray loaf + face as the base
-     sprite (so it swaps in seamlessly, body centered on the canvas), plus a
-     unicorn horn, a rainbow mane cresting the back, and a flowing rainbow
-     tail. Faces left, like the base sprite; the game flips it to walk right. -->
-<div class="row">
-<svg data-out="pusheencorn" width="138" height="116" viewBox="0 0 138 116">
-  <!-- flowing rainbow tail, right side -->
-  <path d="M112 50 C 132 52 136 76 120 94 C 111 102 98 97 103 86 C 116 80 119 64 107 58 Z"
-        fill="#f6a5c0" stroke="#442001" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M113 55 C 126 60 126 79 116 89" fill="none" stroke="#a8e6cf" stroke-width="4.5" stroke-linecap="round"/>
-  <path d="M115 59 C 124 65 123 79 117 85" fill="none" stroke="#c9b6e8" stroke-width="3" stroke-linecap="round"/>
-  <!-- plump loaf body, centered on the canvas -->
-  <rect x="22" y="26" width="94" height="64" rx="30" fill="#b5a89c" stroke="#442001" stroke-width="3"/>
-  <!-- ears flanking the horn -->
-  <path d="M28 30 L26 17 L39 28 Z" fill="#b5a89c" stroke="#442001" stroke-width="2.5" stroke-linejoin="round"/>
-  <path d="M45 28 L50 17 L57 29 Z" fill="#b5a89c" stroke="#442001" stroke-width="2.5" stroke-linejoin="round"/>
-  <!-- rainbow mane cresting the upper back -->
-  <path d="M50 43 C 46 30 52 18 61 20 C 59 30 59 38 62 43 Z" fill="#f6a5c0" stroke="#442001" stroke-width="2.5" stroke-linejoin="round"/>
-  <path d="M60 43 C 56 31 63 21 71 23 C 69 32 68 38 70 43 Z" fill="#ffd97a" stroke="#442001" stroke-width="2.5" stroke-linejoin="round"/>
-  <path d="M69 44 C 65 33 72 25 80 27 C 78 34 77 40 79 44 Z" fill="#8fd0f2" stroke="#442001" stroke-width="2.5" stroke-linejoin="round"/>
-  <!-- unicorn horn -->
-  <path d="M33 27 L43 27 L38.5 3 Z" fill="#ffd97a" stroke="#442001" stroke-width="2.5" stroke-linejoin="round"/>
-  <path d="M34.5 22 l7 -1.4 M35.5 16.5 l6 -1.3 M36.5 11 l4.5 -1" fill="none" stroke="#d9a83f" stroke-width="1.7" stroke-linecap="round"/>
-  <!-- face (left), whiskers, feet -->
-  <circle cx="42" cy="56" r="3.2" fill="#442001"/><circle cx="60" cy="56" r="3.2" fill="#442001"/>
-  <path d="M47 60 q4 4 7 1 q3 3 6 -1" fill="none" stroke="#442001" stroke-width="1.8" stroke-linecap="round"/>
-  <circle cx="53.5" cy="61.5" r="1.7" fill="#e88ba0"/>
-  <path d="M14 55 l18 1 M14 61 l18 -1" fill="none" stroke="#442001" stroke-width="1.6" stroke-linecap="round"/>
-  <path d="M44 90 v4 M62 90 v4 M86 90 v4" fill="none" stroke="#442001" stroke-width="2" stroke-linecap="round"/>
-</svg>
-</div>
+<!-- Pusheencorn (pusheencorn.png) is NOT generated from here either. Like
+     Stormy, the costume sprite is made in an image generator and fitted to the
+     game: background removed, the gray body scaled to Pusheen's size and
+     anchored by the feet (centered so it swaps in over the base sprite). So
+     there's deliberately no data-out="pusheencorn" here -- re-running this
+     file must not overwrite that art. -->
 
 <!-- Yarn ball -->
 <div class="row">

@@ -3,15 +3,16 @@ import { IDLE, STORMY, STORMY_RADAR } from '../config/feel.js';
 import { YARN_IDS } from '../config/gameState.js';
 
 // The sitting-up sprite is 108x118. She's anchored by her feet, not her
-// center: the origin sits at the body's baseline (~y92) so she plants on the
-// floor while the fluffy tail (lower in the art) spills below the floor line
-// for a little depth. Offsets below are measured up from that planted origin.
+// center: the origin sits at the body's baseline (~y86, where her legs meet
+// the ground) so she plants on the floor while the fluffy tail (lower in the
+// art) spills below the floor line for a little depth. Offsets below are
+// measured up from that planted origin, matched to the art by measuring it.
 const SPRITE_W = 108;
 const SPRITE_H = 118;
-const BODY_BASELINE_Y = 92;      // feet, in sprite pixels
-const BODY_CENTER_X = 46;        // body midline, in sprite pixels
-const BODY_MID_DY = 42;          // body center, above the planted origin
-const HEAD_TOP_DY = 90;          // above the origin -- where cue hearts rise
+const BODY_BASELINE_Y = 86;      // feet, in sprite pixels
+const BODY_CENTER_X = 41;        // head/body midline, in sprite pixels
+const BODY_MID_DY = 39;          // body center, above the planted origin
+const HEAD_TOP_DY = 80;          // above the origin -- where cue hearts rise
 
 const HEART_COLOR = '#f8bbd0';
 const BUBBLE_OFFSET_Y = -104;
