@@ -3,6 +3,14 @@ import { RADAR, SNIFF_CUE } from '../config/feel.js';
 
 const CUE_COLOR = '#fff6d8';
 
+// A gate is { requires: <registry key | (scene) => bool> }. Ships unused in
+// v1.5 (the cabinet is ungated); v2 gates e.g. a container on holding an item.
+function passesGate (gate, scene)
+{
+    const req = gate.requires;
+    return typeof req === 'function' ? req(scene) : !!scene.registry.get(req);
+}
+
 // A generic peek-with-contents interactable: approach for the lead sniff cue,
 // press E in range to open a peek panel of contents. Generalizes the old
 // Cabinet -- the drawer art, the item grid, number-key select, and the nope-
@@ -27,6 +35,7 @@ export class Container extends GameObjects.Container
         this.verb = 'peek';
         this.contents = opts.contents ?? [];
         this._isActionable = opts.isActionable ?? null;
+        this.gate = opts.gate ?? null;
         this.audio = scene.registry.get('audio');
 
         this.visual = scene.add.image(0, 0, opts.sprite);
@@ -61,7 +70,10 @@ export class Container extends GameObjects.Container
 
     isActionable (scene)
     {
-        return this._isActionable ? this._isActionable(scene) : true;
+        if (this._isActionable && !this._isActionable(scene)) {
+            return false;
+        }
+        return this.gate ? passesGate(this.gate, scene) : true;
     }
 
     interact (pusheen, scene)
