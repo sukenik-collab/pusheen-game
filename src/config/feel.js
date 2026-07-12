@@ -102,6 +102,9 @@ export const COSTUME = {
     hopInMs: 280,
     holdMs: 450,
     popOutMs: 340,
+    // land beside the box, not on top of its own footprint -- popping out
+    // to the side keeps the box (and the transformation) readable
+    popOutOffsetX: -85,
     wobbleDeg: 4,
     wobbleMs: 90
 };
