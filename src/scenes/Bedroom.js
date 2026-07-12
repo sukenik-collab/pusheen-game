@@ -3,7 +3,7 @@ import { JUMP, COSTUME } from '../config/feel.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Door } from '../entities/Door.js';
 import { YarnBall } from '../entities/YarnBall.js';
-import { Pillow } from '../entities/Pillow.js';
+import { Pillow, PILLOW_HEIGHT } from '../entities/Pillow.js';
 import { CostumeBox } from '../entities/CostumeBox.js';
 import { fadeToRoom, fadeInRoom } from './roomTransition.js';
 
@@ -15,17 +15,25 @@ const GROUND_COLOR = 0x46394f;
 // right-wall door, clear of its trigger zone so it can't instantly re-fire).
 const SPAWN_X_FROM_LIVING_ROOM = 1130;
 
-// The shelf is the one costume-gated spot: its surface sits above what a
-// normal hop can reach even from the bed top (64 + ~82px apex = 146), but
-// comfortably under the Pusheencorn jump's ~192px apex. Sit it 70% of the
-// way up that gap -- a little higher than dead-center so a normal hop lands
-// definitively short, while the costume jump still clears it with room to
-// settle. Derived from the feel values so retuning either jump moves it.
-const NORMAL_REACH_FROM_BED = (JUMP.velocity * JUMP.velocity) / (2 * JUMP.gravity) + 64;
+// The bed's *mattress* surface -- where she actually stands -- is not the top
+// of the bed sprite. The sprite is 64 tall but its mattress top sits at the
+// art's y=20 inset (the headboard/foot posts stick up above it), so the
+// standable surface is 44px above the floor. Colliding at the sprite top
+// instead would leave her floating a post-height above the sheets.
+const BED_SURFACE_HEIGHT = 44;
+// The pillow is a small step resting on the mattress that she hops onto; its
+// top is the highest launch point a normal hop can start from.
+const PILLOW_SURFACE_HEIGHT = BED_SURFACE_HEIGHT + PILLOW_HEIGHT;
+
+// The shelf is the one costume-gated spot: above what a normal hop can reach
+// even launching from the pillow (the tallest step), but comfortably under the
+// Pusheencorn apex from the floor. Sit it 70% of the way up that gap -- a
+// little higher than dead-center so a normal hop lands definitively short.
+// Derived from the feel values so retuning either jump moves it.
+const NORMAL_APEX = (JUMP.velocity * JUMP.velocity) / (2 * JUMP.gravity);
 const COSTUME_APEX = (COSTUME.jumpVelocity * COSTUME.jumpVelocity) / (2 * COSTUME.gravity);
-const SHELF_SURFACE_HEIGHT = Math.round(
-    NORMAL_REACH_FROM_BED + (COSTUME_APEX - NORMAL_REACH_FROM_BED) * 0.7
-);
+const NORMAL_REACH = PILLOW_SURFACE_HEIGHT + NORMAL_APEX;
+const SHELF_SURFACE_HEIGHT = Math.round(NORMAL_REACH + (COSTUME_APEX - NORMAL_REACH) * 0.7);
 const SHELF_THICKNESS = 16;
 
 // The room's furniture, declared as data and built by one small loop.
@@ -40,9 +48,10 @@ const SHELF_THICKNESS = 16;
 const LAYOUT = [
     { name: 'rug', role: 'background', sprite: 'rug', x: 400, w: 340, h: 14, yFromGround: 7 },
     { name: 'moonWindow', role: 'background', sprite: 'moonWindow', x: 640, w: 110, h: 140, yFromGround: 510 },
-    { name: 'bed', role: 'standable', sprite: 'bed', x: 400, w: 280, h: 64 },
-    // Pillow is not layout -- it's the squishy Pillow entity, created after
-    // the bed so it renders on top of it (see create()).
+    // Bed is drawn only; its real standable surface (the mattress, inset below
+    // the sprite top) is a separate solid body built in create(), and the
+    // pillow is the squishy Pillow entity -- both live in create(), not here.
+    { name: 'bed', role: 'background', sprite: 'bed', x: 400, w: 280, h: 64 },
     // Low enough (< the ~82px jump apex) to hop over -- it sits mid-room and
     // must never wall off the left half.
     { name: 'dresser', role: 'solid', sprite: 'dresser', x: 780, w: 120, h: 70 },
@@ -77,9 +86,19 @@ export class Bedroom extends Scene
         this.solids = [];
         LAYOUT.forEach((item) => this.buildLayoutItem(item, groundTop));
 
-        // Squishy pillow, on top of the bed -- built after the layout so it
-        // renders over the bed's art.
-        this.pillow = new Pillow(this, 300, groundTop - 77);
+        // The bed's standable surface: a solid body whose top is the mattress
+        // (not the sprite top), so she stands on the sheets instead of floating
+        // at the headboard-post height. Full-height so she can't walk through
+        // the frame; invisible (the bed sprite draws the bed).
+        const mattressTop = groundTop - BED_SURFACE_HEIGHT;
+        this.bedBody = this.add.rectangle(400, (mattressTop + groundTop) / 2, 240, BED_SURFACE_HEIGHT)
+            .setVisible(false);
+        this.physics.add.existing(this.bedBody, true);
+        this.solids.push(this.bedBody);
+
+        // Squishy pillow -- a small raised step on the left of the mattress she
+        // hops onto. Built after the layout so it renders over the bed's art.
+        this.pillow = new Pillow(this, 330, groundTop - PILLOW_SURFACE_HEIGHT + PILLOW_HEIGHT / 2);
 
         this.doorToLivingRoom = new Door(this, 1240, groundTop, 'left');
 
@@ -92,6 +111,7 @@ export class Bedroom extends Scene
         this.pusheen = new Pusheen(this, data?.spawnX ?? SPAWN_X_FROM_LIVING_ROOM, height - 200);
         this.physics.add.collider(this.pusheen, this.ground);
         this.solids.forEach((solid) => this.physics.add.collider(this.pusheen, solid));
+        this.physics.add.collider(this.pusheen, this.pillow, () => this.pillow.onCollide());
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keys = this.input.keyboard.addKeys('W,A,S,D,SPACE,E');
@@ -146,7 +166,6 @@ export class Bedroom extends Scene
         }
 
         this.yarnBalls.forEach((ball) => ball.update(this.pusheen));
-        this.pillow.update(this.pusheen);
         this.costumeBox.update(this.pusheen);
 
         const interactAvailable = this.yarnBalls.some((ball) => ball.inInnerZone) ||
@@ -190,5 +209,6 @@ export class Bedroom extends Scene
         }
 
         this.pusheen.update();
+        this.pillow.resolveContact();
     }
 }
