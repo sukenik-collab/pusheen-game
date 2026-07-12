@@ -12,12 +12,6 @@ const ITEM_SPACING = 160;
 const NOPE_SHAKE_PX = 8;
 const NOPE_SHAKE_MS = 55;
 
-const ITEMS = [
-    { key: 'socks', label: 'Socks', sprite: 'itemSocks', isSnack: false },
-    { key: 'tshirt', label: 'T-Shirt', sprite: 'itemShirt', isSnack: false },
-    { key: 'popcorn', label: 'Popcorn', sprite: 'itemPopcorn', isSnack: true }
-];
-
 const CARD_FADE_MS = 500;
 const PLAY_AGAIN_FADE_MS = 400;
 const PLAY_AGAIN_WIDTH = 260;
@@ -73,10 +67,11 @@ export class UI extends Scene
             this.updateInteractButtonVisibility();
         });
 
-        this.registry.events.on('changedata-cabinet:peekOpen', (parent, value) => {
+        this.registry.events.on('changedata-peek:open', (parent, value) => {
             this.updateInteractButtonVisibility();
 
             if (value) {
+                this.populatePeekPanel(this.registry.get('peek:contents') ?? []);
                 this.openPeekPanel();
             } else {
                 this.closePeekPanel();
@@ -157,7 +152,7 @@ export class UI extends Scene
     // just reflects it, plus the open peek panel's cancel affordance.
     updateInteractButtonVisibility ()
     {
-        const inRange = this.registry.get('interact:available') || this.registry.get('cabinet:peekOpen');
+        const inRange = this.registry.get('interact:available') || this.registry.get('peek:open');
         this.setInteractButtonVisible(inRange);
     }
 
@@ -172,10 +167,23 @@ export class UI extends Scene
 
         this.peekPanel.add(this.add.image(0, 0, 'drawer'));
 
-        const startX = -ITEM_SPACING;
+        // Item boxes are (re)built from peek:contents each time the panel
+        // opens, so the same panel can show any container's contents.
+        // itemObjects tracks the built display objects so we can clear them
+        // between opens; itemBoxes maps them to their content for selection.
+        this.itemObjects = [];
+        this.itemBoxes = [];
+    }
+
+    populatePeekPanel (contents)
+    {
+        this.itemObjects.forEach((obj) => obj.destroy());
+        this.itemObjects = [];
         this.itemBoxes = [];
 
-        ITEMS.forEach((item, i) => {
+        const startX = -ITEM_SPACING;
+
+        contents.forEach((item, i) => {
             const itemX = startX + i * ITEM_SPACING;
             const box = this.add.image(itemX, -10, item.sprite)
                 .setInteractive();
@@ -192,6 +200,7 @@ export class UI extends Scene
             this.peekPanel.add(numberHint);
 
             box.on('pointerdown', () => this.selectItem(item, box));
+            this.itemObjects.push(box, label, numberHint);
             this.itemBoxes.push({ item, box });
         });
     }
@@ -207,14 +216,15 @@ export class UI extends Scene
 
     selectItem (item, box)
     {
-        if (item.isSnack) {
+        if (item.effect === 'takeSnack') {
             this.audio?.play('collect');
             // Order matters: snack:collected must already be true before
-            // cabinet:peekOpen flips false, since that triggers
-            // updateInteractButtonVisibility() which reads it.
+            // peek:open flips false, since that triggers
+            // updateInteractButtonVisibility() (via the interact:available it
+            // then recomputes) reading the snack state.
             this.registry.set('snack:collected', true);
             this.registry.set('snack:count', 1);
-            this.registry.set('cabinet:peekOpen', false);
+            this.registry.set('peek:open', false);
         } else {
             this.audio?.play('nope');
             this.playNopeShake(box);
@@ -249,10 +259,10 @@ export class UI extends Scene
         });
     }
 
-    // Purely the visual reaction to cabinet:peekOpen going false -- the
-    // registry is already the source of truth by the time this runs
-    // (LivingRoom on cancel, or selectItem() above on collecting the snack),
-    // so this doesn't set it again.
+    // Purely the visual reaction to peek:open going false -- the registry is
+    // already the source of truth by the time this runs (LivingRoom on cancel,
+    // or selectItem() above on collecting the snack), so this doesn't set it
+    // again.
     closePeekPanel ()
     {
         this.tweens.add({

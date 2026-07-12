@@ -3,7 +3,7 @@ import { NAP, JUMP } from '../config/feel.js';
 import { resetRunState } from '../config/gameState.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Cushion, CUSHION_HEIGHT } from '../entities/Cushion.js';
-import { Cabinet, CABINET_HEIGHT } from '../entities/Cabinet.js';
+import { Container } from '../entities/Container.js';
 import { Sunbeam } from '../entities/Sunbeam.js';
 import { Door } from '../entities/Door.js';
 import { Stormy } from '../entities/Stormy.js';
@@ -18,6 +18,18 @@ const FLOOR_COLOR = 0xd7ccc0;
 const GROUND_COLOR = 0x8d6e63;
 
 const COUCH_BASE_HEIGHT = 50;
+// The cabinet's placement height (was exported from the now-deleted Cabinet.js).
+const CABINET_HEIGHT = 160;
+
+// The cabinet's contents, previously hardcoded in the UI scene. Order is
+// preserved (socks, t-shirt, popcorn) so number keys 1/2/3 map identically.
+// `effect` drives what selecting an item does: 'takeSnack' collects it, 'nope'
+// gives the little decoy shake. Lives with the container now, not in the UI.
+const CABINET_CONTENTS = [
+    { key: 'socks', label: 'Socks', sprite: 'itemSocks', effect: 'nope' },
+    { key: 'tshirt', label: 'T-Shirt', sprite: 'itemShirt', effect: 'nope' },
+    { key: 'popcorn', label: 'Popcorn', sprite: 'itemPopcorn', effect: 'takeSnack' }
+];
 // Fresh-lap spawn (near the sunbeam); walking in from the bedroom instead
 // spawns just inside the left-wall door, clear of its trigger zone.
 const SPAWN_X_DEFAULT = 950;
@@ -59,8 +71,14 @@ export class LivingRoom extends Scene
 
         this.add.rectangle(width / 2, height / 2, width, height, FLOOR_COLOR);
 
-        // Left -- cabinet with the sniff/peek radar
-        this.cabinet = new Cabinet(this, 180, groundTop - CABINET_HEIGHT / 2);
+        // Left -- cabinet with the sniff/peek radar. A generic Container; its
+        // snack-gate (goes quiet once the snack is found) is the isActionable
+        // predicate, and its contents drive the UI peek panel.
+        this.cabinet = new Container(this, 180, groundTop - CABINET_HEIGHT / 2, {
+            sprite: 'cabinet',
+            contents: CABINET_CONTENTS,
+            isActionable: (scene) => !scene.registry.get('snack:collected')
+        });
 
         // Right -- window + sunbeam with the nap trigger
         this.sunbeam = new Sunbeam(this, 1080, groundTop);
@@ -107,7 +125,7 @@ export class LivingRoom extends Scene
 
         // Visit-scoped keys only -- run progress (snack, quest) lives in
         // gameState.js so a room transition back here can't wipe it.
-        this.registry.set('cabinet:peekOpen', false);
+        this.registry.set('peek:open', false);
         this.registry.set('interact:available', false);
         this.registry.set('input:interactPressed', false);
         this.registry.set('nap:active', false);
@@ -163,14 +181,14 @@ export class LivingRoom extends Scene
         const interactPressed = Input.Keyboard.JustDown(this.keys.E) || this.registry.get('input:interactPressed');
         this.registry.set('input:interactPressed', false);
 
-        const peekOpen = this.registry.get('cabinet:peekOpen');
+        const peekOpen = this.registry.get('peek:open');
         const napActive = this.registry.get('nap:active');
 
         if (peekOpen) {
             this.pusheen.stopMoving();
 
             if (interactPressed) {
-                this.registry.set('cabinet:peekOpen', false);
+                this.registry.set('peek:open', false);
             }
         } else if (napActive) {
             this.pusheen.stopMoving();
