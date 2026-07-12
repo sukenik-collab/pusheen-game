@@ -98,7 +98,6 @@ export const BOX_RADAR = {
 export const COSTUME = {
     gravity: 1000,
     jumpVelocity: -620,
-    tint: 0xffd9f0,
     hopInMs: 280,
     holdMs: 450,
     popOutMs: 340,

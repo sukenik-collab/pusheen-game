@@ -31,10 +31,14 @@ export class Preloader extends Scene
         this.load.image('shelf', 'assets/sprites/shelf.png');
         this.load.image('rug', 'assets/sprites/rug.png');
         this.load.image('moonWindow', 'assets/sprites/moon-window.png');
-        this.load.image('stormy', 'assets/sprites/stormy.png');
+        // Stormy has two faces: sad while her yarn is lost, happy once it's back.
+        this.load.image('stormySad', 'assets/sprites/stormy-sad.png');
+        this.load.image('stormyHappy', 'assets/sprites/stormy-happy.png');
         this.load.image('yarnBall', 'assets/sprites/yarn-ball.png');
         this.load.image('costumeBox', 'assets/sprites/costume-box.png');
-        this.load.image('horn', 'assets/sprites/horn.png');
+        // The costumed Pusheen: horn, mane and rainbow tail are baked into this
+        // sprite, which swaps in for 'pusheen' when she wears the costume.
+        this.load.image('pusheencorn', 'assets/sprites/pusheencorn.png');
 
         // A tiny soft dot, reused as the sunbeam's dust-mote particle texture.
         const g = this.add.graphics();

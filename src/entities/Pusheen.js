@@ -21,12 +21,6 @@ export class Pusheen extends GameObjects.Container
         this.visual = scene.add.image(0, 0, 'pusheen');
         this.add(this.visual);
 
-        // Pusheencorn horn, hidden until the costume box grants it. A plain
-        // container child, so the visual's squash tweens don't scale it --
-        // acceptable jank until a full costume spritesheet exists.
-        this.horn = scene.add.image(0, -HEIGHT / 2 - 10, 'horn').setVisible(false);
-        this.add(this.horn);
-
         this.audio = scene.registry.get('audio');
 
         this.body.setSize(WIDTH, HEIGHT);
@@ -83,21 +77,17 @@ export class Pusheen extends GameObjects.Container
     }
 
     // The Pusheencorn costume's one ability: a floatier, taller jump
-    // (lower gravity + stronger impulse). Look is placeholder: pink tint
-    // + the little horn.
+    // (lower gravity + stronger impulse). The look is the whole sprite: swap
+    // in the pusheencorn art (horn, mane, rainbow tail baked in), which is
+    // registered the same as the base sprite so every squash/idle tween on
+    // this.visual keeps working unchanged.
     setCostume (on)
     {
         this.costumed = on;
         this.scene.registry.set('costume:pusheencorn', on);
 
         this.body.setGravityY(on ? COSTUME.gravity : JUMP.gravity);
-        this.horn.setVisible(on);
-
-        if (on) {
-            this.visual.setTint(COSTUME.tint);
-        } else {
-            this.visual.clearTint();
-        }
+        this.visual.setTexture(on ? 'pusheencorn' : 'pusheen');
     }
 
     isGrounded ()
