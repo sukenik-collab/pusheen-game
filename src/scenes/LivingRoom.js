@@ -1,15 +1,24 @@
 import { Scene, Input } from 'phaser';
 import { NAP, JUMP } from '../config/feel.js';
+import { resetRunState } from '../config/gameState.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Cushion, CUSHION_HEIGHT } from '../entities/Cushion.js';
 import { Cabinet, CABINET_HEIGHT } from '../entities/Cabinet.js';
 import { Sunbeam } from '../entities/Sunbeam.js';
+import { Door } from '../entities/Door.js';
+import { Stormy } from '../entities/Stormy.js';
+import { YarnBall } from '../entities/YarnBall.js';
+import { fadeToRoom, fadeInRoom } from './roomTransition.js';
 
 const GROUND_HEIGHT = 40;
 const FLOOR_COLOR = 0xd7ccc0;
 const GROUND_COLOR = 0x8d6e63;
 
 const COUCH_BASE_HEIGHT = 50;
+// Fresh-lap spawn (near the sunbeam); walking in from the bedroom instead
+// spawns just inside the left-wall door, clear of its trigger zone.
+const SPAWN_X_DEFAULT = 950;
+const SPAWN_X_FROM_BEDROOM = 150;
 // Derived from feel.js's own JUMP values (apex = v^2/2g) rather than a
 // hand-copied comment, so retuning JUMP can't silently strand the cushion
 // out of reach (or make it trivial to clear) without this moving too.
@@ -23,7 +32,7 @@ export class LivingRoom extends Scene
         super('LivingRoom');
     }
 
-    create ()
+    create (data)
     {
         const { width, height } = this.scale;
         const groundTop = height - GROUND_HEIGHT;
@@ -41,12 +50,20 @@ export class LivingRoom extends Scene
         // Right -- window + sunbeam with the nap trigger
         this.sunbeam = new Sunbeam(this, 1080, groundTop);
 
+        // Far left -- doorway to the bedroom
+        this.doorToBedroom = new Door(this, 40, groundTop, 'right');
+
         // Center -- couch base + the one squashable cushion, reachable with a hop.
         // The base gets its own solid static body (matching its real, wider
         // footprint) so the couch reads as one continuous solid piece -- without
         // it, only the narrower cushion above collided, and walking up to the
         // couch meant bonking into that floating box from the side instead of
         // being blocked by the couch itself.
+        // Quest: one yarn ball hides behind the couch's left arm -- created
+        // before the couch so it renders tucked behind it, edge peeking out.
+        this.yarnBalls = [];
+        this.spawnYarn('couch', 550, groundTop - 14);
+
         const couchBaseY = groundTop - COUCH_BASE_HEIGHT / 2;
         this.couchBase = this.add.image(width / 2, couchBaseY, 'couchBase');
         this.physics.add.existing(this.couchBase, true);
@@ -56,9 +73,13 @@ export class LivingRoom extends Scene
         this.ground = this.add.rectangle(width / 2, groundTop + GROUND_HEIGHT / 2, width, GROUND_HEIGHT, GROUND_COLOR);
         this.physics.add.existing(this.ground, true);
 
+        // Stormy waits between the couch and the sunbeam, near the spawn,
+        // so a fresh lap meets her (and hears about the yarn) right away.
+        this.stormy = new Stormy(this, 820, groundTop);
+
         // Start near the sunbeam (right), not the cabinet -- playtest moved
         // the spawn; see the design doc's scene-layout note for why.
-        this.pusheen = new Pusheen(this, 950, height - 200);
+        this.pusheen = new Pusheen(this, data?.spawnX ?? SPAWN_X_DEFAULT, height - 200);
         this.physics.add.collider(this.pusheen, this.ground);
         this.physics.add.collider(this.pusheen, this.couchBase);
         this.physics.add.collider(this.pusheen, this.cushion, () => this.cushion.onCollide());
@@ -66,10 +87,10 @@ export class LivingRoom extends Scene
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keys = this.input.keyboard.addKeys('W,A,S,D,SPACE,E');
 
+        // Visit-scoped keys only -- run progress (snack, quest) lives in
+        // gameState.js so a room transition back here can't wipe it.
         this.registry.set('cabinet:peekOpen', false);
-        this.registry.set('cabinet:inInnerZone', false);
-        this.registry.set('snack:collected', false);
-        this.registry.set('snack:count', 0);
+        this.registry.set('interact:available', false);
         this.registry.set('input:interactPressed', false);
         this.registry.set('nap:active', false);
         this.registry.set('nap:showCard', false);
@@ -91,23 +112,49 @@ export class LivingRoom extends Scene
         this.events.once('shutdown', () => {
             this.registry.events.off('changedata-snack:collected', onSnackCollected);
         });
+
+        // Returning from the bedroom with the snack already found: re-light
+        // the beam immediately so the room still points at the nap spot.
+        if (this.registry.get('snack:collected')) {
+            this.sunbeam.illuminate();
+        }
+
+        this.transitioning = false;
+
+        if (data?.fadeIn) {
+            fadeInRoom(this);
+        }
     }
 
     update ()
     {
         if (this.registry.get('game:restartRequested')) {
             this.registry.set('game:restartRequested', false);
-            this.scene.restart();
+            resetRunState(this.registry);
+            this.scene.restart({ spawnX: SPAWN_X_DEFAULT, fadeIn: false });
+            return;
+        }
+
+        if (this.transitioning) {
+            this.pusheen.stopMoving();
+            this.pusheen.update();
             return;
         }
 
         this.cabinet.update(this.pusheen);
+        this.stormy.update(this.pusheen);
+        this.yarnBalls.forEach((ball) => ball.update(this.pusheen));
 
         // Phaser's registry fires changedata on every set(), even when the
         // value is unchanged -- guard so UI's listener only runs on the
         // real transitions, not every frame regardless of zone state.
-        if (this.cabinet.inInnerZone !== this.registry.get('cabinet:inInnerZone')) {
-            this.registry.set('cabinet:inInnerZone', this.cabinet.inInnerZone);
+        const interactAvailable = !this.registry.get('nap:active') && (
+            (this.cabinet.inInnerZone && !this.registry.get('snack:collected')) ||
+            this.stormy.inInnerZone ||
+            this.yarnBalls.some((ball) => ball.inInnerZone)
+        );
+        if (interactAvailable !== this.registry.get('interact:available')) {
+            this.registry.set('interact:available', interactAvailable);
         }
 
         const interactPressed = Input.Keyboard.JustDown(this.keys.E) || this.registry.get('input:interactPressed');
@@ -146,17 +193,34 @@ export class LivingRoom extends Scene
                 this.pusheen.jump();
             }
 
-            if (interactPressed && this.cabinet.inInnerZone && !this.registry.get('snack:collected')) {
-                this.registry.set('cabinet:peekOpen', true);
+            if (interactPressed) {
+                if (this.cabinet.inInnerZone && !this.registry.get('snack:collected')) {
+                    this.registry.set('cabinet:peekOpen', true);
+                } else if (this.stormy.inInnerZone) {
+                    this.stormy.interact();
+                } else {
+                    this.yarnBalls.find((ball) => ball.inInnerZone)?.collect();
+                }
             }
 
             if (this.sunbeam.checkTrigger(this.pusheen, this.registry.get('snack:collected'))) {
                 this.startNapSequence();
             }
+
+            if (this.doorToBedroom.checkTrigger(this.pusheen)) {
+                fadeToRoom(this, 'Bedroom', { fadeIn: true });
+            }
         }
 
         this.pusheen.update();
         this.cushion.resolveContact();
+    }
+
+    spawnYarn (id, x, y)
+    {
+        if (!this.registry.get(`yarn:collected:${id}`)) {
+            this.yarnBalls.push(new YarnBall(this, x, y, id));
+        }
     }
 
     startNapSequence ()

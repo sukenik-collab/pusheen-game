@@ -1,5 +1,6 @@
 import { Scene } from 'phaser';
 import { TRACKS, SFX_SETS } from '../config/audioManifest.js';
+import { resetRunState } from '../config/gameState.js';
 import { AudioController } from '../audio/AudioController.js';
 
 export class Preloader extends Scene
@@ -20,6 +21,24 @@ export class Preloader extends Scene
         this.load.image('itemSocks', 'assets/sprites/item-socks.png');
         this.load.image('itemShirt', 'assets/sprites/item-shirt.png');
         this.load.image('itemPopcorn', 'assets/sprites/item-popcorn.png');
+
+        // Bedroom + quest + costume art (sized to match their physics
+        // footprints exactly, same convention as the furniture above).
+        this.load.image('door', 'assets/sprites/door.png');
+        this.load.image('bed', 'assets/sprites/bed.png');
+        this.load.image('pillow', 'assets/sprites/pillow.png');
+        this.load.image('dresser', 'assets/sprites/dresser.png');
+        this.load.image('shelf', 'assets/sprites/shelf.png');
+        this.load.image('rug', 'assets/sprites/rug.png');
+        this.load.image('moonWindow', 'assets/sprites/moon-window.png');
+        // Stormy has two faces: sad while her yarn is lost, happy once it's back.
+        this.load.image('stormySad', 'assets/sprites/stormy-sad.png');
+        this.load.image('stormyHappy', 'assets/sprites/stormy-happy.png');
+        this.load.image('yarnBall', 'assets/sprites/yarn-ball.png');
+        this.load.image('costumeBox', 'assets/sprites/costume-box.png');
+        // The costumed Pusheen: horn, mane and rainbow tail are baked into this
+        // sprite, which swaps in for 'pusheen' when she wears the costume.
+        this.load.image('pusheencorn', 'assets/sprites/pusheencorn.png');
 
         // A tiny soft dot, reused as the sunbeam's dust-mote particle texture.
         const g = this.add.graphics();
@@ -44,6 +63,8 @@ export class Preloader extends Scene
         const audio = new AudioController(this.game);
         this.registry.set('audio', audio);
         audio.startMusic();
+
+        resetRunState(this.registry);
 
         this.scene.start('LivingRoom');
         this.scene.launch('UI');

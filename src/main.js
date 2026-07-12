@@ -1,6 +1,7 @@
 import { AUTO, Game, Scale } from 'phaser';
 import { Preloader } from './scenes/Preloader';
 import { LivingRoom } from './scenes/LivingRoom';
+import { Bedroom } from './scenes/Bedroom';
 import { UI } from './scenes/UI';
 
 // Find out more information about the Game Config at:
@@ -31,10 +32,13 @@ const config = {
     scene: [
         Preloader,
         LivingRoom,
+        Bedroom,
         UI
     ]
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    new Game(config);
+    // Exposed so playtests can poke feel values / registry state from the
+    // browser console without a rebuild.
+    window.__pusheen = new Game(config);
 });
