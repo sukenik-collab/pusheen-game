@@ -5,6 +5,7 @@ import { Door } from '../entities/Door.js';
 import { YarnBall } from '../entities/YarnBall.js';
 import { Pillow, PILLOW_HEIGHT } from '../entities/Pillow.js';
 import { CostumeBox } from '../entities/CostumeBox.js';
+import { buildLayout } from '../systems/roomBuilder.js';
 import { fadeToRoom, fadeInRoom } from './roomTransition.js';
 
 const GROUND_HEIGHT = 40;
@@ -83,8 +84,7 @@ export class Bedroom extends Scene
         // Tucked toward the left end of the shelf, clear of the bed below.
         this.spawnYarn('shelf', 70, groundTop - SHELF_SURFACE_HEIGHT - 14);
 
-        this.solids = [];
-        LAYOUT.forEach((item) => this.buildLayoutItem(item, groundTop));
+        this.solids = buildLayout(this, LAYOUT, groundTop);
 
         // The bed's standable surface: a solid body whose top is the mattress
         // (not the sprite top), so she stands on the sheets instead of floating
@@ -126,28 +126,6 @@ export class Bedroom extends Scene
     {
         if (!this.registry.get(`yarn:collected:${id}`)) {
             this.yarnBalls.push(new YarnBall(this, x, y, id));
-        }
-    }
-
-    buildLayoutItem (item, groundTop)
-    {
-        const y = groundTop - (item.yFromGround ?? item.h / 2);
-        const obj = item.sprite
-            ? this.add.image(item.x, y, item.sprite)
-            : this.add.rectangle(item.x, y, item.w, item.h, item.color);
-
-        if (item.role === 'solid' || item.role === 'standable') {
-            this.physics.add.existing(obj, true);
-
-            if (item.oneWay) {
-                // Land on the top face only -- she can jump up through it
-                // instead of bonking the underside.
-                obj.body.checkCollision.down = false;
-                obj.body.checkCollision.left = false;
-                obj.body.checkCollision.right = false;
-            }
-
-            this.solids.push(obj);
         }
     }
 
