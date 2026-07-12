@@ -6,6 +6,7 @@ import { YarnBall } from '../entities/YarnBall.js';
 import { Pillow, PILLOW_HEIGHT } from '../entities/Pillow.js';
 import { CostumeBox } from '../entities/CostumeBox.js';
 import { buildLayout } from '../systems/roomBuilder.js';
+import { InteractionController } from '../systems/InteractionController.js';
 import { fadeToRoom, fadeInRoom } from './roomTransition.js';
 
 const GROUND_HEIGHT = 40;
@@ -122,6 +123,14 @@ export class Bedroom extends Scene
         // The Pusheencorn box, between the dresser and the door.
         this.costumeBox = new CostumeBox(this, 970, groundTop);
 
+        // One dispatcher for every E-press interaction in this room. Register
+        // yarn before the box to preserve the old yarn-first tie-break (moot
+        // today -- their zones don't overlap -- but explicit). The door is a
+        // walk-into trigger and stays out (see InteractionController's note).
+        this.interactions = new InteractionController(this);
+        this.yarnBalls.forEach((ball) => this.interactions.register(ball));
+        this.interactions.register(this.costumeBox);
+
         this.ground = this.add.rectangle(width / 2, groundTop + GROUND_HEIGHT / 2, width, GROUND_HEIGHT, GROUND_COLOR);
         this.physics.add.existing(this.ground, true);
 
@@ -160,14 +169,9 @@ export class Bedroom extends Scene
             return;
         }
 
-        this.yarnBalls.forEach((ball) => ball.update(this.pusheen));
-        this.costumeBox.update(this.pusheen);
-
-        const interactAvailable = this.yarnBalls.some((ball) => ball.inInnerZone) ||
-            this.costumeBox.inInnerZone;
-        if (interactAvailable !== this.registry.get('interact:available')) {
-            this.registry.set('interact:available', interactAvailable);
-        }
+        // Updates every registered interactable's zones/cues and publishes
+        // interact:available (guarded).
+        this.interactions.update(this.pusheen);
 
         const interactPressed = Input.Keyboard.JustDown(this.keys.E) || this.registry.get('input:interactPressed');
         this.registry.set('input:interactPressed', false);
@@ -190,15 +194,11 @@ export class Bedroom extends Scene
         }
 
         if (interactPressed) {
-            const ball = this.yarnBalls.find((b) => b.inInnerZone);
-
-            if (ball) {
-                ball.collect();
-            } else if (this.costumeBox.inInnerZone) {
-                this.costumeBox.interact(this.pusheen);
-            }
+            this.interactions.pressInteract(this.pusheen);
         }
 
+        // The door is a walk-into trigger, handled here rather than through the
+        // interaction controller (see the controller's note on triggers).
         if (this.doorToLivingRoom.checkTrigger(this.pusheen)) {
             fadeToRoom(this, 'LivingRoom', { spawnX: 150, fadeIn: true });
         }
