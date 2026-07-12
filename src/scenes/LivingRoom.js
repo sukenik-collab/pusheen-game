@@ -11,7 +11,7 @@ import { YarnBall } from '../entities/YarnBall.js';
 import { buildLayout } from '../systems/roomBuilder.js';
 import { InteractionController } from '../systems/InteractionController.js';
 import { subscribeRegistry } from '../systems/registryHelpers.js';
-import { fadeToRoom, fadeInRoom } from './roomTransition.js';
+import { fadeToRoom, fadeInRoom, resolveSpawn } from './roomTransition.js';
 
 const GROUND_HEIGHT = 40;
 const FLOOR_COLOR = 0xd7ccc0;
@@ -30,10 +30,13 @@ const CABINET_CONTENTS = [
     { key: 'tshirt', label: 'T-Shirt', sprite: 'itemShirt', effect: 'nope' },
     { key: 'popcorn', label: 'Popcorn', sprite: 'itemPopcorn', effect: 'takeSnack' }
 ];
-// Fresh-lap spawn (near the sunbeam); walking in from the bedroom instead
-// spawns just inside the left-wall door, clear of its trigger zone.
-const SPAWN_X_DEFAULT = 950;
-const SPAWN_X_FROM_BEDROOM = 150;
+// Named entry points. default = a fresh lap / Play again, near the sunbeam;
+// fromBedroom = walking in through the left-wall door, just inside it and
+// clear of its trigger zone so it can't instantly re-fire.
+const SPAWN_POINTS = {
+    default: { x: 950 },
+    fromBedroom: { x: 150 }
+};
 // Derived from feel.js's own JUMP values (apex = v^2/2g) rather than a
 // hand-copied comment, so retuning JUMP can't silently strand the cushion
 // out of reach (or make it trivial to clear) without this moving too.
@@ -84,7 +87,7 @@ export class LivingRoom extends Scene
         this.sunbeam = new Sunbeam(this, 1080, groundTop);
 
         // Far left -- doorway to the bedroom
-        this.doorToBedroom = new Door(this, 40, groundTop, 'right');
+        this.doorToBedroom = new Door(this, 40, groundTop, { side: 'right', to: 'Bedroom', enterAt: 'fromLivingRoom' });
 
         // Center -- couch base (built from LAYOUT below) + the one squashable
         // cushion, reachable with a hop. Quest: one yarn ball hides behind the
@@ -115,7 +118,8 @@ export class LivingRoom extends Scene
 
         // Start near the sunbeam (right), not the cabinet -- playtest moved
         // the spawn; see the design doc's scene-layout note for why.
-        this.pusheen = new Pusheen(this, data?.spawnX ?? SPAWN_X_DEFAULT, height - 200);
+        const spawn = resolveSpawn(SPAWN_POINTS, data);
+        this.pusheen = new Pusheen(this, spawn.x, height - 200);
         this.physics.add.collider(this.pusheen, this.ground);
         this.solids.forEach((solid) => this.physics.add.collider(this.pusheen, solid));
         this.physics.add.collider(this.pusheen, this.cushion, () => this.cushion.onCollide());
@@ -163,7 +167,7 @@ export class LivingRoom extends Scene
         if (this.registry.get('game:restartRequested')) {
             this.registry.set('game:restartRequested', false);
             resetRunState(this.registry);
-            this.scene.restart({ spawnX: SPAWN_X_DEFAULT, fadeIn: false });
+            this.scene.restart({ fadeIn: false });
             return;
         }
 
@@ -223,7 +227,7 @@ export class LivingRoom extends Scene
             }
 
             if (this.doorToBedroom.checkTrigger(this.pusheen)) {
-                fadeToRoom(this, 'Bedroom', { fadeIn: true });
+                fadeToRoom(this, this.doorToBedroom.to, { spawn: this.doorToBedroom.enterAt, fadeIn: true });
             }
         }
 
