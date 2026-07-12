@@ -1,41 +1,56 @@
 import { GameObjects } from 'phaser';
 import { CUSHION_SQUASH } from '../config/feel.js';
 
-// A soft spot on the bed. Unlike the couch cushion it has no body -- she
-// stands on the bed itself -- so it isn't a landing platform; it just gives
-// the same volume-conserving squish when she settles onto it, so the bed
-// reads as plush rather than a plank.
+const WIDTH = 90;
+const HEIGHT = 26;
+
+export const PILLOW_HEIGHT = HEIGHT;
+
+// A plush pillow: a small raised step resting on the bed's mattress that she
+// hops onto. It has a solid static body (so she lands on top instead of
+// clipping through), and it squishes on contact -- the same volume-conserving
+// squash as the couch cushion, so the bed reads as soft.
 export class Pillow extends GameObjects.Container
 {
     constructor (scene, x, y)
     {
         super(scene, x, y);
         scene.add.existing(this);
+        scene.physics.add.existing(this, true);
 
         this.visual = scene.add.image(0, 0, 'pillow');
         this.add(this.visual);
 
         this.audio = scene.registry.get('audio');
 
-        this.halfW = this.visual.width / 2;
-        this.wasResting = false;
+        // Static bodies derive their position from the game object's render
+        // bounds, which a Container doesn't implement -- set the body rect
+        // directly, same as Cushion. It never needs to move again.
+        this.body.setSize(WIDTH, HEIGHT);
+        this.body.position.set(x - WIDTH / 2, y - HEIGHT / 2);
+
+        this.touchedThisStep = false;
+        this.wasContacted = false;
     }
 
-    // Squash once when she comes to rest on the bed above the pillow, not
-    // every frame she stands there. The height check keeps a hop across the
-    // floor below the bed from triggering it -- resting *on the bed* puts her
-    // center above the pillow's.
-    update (pusheen)
+    // Fired from the pusheen<->pillow collider callback -- only on steps where
+    // Arcade Physics detects a fresh overlap for this exact pair.
+    onCollide ()
     {
-        const resting = pusheen.isGrounded() &&
-            Math.abs(pusheen.x - this.x) <= this.halfW + 24 &&
-            pusheen.y < this.y;
+        this.touchedThisStep = true;
+    }
 
-        if (resting && !this.wasResting) {
+    // Called once per frame after the physics step, so onCollide() has already
+    // fired if it was going to. Squash once when she first lands, not every
+    // frame she rests here.
+    resolveContact ()
+    {
+        if (this.touchedThisStep && !this.wasContacted) {
             this.playSquash();
         }
 
-        this.wasResting = resting;
+        this.wasContacted = this.touchedThisStep;
+        this.touchedThisStep = false;
     }
 
     playSquash ()
