@@ -5,6 +5,18 @@ Status: draft v0.1 · Companion to: MVP Product Brief · Implementation detail l
 
 This doc turns the brief's *feelings* into concrete, tunable specifics. All numbers assume a ~1280×720 logical canvas and are **starting seeds to tune by feel during playtest**, not fixed values. Phaser API specifics (tweens, physics config, sensor geometry) live in the tech spec.
 
+> **Reconciliation note (2026-07).** Sections 2–4 (movement, squash & stretch,
+> the concentric-zone sniff radar) are **durable feel targets and still
+> authoritative** — they now generalize across every room. Sections 1, 5–7
+> describe the specific living-room slice and are still accurate *for that room*,
+> which is now one of four. **The live source of truth for all tuning is
+> `src/config/feel.js`**, which has since grown beyond this doc: `COSTUME` (the
+> Pusheencorn floaty jump), `YARN_RADAR` / `YARN_POP` (the hidden-yarn quest),
+> `STORMY_RADAR` / `STORMY` (the NPC), `BOX_RADAR` (the costume box), `DOOR`
+> (room-transition fade), and `NAP`. Room Pair #2 (v2) adds `CARRY` (held-item
+> jump multiplier) and `SLOTH`. Feel targets for those new mechanics live in
+> **`pusheen-v2-room-pair-2-spec.md`**.
+
 ---
 
 ## 1. Scene layout
@@ -39,7 +51,7 @@ Outer must be meaningfully larger than inner so the cue *leads* the player — t
 - Overlay shows the inside: three items in a simple grid — a pair of socks, a folded t-shirt, and a bag of popcorn (the snack).
 - This adds a second interaction beyond peek: the player taps/clicks one item to choose it.
   - Choosing the popcorn: it lifts out of the panel, the `0/1 → 1/1` counter ticks, overlay eases closed.
-  - Choosing a decoy (socks or t-shirt): *open question — nothing happens vs. a small "nope" reaction (a tiny shake/bounce)*. Either way the overlay stays open so the player can try again; no fail state.
+  - Choosing a decoy (socks or t-shirt): *resolved — a small "nope" reaction (a tiny shake + soft "nope" SFX) shipped.* The overlay stays open so the player can try again; no fail state.
 - No inventory. The snack is now "got"; that's all the state we track.
 
 ## 6. The payoff: the sunbeam nap (level complete)
@@ -49,8 +61,15 @@ The finale matches the goal — no flagpole.
 - After the "So Cozy!" beat, show a **"Play again!" button**. Tapping it resets the scene (uncollect the snack, clear the counter, cat back at the start) for another lap — no page reload needed.
 - Slow, warm, unhurried. This beat is the emotional dividend of the whole loop — give it room to breathe.
 
-## 7. Optional: the hiding box
-Climb in → brief pause → pop back out. No effect, no reward — purely delightful, and it tests the box *interaction feel* that the full game's identity is built on. Costs almost nothing; skip if it adds any friction.
+## 7. The costume box *(shipped — evolved past this section)*
+This started as the optional *no-ability* hiding box (climb in → pause → pop out,
+no effect) to test box *interaction feel*. That feel proved out and it became the
+**Pusheencorn costume box**: climb in → the box wobbles → pop out transformed,
+granting a floatier/taller jump (see `COSTUME` in `feel.js`) that gates the
+bedroom's high shelf. Interacting again pops the costume back off. The
+climb-in/pop-out beat is entirely tween-driven; physics returns only for the
+landing. The original "delightful hiding spot" feel is preserved — it just now
+carries an ability.
 
 ## 8. Art & audio for this slice
 - **Art:** placeholder shapes throughout — a plump gray oval is a valid Pusheen. Do not make real art before the feel is proven. The oval is designed to *grow into* the final character (ears, stripes, dot eyes) later, so nothing here is throwaway.
