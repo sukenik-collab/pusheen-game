@@ -54,17 +54,22 @@ export class UI extends Scene
             color: '#3e2c23'
         });
 
+        this.yarnCounterText = this.add.text(20, 48, 'Yarn: 0/3', {
+            fontSize: '22px',
+            color: '#3e2c23'
+        });
+
         this.createPeekPanel();
         this.createNapCard();
         this.createAudioMenu();
         this.numberKeys = this.input.keyboard.addKeys('ONE,TWO,THREE');
 
         // The E button is needed both to open the panel (in range) and to
-        // close it again (cancel) -- gating visibility on inInnerZone alone
-        // let it hide itself out from under a touch player mid-cancel if
-        // residual momentum carried her out of range while the panel was
+        // close it again (cancel) -- gating visibility on interact:available
+        // alone let it hide itself out from under a touch player mid-cancel
+        // if residual momentum carried her out of range while the panel was
         // still open, so both signals feed the same recompute.
-        this.registry.events.on('changedata-cabinet:inInnerZone', () => {
+        this.registry.events.on('changedata-interact:available', () => {
             this.updateInteractButtonVisibility();
         });
 
@@ -80,6 +85,10 @@ export class UI extends Scene
 
         this.registry.events.on('changedata-snack:count', (parent, value) => {
             this.counterText.setText(`Snack: ${value}/1`);
+        });
+
+        this.registry.events.on('changedata-yarn:count', (parent, value) => {
+            this.yarnCounterText.setText(`Yarn: ${value}/3`);
         });
 
         this.registry.events.on('changedata-nap:showCard', (parent, value) => {
@@ -143,10 +152,13 @@ export class UI extends Scene
         this.interactButton.text.setVisible(visible);
     }
 
+    // The rooms own what counts as "interactable here" (cabinet, Stormy,
+    // yarn, box...) and publish the single interact:available flag; the UI
+    // just reflects it, plus the open peek panel's cancel affordance.
     updateInteractButtonVisibility ()
     {
-        const inRange = this.registry.get('cabinet:inInnerZone') || this.registry.get('cabinet:peekOpen');
-        this.setInteractButtonVisible(inRange && !this.registry.get('snack:collected'));
+        const inRange = this.registry.get('interact:available') || this.registry.get('cabinet:peekOpen');
+        this.setInteractButtonVisible(inRange);
     }
 
     createPeekPanel ()
