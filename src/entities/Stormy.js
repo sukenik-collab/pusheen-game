@@ -2,11 +2,19 @@ import { GameObjects, Geom } from 'phaser';
 import { IDLE, STORMY, STORMY_RADAR } from '../config/feel.js';
 import { YARN_IDS } from '../config/gameState.js';
 
-// stormy.png is 80x54, drawn at its native size.
-const VISUAL_HALF_HEIGHT = 27;
+// The sitting-up sprite is 108x118. She's anchored by her feet, not her
+// center: the origin sits at the body's baseline (~y92) so she plants on the
+// floor while the fluffy tail (lower in the art) spills below the floor line
+// for a little depth. Offsets below are measured up from that planted origin.
+const SPRITE_W = 108;
+const SPRITE_H = 118;
+const BODY_BASELINE_Y = 92;      // feet, in sprite pixels
+const BODY_CENTER_X = 46;        // body midline, in sprite pixels
+const BODY_MID_DY = 42;          // body center, above the planted origin
+const HEAD_TOP_DY = 90;          // above the origin -- where cue hearts rise
 
 const HEART_COLOR = '#f8bbd0';
-const BUBBLE_OFFSET_Y = -70;
+const BUBBLE_OFFSET_Y = -104;
 
 // Quest copy, keyed by how many yarn balls are found so far.
 const HINTS = [
@@ -24,12 +32,16 @@ export class Stormy extends GameObjects.Container
 {
     constructor (scene, x, groundTop)
     {
-        super(scene, x, groundTop - VISUAL_HALF_HEIGHT);
+        super(scene, x, groundTop);
         scene.add.existing(this);
 
         this.audio = scene.registry.get('audio');
 
-        this.visual = scene.add.image(0, 0, 'stormy');
+        // Sad while the yarn is lost; if the quest was already finished this
+        // run (she's revisited), she's already happy.
+        const face = scene.registry.get('quest:complete') ? 'stormyHappy' : 'stormySad';
+        this.visual = scene.add.image(0, 0, face)
+            .setOrigin(BODY_CENTER_X / SPRITE_W, BODY_BASELINE_Y / SPRITE_H);
         this.add(this.visual);
 
         // Idle breathing, same as Pusheen's.
@@ -54,8 +66,9 @@ export class Stormy extends GameObjects.Container
         this.add(this.bubble);
         this.bubbleHideTimer = null;
 
-        this.outerZone = new Geom.Circle(x, this.y, STORMY_RADAR.sniffRadius);
-        this.innerZone = new Geom.Circle(x, this.y, STORMY_RADAR.interactRadius);
+        const zoneY = this.y - BODY_MID_DY;
+        this.outerZone = new Geom.Circle(x, zoneY, STORMY_RADAR.sniffRadius);
+        this.innerZone = new Geom.Circle(x, zoneY, STORMY_RADAR.interactRadius);
         this.inOuterZone = false;
         this.inInnerZone = false;
     }
@@ -99,6 +112,7 @@ export class Stormy extends GameObjects.Container
     celebrate ()
     {
         this.scene.registry.set('quest:complete', true);
+        this.visual.setTexture('stormyHappy');
         this.audio?.play('collect');
         this.showBubble(CELEBRATE);
 
@@ -120,7 +134,7 @@ export class Stormy extends GameObjects.Container
 
     spawnHeart (offsetX)
     {
-        const heart = this.scene.add.text(this.x + offsetX, this.y - VISUAL_HALF_HEIGHT - 8, '♥', {
+        const heart = this.scene.add.text(this.x + offsetX, this.y - HEAD_TOP_DY, '♥', {
             fontSize: '24px',
             color: HEART_COLOR
         }).setOrigin(0.5);
