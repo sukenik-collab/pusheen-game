@@ -1,6 +1,13 @@
 # Pusheen Cozy Game — MVP Tech Spec
 *"The Living Room Snack Hunt" vertical slice*
 
+> ⚠️ **STALE — historical reference only.** This describes the original
+> single-room, pre-costume MVP and no longer matches the code (which has a second
+> room, doors, the Pusheencorn costume, colon-namespaced registry keys, and
+> different entities). For the current architecture and the next work, see
+> **`pusheen-v1.5-refactor-spec.md`** and **`pusheen-v2-room-pair-2-spec.md`**,
+> which are authoritative. Kept for the *why* behind the original decisions.
+
 Status: draft v0.1 · Companions: Product Brief (the why + success/kill criteria), Design Doc (the feel targets) · Project memory: CLAUDE.md
 
 This spec is written to be **delegatable to Claude Code**. It defines architecture, structure, and the implementation specifics that carry the "feel," then a checklist and a phased build plan with a testable checkpoint at each step.
