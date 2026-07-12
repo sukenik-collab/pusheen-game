@@ -106,9 +106,11 @@ export class Bedroom extends Scene
         // so they should stop her -- both walking in at floor level and walking
         // off the ends while up on the sheets. The mattress body is inset and
         // only mattress-high, so without these she clips into the drawn frame
-        // and walks straight through the posts. Full sprite height; she still
-        // mounts the bed by hopping onto the mattress (apex clears the posts).
-        const BED_FRAME_HEIGHT = 64;   // matches the bed sprite's height
+        // and walks straight through the posts. Height is read from the bed
+        // image so the collision always matches the drawn bed (the bed sits
+        // with its bottom on the floor, so the posts span its full height); she
+        // still mounts the bed by hopping onto the mattress (apex clears them).
+        const BED_FRAME_HEIGHT = this.textures.get('bed').getSourceImage().height;
         const POST_W = 20;             // frame inset: (spriteW 280 - mattress 240) / 2
         const frameTop = groundTop - BED_FRAME_HEIGHT;
         [270, 530].forEach((postX) => {   // sprite ends at 260 / 540
