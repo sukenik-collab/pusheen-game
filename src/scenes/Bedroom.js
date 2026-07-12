@@ -102,19 +102,21 @@ export class Bedroom extends Scene
         this.physics.add.existing(this.bedBody, true);
         this.solids.push(this.bedBody);
 
-        // Headboard + footboard: the frame's end posts rise above the mattress,
-        // so they should stop her -- both walking in at floor level and walking
-        // off the ends while up on the sheets. The mattress body is inset and
-        // only mattress-high, so without these she clips into the drawn frame
-        // and walks straight through the posts. Height is read from the bed
-        // image so the collision always matches the drawn bed (the bed sits
-        // with its bottom on the floor, so the posts span its full height); she
-        // still mounts the bed by hopping onto the mattress (apex clears them).
-        const BED_FRAME_HEIGHT = this.textures.get('bed').getSourceImage().height;
-        const POST_W = 20;             // frame inset: (spriteW 280 - mattress 240) / 2
-        const frameTop = groundTop - BED_FRAME_HEIGHT;
-        [270, 530].forEach((postX) => {   // sprite ends at 260 / 540
-            const post = this.add.rectangle(postX, (frameTop + groundTop) / 2, POST_W, BED_FRAME_HEIGHT)
+        // Headboard (left) and footboard (right) are DIFFERENT heights in the
+        // art -- measured from bed.png, whose bottom sits on the floor: the
+        // headboard rises ~63px (nearly the full 64), the footboard only ~46px
+        // (a low foot, barely above the 44px mattress). Two posts so each blocks
+        // to the height it's actually drawn: at floor level both stop her
+        // walking into the frame; up on the sheets the tall headboard walls off
+        // the head end while the low footboard lets her step off the foot. She
+        // still mounts the bed by hopping onto the mattress.
+        const POST_W = 20;   // frame inset: (spriteW 280 - mattress 240) / 2
+        [
+            { x: 270, h: 63 },   // headboard, left
+            { x: 530, h: 46 }    // footboard, right
+        ].forEach(({ x, h }) => {
+            const top = groundTop - h;
+            const post = this.add.rectangle(x, (top + groundTop) / 2, POST_W, h)
                 .setVisible(false);
             this.physics.add.existing(post, true);
             this.solids.push(post);
