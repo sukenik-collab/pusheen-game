@@ -37,6 +37,7 @@ export class Stormy extends GameObjects.Container
         scene.add.existing(this);
 
         this.audio = scene.registry.get('audio');
+        this.verb = 'talk';
 
         // Sad while the yarn is lost; if the quest was already finished this
         // run (she's revisited), she's already happy.

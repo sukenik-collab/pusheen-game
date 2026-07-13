@@ -3,27 +3,57 @@ import { NAP, JUMP } from '../config/feel.js';
 import { resetRunState } from '../config/gameState.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Cushion, CUSHION_HEIGHT } from '../entities/Cushion.js';
-import { Cabinet, CABINET_HEIGHT } from '../entities/Cabinet.js';
+import { Container } from '../entities/Container.js';
 import { Sunbeam } from '../entities/Sunbeam.js';
 import { Door } from '../entities/Door.js';
 import { Stormy } from '../entities/Stormy.js';
 import { YarnBall } from '../entities/YarnBall.js';
-import { fadeToRoom, fadeInRoom } from './roomTransition.js';
+import { buildLayout } from '../systems/roomBuilder.js';
+import { InteractionController } from '../systems/InteractionController.js';
+import { subscribeRegistry } from '../systems/registryHelpers.js';
+import { fadeToRoom, fadeInRoom, resolveSpawn } from './roomTransition.js';
 
 const GROUND_HEIGHT = 40;
 const FLOOR_COLOR = 0xd7ccc0;
 const GROUND_COLOR = 0x8d6e63;
 
 const COUCH_BASE_HEIGHT = 50;
-// Fresh-lap spawn (near the sunbeam); walking in from the bedroom instead
-// spawns just inside the left-wall door, clear of its trigger zone.
-const SPAWN_X_DEFAULT = 950;
-const SPAWN_X_FROM_BEDROOM = 150;
+// The cabinet's placement height (was exported from the now-deleted Cabinet.js).
+const CABINET_HEIGHT = 160;
+
+// The cabinet's contents, previously hardcoded in the UI scene. Order is
+// preserved (socks, t-shirt, popcorn) so number keys 1/2/3 map identically.
+// `effect` drives what selecting an item does: 'takeSnack' collects it, 'nope'
+// gives the little decoy shake. Lives with the container now, not in the UI.
+const CABINET_CONTENTS = [
+    { key: 'socks', label: 'Socks', sprite: 'itemSocks', effect: 'nope' },
+    { key: 'tshirt', label: 'T-Shirt', sprite: 'itemShirt', effect: 'nope' },
+    { key: 'popcorn', label: 'Popcorn', sprite: 'itemPopcorn', effect: 'takeSnack' }
+];
+// Named entry points. default = a fresh lap / Play again, near the sunbeam;
+// fromBedroom = walking in through the left-wall door, just inside it and
+// clear of its trigger zone so it can't instantly re-fire.
+const SPAWN_POINTS = {
+    default: { x: 950 },
+    fromBedroom: { x: 150 }
+};
 // Derived from feel.js's own JUMP values (apex = v^2/2g) rather than a
 // hand-copied comment, so retuning JUMP can't silently strand the cushion
 // out of reach (or make it trivial to clear) without this moving too.
 const JUMP_APEX_HEIGHT = (JUMP.velocity * JUMP.velocity) / (2 * JUMP.gravity);
 const CUSHION_SURFACE_HEIGHT = Math.round(JUMP_APEX_HEIGHT * 0.8);
+
+// The room's one piece of solid furniture, as data built by the shared
+// roomBuilder (same construction path as the Bedroom). Its own solid body,
+// wider than the cushion above, makes the couch read as one continuous piece
+// -- without it, only the narrower cushion collided and walking up meant
+// bonking a floating box from the side. The cabinet, cushion, yarn, sunbeam,
+// and door are entities, not layout. The couch yarn is spawned in create()
+// *before* this runs so it renders tucked behind the couch's left arm -- that
+// render-order nuance stays in create() (see roomBuilder's note).
+const LAYOUT = [
+    { name: 'couchBase', role: 'solid', sprite: 'couchBase', x: 640, yFromGround: COUCH_BASE_HEIGHT / 2 }
+];
 
 export class LivingRoom extends Scene
 {
@@ -44,29 +74,30 @@ export class LivingRoom extends Scene
 
         this.add.rectangle(width / 2, height / 2, width, height, FLOOR_COLOR);
 
-        // Left -- cabinet with the sniff/peek radar
-        this.cabinet = new Cabinet(this, 180, groundTop - CABINET_HEIGHT / 2);
+        // Left -- cabinet with the sniff/peek radar. A generic Container; its
+        // snack-gate (goes quiet once the snack is found) is the isActionable
+        // predicate, and its contents drive the UI peek panel.
+        this.cabinet = new Container(this, 180, groundTop - CABINET_HEIGHT / 2, {
+            sprite: 'cabinet',
+            contents: CABINET_CONTENTS,
+            isActionable: (scene) => !scene.registry.get('snack:collected')
+        });
 
         // Right -- window + sunbeam with the nap trigger
         this.sunbeam = new Sunbeam(this, 1080, groundTop);
 
         // Far left -- doorway to the bedroom
-        this.doorToBedroom = new Door(this, 40, groundTop, 'right');
+        this.doorToBedroom = new Door(this, 40, groundTop, { side: 'right', to: 'Bedroom', enterAt: 'fromLivingRoom' });
 
-        // Center -- couch base + the one squashable cushion, reachable with a hop.
-        // The base gets its own solid static body (matching its real, wider
-        // footprint) so the couch reads as one continuous solid piece -- without
-        // it, only the narrower cushion above collided, and walking up to the
-        // couch meant bonking into that floating box from the side instead of
-        // being blocked by the couch itself.
-        // Quest: one yarn ball hides behind the couch's left arm -- created
-        // before the couch so it renders tucked behind it, edge peeking out.
+        // Center -- couch base (built from LAYOUT below) + the one squashable
+        // cushion, reachable with a hop. Quest: one yarn ball hides behind the
+        // couch's left arm -- spawned before the couch is built so it renders
+        // tucked behind it, edge peeking out (render-order nuance kept here).
         this.yarnBalls = [];
         this.spawnYarn('couch', 550, groundTop - 14);
 
-        const couchBaseY = groundTop - COUCH_BASE_HEIGHT / 2;
-        this.couchBase = this.add.image(width / 2, couchBaseY, 'couchBase');
-        this.physics.add.existing(this.couchBase, true);
+        this.solids = buildLayout(this, LAYOUT, groundTop);
+
         const cushionY = groundTop - CUSHION_SURFACE_HEIGHT + CUSHION_HEIGHT / 2;
         this.cushion = new Cushion(this, width / 2, cushionY);
 
@@ -77,11 +108,20 @@ export class LivingRoom extends Scene
         // so a fresh lap meets her (and hears about the yarn) right away.
         this.stormy = new Stormy(this, 820, groundTop);
 
+        // One dispatcher for every E-press interaction here, registered in the
+        // old positional priority order (cabinet > Stormy > yarn) as the
+        // tie-break. Today the zones don't overlap, so nearest-dispatch already
+        // reproduces that priority. The door + sunbeam are walk-into triggers
+        // and stay out of the controller (see its note on triggers).
+        this.interactions = new InteractionController(this);
+        [this.cabinet, this.stormy, ...this.yarnBalls].forEach((item) => this.interactions.register(item));
+
         // Start near the sunbeam (right), not the cabinet -- playtest moved
         // the spawn; see the design doc's scene-layout note for why.
-        this.pusheen = new Pusheen(this, data?.spawnX ?? SPAWN_X_DEFAULT, height - 200);
+        const spawn = resolveSpawn(SPAWN_POINTS, data);
+        this.pusheen = new Pusheen(this, spawn.x, height - 200);
         this.physics.add.collider(this.pusheen, this.ground);
-        this.physics.add.collider(this.pusheen, this.couchBase);
+        this.solids.forEach((solid) => this.physics.add.collider(this.pusheen, solid));
         this.physics.add.collider(this.pusheen, this.cushion, () => this.cushion.onCollide());
 
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -89,7 +129,7 @@ export class LivingRoom extends Scene
 
         // Visit-scoped keys only -- run progress (snack, quest) lives in
         // gameState.js so a room transition back here can't wipe it.
-        this.registry.set('cabinet:peekOpen', false);
+        this.registry.set('peek:open', false);
         this.registry.set('interact:available', false);
         this.registry.set('input:interactPressed', false);
         this.registry.set('nap:active', false);
@@ -97,20 +137,16 @@ export class LivingRoom extends Scene
         this.registry.set('nap:showPlayAgain', false);
         this.registry.set('game:restartRequested', false);
 
-        // The registry's event emitter is global and outlives any one
-        // LivingRoom instance, so a listener added on every create() (every
-        // restart) would accumulate and pile up stale closures over stale
-        // scene instances -- explicitly drop it on shutdown, unlike UI's
-        // registry listeners, which only ever run through create() once
-        // since UI itself is never restarted.
-        const onSnackCollected = (parent, value) => {
+        // Light the beam the moment the snack is found. subscribeRegistry
+        // drops the listener on shutdown -- the registry emitter outlives any
+        // one LivingRoom instance, so a listener re-added on every create()
+        // (every restart) would otherwise pile up stale closures over dead
+        // scenes. (UI's registry listeners don't need this: UI is never
+        // restarted, so its create() runs exactly once.)
+        subscribeRegistry(this, 'snack:collected', (parent, value) => {
             if (value) {
                 this.sunbeam.illuminate();
             }
-        };
-        this.registry.events.on('changedata-snack:collected', onSnackCollected);
-        this.events.once('shutdown', () => {
-            this.registry.events.off('changedata-snack:collected', onSnackCollected);
         });
 
         // Returning from the bedroom with the snack already found: re-light
@@ -131,7 +167,7 @@ export class LivingRoom extends Scene
         if (this.registry.get('game:restartRequested')) {
             this.registry.set('game:restartRequested', false);
             resetRunState(this.registry);
-            this.scene.restart({ spawnX: SPAWN_X_DEFAULT, fadeIn: false });
+            this.scene.restart({ fadeIn: false });
             return;
         }
 
@@ -141,33 +177,22 @@ export class LivingRoom extends Scene
             return;
         }
 
-        this.cabinet.update(this.pusheen);
-        this.stormy.update(this.pusheen);
-        this.yarnBalls.forEach((ball) => ball.update(this.pusheen));
-
-        // Phaser's registry fires changedata on every set(), even when the
-        // value is unchanged -- guard so UI's listener only runs on the
-        // real transitions, not every frame regardless of zone state.
-        const interactAvailable = !this.registry.get('nap:active') && (
-            (this.cabinet.inInnerZone && !this.registry.get('snack:collected')) ||
-            this.stormy.inInnerZone ||
-            this.yarnBalls.some((ball) => ball.inInnerZone)
-        );
-        if (interactAvailable !== this.registry.get('interact:available')) {
-            this.registry.set('interact:available', interactAvailable);
-        }
+        // Updates every registered interactable's zones/cues and publishes
+        // interact:available (guarded). Suppressed during the nap so the
+        // button can't reappear mid-payoff -- the old !nap:active guard.
+        this.interactions.update(this.pusheen, { suppress: this.registry.get('nap:active') });
 
         const interactPressed = Input.Keyboard.JustDown(this.keys.E) || this.registry.get('input:interactPressed');
         this.registry.set('input:interactPressed', false);
 
-        const peekOpen = this.registry.get('cabinet:peekOpen');
+        const peekOpen = this.registry.get('peek:open');
         const napActive = this.registry.get('nap:active');
 
         if (peekOpen) {
             this.pusheen.stopMoving();
 
             if (interactPressed) {
-                this.registry.set('cabinet:peekOpen', false);
+                this.registry.set('peek:open', false);
             }
         } else if (napActive) {
             this.pusheen.stopMoving();
@@ -194,13 +219,7 @@ export class LivingRoom extends Scene
             }
 
             if (interactPressed) {
-                if (this.cabinet.inInnerZone && !this.registry.get('snack:collected')) {
-                    this.registry.set('cabinet:peekOpen', true);
-                } else if (this.stormy.inInnerZone) {
-                    this.stormy.interact();
-                } else {
-                    this.yarnBalls.find((ball) => ball.inInnerZone)?.collect();
-                }
+                this.interactions.pressInteract(this.pusheen);
             }
 
             if (this.sunbeam.checkTrigger(this.pusheen, this.registry.get('snack:collected'))) {
@@ -208,7 +227,7 @@ export class LivingRoom extends Scene
             }
 
             if (this.doorToBedroom.checkTrigger(this.pusheen)) {
-                fadeToRoom(this, 'Bedroom', { fadeIn: true });
+                fadeToRoom(this, this.doorToBedroom.to, { spawn: this.doorToBedroom.enterAt, fadeIn: true });
             }
         }
 
