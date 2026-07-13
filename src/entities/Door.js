@@ -8,6 +8,8 @@ const HEIGHT = 150;
 // pattern as the sunbeam's nap trigger.
 //
 // opts:
+//   texture         : door art key (default 'door'); e.g. 'screenDoor',
+//                     'gardenGate' for the v2 doorways
 //   side            : 'left' | 'right' knob side (the art's knob is on the right)
 //   to              : target scene key
 //   enterAt         : named spawn point in the target room (see resolveSpawn)
@@ -23,7 +25,7 @@ export class Door extends GameObjects.Container
 
         const knobSide = opts.side ?? 'left';
         // The art's knob is on the right; mirror for left-knob doors.
-        this.add(scene.add.image(0, 0, 'door').setFlipX(knobSide === 'left'));
+        this.add(scene.add.image(0, 0, opts.texture ?? 'door').setFlipX(knobSide === 'left'));
 
         this.to = opts.to ?? null;
         this.enterAt = opts.enterAt ?? null;
