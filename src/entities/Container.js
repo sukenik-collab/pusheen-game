@@ -45,7 +45,13 @@ export class Container extends GameObjects.Container
         this.gate = opts.gate ?? null;
         this.audio = scene.registry.get('audio');
 
+        // `hidden` = the container is drawn into the room backdrop already (the
+        // kitchen fridge); keep the sprite for zone geometry + cue height, but
+        // don't draw a second copy over the art.
         this.visual = scene.add.image(0, 0, opts.sprite);
+        if (opts.hidden) {
+            this.visual.setVisible(false);
+        }
         this.add(this.visual);
 
         // Outer must be strictly larger than inner so the cue leads the

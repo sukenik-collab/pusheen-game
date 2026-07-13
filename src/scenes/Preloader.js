@@ -44,6 +44,7 @@ export class Preloader extends Scene
         // to the 1280x720 canvas where they're placed. Sloth is a transparent
         // hanging sprite, centered in its frame.
         this.load.image('backyardBg', 'assets/sprites/backyard-bg.png');
+        this.load.image('kitchenBg', 'assets/sprites/kitchen-bg.png');
         this.load.image('sloth', 'assets/sprites/sloth-sleeping.png');
 
         // A tiny soft dot, reused as the sunbeam's dust-mote particle texture.
@@ -75,28 +76,26 @@ export class Preloader extends Scene
             gfx.fillRoundedRect(2, 46, 72, 12, 4);          // rails
             gfx.fillRoundedRect(2, 104, 72, 12, 4);
         });
-        // Kitchen backdrop: warm wall, a window onto the backyard (continuity
-        // -- same sun + tree), and a countertop the glass/fridge sit on.
-        this.makeTexture('kitchenBg', 1280, 720, (gfx) => {
-            gfx.fillStyle(0xf2e4c9, 1);
-            gfx.fillRect(0, 0, 1280, 720);                 // wall
-            gfx.fillStyle(0x9fd0e0, 1);
-            gfx.fillRect(470, 120, 340, 210);              // window sky
-            gfx.fillStyle(0xf7e26b, 1);
-            gfx.fillCircle(760, 175, 30);                  // sun through window
-            gfx.fillStyle(0x4f8f43, 1);
-            gfx.fillCircle(540, 300, 78);                  // tree through window
-            gfx.lineStyle(12, 0xffffff, 1);
-            gfx.strokeRect(470, 120, 340, 210);            // window frame
-            gfx.lineBetween(640, 120, 640, 330);
-            gfx.lineBetween(470, 225, 810, 225);
-            gfx.fillStyle(0xc9a97a, 1);
-            gfx.fillRect(0, 604, 1280, 40);                // countertop
-            gfx.fillStyle(0xb08e5f, 1);
-            gfx.fillRect(0, 644, 1280, 76);                // cabinets below
+        // (Backyard + kitchen backdrops and Sloth are real art, loaded above.
+        // Sloth's awake sprite is still pending -- for now the wake beat conveys
+        // it via animation.)
+
+        // The two climbing steps up to the counter (stool -> box -> counter
+        // top). Wide + adjacent, so the horizontal hop between them is small.
+        this.makeTexture('stepStool', 140, 80, (gfx) => {
+            gfx.fillStyle(0xc98f5a, 1);
+            gfx.fillRoundedRect(0, 0, 140, 22, 6);         // seat
+            gfx.fillRect(16, 22, 14, 58);                  // legs
+            gfx.fillRect(110, 22, 14, 58);
         });
-        // (Sloth's sleeping sprite is real art, loaded above. His awake sprite
-        // is still pending -- for now the wake beat conveys it via animation.)
+        this.makeTexture('stepBox', 120, 160, (gfx) => {
+            gfx.fillStyle(0xd0a56a, 1);
+            gfx.fillRoundedRect(0, 0, 120, 160, 8);
+            gfx.lineStyle(4, 0xb2854b, 1);
+            gfx.strokeRect(6, 6, 108, 148);
+            gfx.lineBetween(0, 54, 120, 54);               // slats
+            gfx.lineBetween(0, 106, 120, 106);
+        });
 
         // The closed fridge in the room. Sized like the LivingRoom cabinet (160
         // tall, on the floor) so its centre-anchored zone is reachable.
