@@ -57,7 +57,7 @@ export class UI extends Scene
         this.createPeekPanel();
         this.createNapCard();
         this.createAudioMenu();
-        this.numberKeys = this.input.keyboard.addKeys('ONE,TWO,THREE');
+        this.numberKeys = this.input.keyboard.addKeys('ONE,TWO,THREE,FOUR');
 
         // The E button is needed both to open the panel (in range) and to
         // close it again (cancel) -- gating visibility on interact:available
@@ -72,6 +72,7 @@ export class UI extends Scene
             this.updateInteractButtonVisibility();
 
             if (value) {
+                this.panelBg.setTexture(this.registry.get('peek:panel') ?? 'drawer');
                 this.populatePeekPanel(this.registry.get('peek:contents') ?? []);
                 this.openPeekPanel();
             } else {
@@ -113,6 +114,7 @@ export class UI extends Scene
         if (Input.Keyboard.JustDown(this.numberKeys.ONE)) this.selectItemByIndex(0);
         if (Input.Keyboard.JustDown(this.numberKeys.TWO)) this.selectItemByIndex(1);
         if (Input.Keyboard.JustDown(this.numberKeys.THREE)) this.selectItemByIndex(2);
+        if (Input.Keyboard.JustDown(this.numberKeys.FOUR)) this.selectItemByIndex(3);
     }
 
     createButtonVisual (x, y, label)
@@ -166,7 +168,10 @@ export class UI extends Scene
             .setScale(0.8)
             .setAlpha(0);
 
-        this.peekPanel.add(this.add.image(0, 0, 'drawer'));
+        // The panel backdrop -- swapped per container on open (drawer for the
+        // cabinet, the lit fridge interior for the fridge, etc.).
+        this.panelBg = this.add.image(0, 0, 'drawer');
+        this.peekPanel.add(this.panelBg);
 
         // Item boxes are (re)built from peek:contents each time the panel
         // opens, so the same panel can show any container's contents.

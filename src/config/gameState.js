@@ -21,5 +21,6 @@ export function resetRunState (registry)
     // v2 -- the juice quest (Room Pair #2).
     registry.set('sloth:met', false);
     registry.set('held:item', 'none');     // 'none' | 'glass' | 'juice'
+    registry.set('glass:taken', false);    // the counter glass, gone once picked up
     registry.set('juice:delivered', false);
 }

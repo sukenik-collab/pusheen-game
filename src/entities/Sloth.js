@@ -27,10 +27,16 @@ export class Sloth extends GameObjects.Container
         this.audio = scene.registry.get('audio');
         this.verb = 'talk';
         this.busy = false;
+        this.groundY = groundTop - 50;   // standing centre, feet on the floor
 
         // Already awake if the juice was delivered earlier this run (revisit):
-        // no sleeping bob, no wake beat replay.
+        // he's dropped off the branch and ambled clear -- no sleeping bob, no
+        // wake-beat replay.
         this.awake = !!scene.registry.get('juice:delivered');
+        if (this.awake) {
+            this.setPosition(x + SLOTH.amblePx, this.groundY);
+        }
+
         this.visual = scene.add.image(0, 0, this.awake ? 'slothAwake' : 'sloth');
         this.add(this.visual);
 
@@ -57,8 +63,8 @@ export class Sloth extends GameObjects.Container
         this.add(this.bubble);
         this.bubbleHideTimer = null;
 
-        this.outerZone = new Geom.Circle(x, this.y, SLOTH_RADAR.sniffRadius);
-        this.innerZone = new Geom.Circle(x, this.y, SLOTH_RADAR.interactRadius);
+        this.outerZone = new Geom.Circle(this.x, this.y, SLOTH_RADAR.sniffRadius);
+        this.innerZone = new Geom.Circle(this.x, this.y, SLOTH_RADAR.interactRadius);
         this.inOuterZone = false;
         this.inInnerZone = false;
     }
@@ -134,7 +140,8 @@ export class Sloth extends GameObjects.Container
         this.showBubble(ACCEPT);
         this.audio?.play('collect');
 
-        // A big volume-conserving yawn, then hop off + amble clear.
+        // A big volume-conserving yawn, then drop off the branch to the ground
+        // and amble clear -- which reveals the hidden door behind where he hung.
         this.scene.tweens.add({
             targets: this.visual,
             scaleX: SLOTH.yawnScaleX,
@@ -145,18 +152,24 @@ export class Sloth extends GameObjects.Container
             onComplete: () => {
                 this.scene.tweens.add({
                     targets: this,
-                    y: this.y - SLOTH.hopPx,
-                    duration: SLOTH.hopMs,
-                    yoyo: true,
-                    ease: 'Quad.easeOut'
+                    y: this.groundY,
+                    duration: SLOTH.dropMs,
+                    ease: 'Bounce.easeOut'
                 });
                 this.scene.tweens.add({
                     targets: this,
                     x: this.x + SLOTH.amblePx,
-                    delay: SLOTH.hopMs * 2,
+                    delay: SLOTH.dropMs,
                     duration: SLOTH.ambleMs,
                     ease: 'Sine.easeInOut',
-                    onComplete: () => { this.busy = false; }
+                    onComplete: () => {
+                        // Move his sensor zones to where he settles, so a later
+                        // "thanks" chat works beside him -- not under the empty
+                        // branch he left.
+                        this.outerZone.setPosition(this.x, this.y);
+                        this.innerZone.setPosition(this.x, this.y);
+                        this.busy = false;
+                    }
                 });
             }
         });

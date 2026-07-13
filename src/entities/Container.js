@@ -37,6 +37,10 @@ export class Container extends GameObjects.Container
 
         this.verb = 'peek';
         this.contents = opts.contents ?? [];
+        // Which peek-panel background to show (the UI swaps its panel art to
+        // this on open) -- e.g. the fridge shows its lit interior, the cabinet
+        // its default drawer.
+        this.panel = opts.panel ?? 'drawer';
         this._isActionable = opts.isActionable ?? null;
         this.gate = opts.gate ?? null;
         this.audio = scene.registry.get('audio');
@@ -81,8 +85,9 @@ export class Container extends GameObjects.Container
 
     interact (pusheen, scene)
     {
-        // Contents first, then open -- UI's open handler reads peek:contents.
+        // Contents + panel first, then open -- UI's open handler reads both.
         scene.registry.set('peek:contents', this.contents);
+        scene.registry.set('peek:panel', this.panel);
         scene.registry.set('peek:open', true);
     }
 

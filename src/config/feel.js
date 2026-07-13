@@ -126,23 +126,24 @@ export const CARRY = {
     offset: { x: 34, y: 20 }
 };
 
-// Sloth's sensor zones -- wide like Stormy's, so you can talk standing beside
-// the hammock rather than on top of her.
+// Sloth's sensor zones -- wide like Stormy's, and a touch wider so you can
+// talk standing on the ground beneath him while he hangs from the low branch.
 export const SLOTH_RADAR = {
-    sniffRadius: 170,
-    interactRadius: 110
+    sniffRadius: 190,
+    interactRadius: 130
 };
 
-// The sleepy friend + her one-time wake beat (all tween-driven).
+// The sleepy friend hanging from the low tree branch + his one-time wake beat
+// (all tween-driven). restHeight = how far his center sits above the floor
+// while he hangs; tune to the branch in the final backdrop art.
 export const SLOTH = {
-    restHeight: 70,        // how high above the floor she rests on the hammock
+    restHeight: 120,
     bubbleHoldMs: 3000,
     yawnScaleX: 1.14,      // a big volume-conserving yawn/stretch
     yawnScaleY: 0.88,
     yawnMs: 420,
-    hopPx: 44,             // hop off the hammock
-    hopMs: 260,
-    amblePx: 170,          // amble a little way clear of the hammock
+    dropMs: 320,           // drop off the branch to the ground (a soft bounce)
+    amblePx: 180,          // amble clear along the ground, revealing the door
     ambleMs: 1500,
     sparkleCount: 8,
     sparkleStaggerMs: 90,
