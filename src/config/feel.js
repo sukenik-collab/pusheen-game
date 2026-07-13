@@ -115,3 +115,48 @@ export const NAP = {
     curlAngle: 8,
     cardHoldMs: 2000
 };
+
+// v2 -- carrying a held item (glass/juice). A gentle < 1 multiplier on the
+// jump (via Pusheen's jumpVelocityMultiplier seam) so a full glass reads a
+// touch heavier -- purely feel, no gating (the return path is always
+// reachable). `offset` positions the accessory sprite on the container, in
+// front of her travel direction (mirrored by setFacing).
+export const CARRY = {
+    jumpMultiplier: 0.82,
+    offset: { x: 34, y: 20 }
+};
+
+// Sloth's sensor zones -- wide like Stormy's, so you can talk standing beside
+// the hammock rather than on top of her.
+export const SLOTH_RADAR = {
+    sniffRadius: 170,
+    interactRadius: 110
+};
+
+// The sleepy friend + her one-time wake beat (all tween-driven).
+export const SLOTH = {
+    restHeight: 70,        // how high above the floor she rests on the hammock
+    bubbleHoldMs: 3000,
+    yawnScaleX: 1.14,      // a big volume-conserving yawn/stretch
+    yawnScaleY: 0.88,
+    yawnMs: 420,
+    hopPx: 44,             // hop off the hammock
+    hopMs: 260,
+    amblePx: 170,          // amble a little way clear of the hammock
+    ambleMs: 1500,
+    sparkleCount: 8,
+    sparkleStaggerMs: 90,
+    sparkleRisePx: 70,
+    sparkleMs: 900
+};
+
+// Room palettes -- lazy-summer-afternoon warmth.
+export const BACKYARD = {
+    sky: 0xbfe0e8,
+    grass: 0x9ac96b
+};
+
+export const KITCHEN = {
+    wall: 0xf2e4c9,
+    floor: 0xd8c39a
+};

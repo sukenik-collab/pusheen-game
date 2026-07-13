@@ -3,9 +3,12 @@ import { RADAR, SNIFF_CUE } from '../config/feel.js';
 
 const CUE_COLOR = '#fff6d8';
 
-// A gate is { requires: <registry key | (scene) => bool> }. Ships unused in
-// v1.5 (the cabinet is ungated); v2 gates e.g. a container on holding an item.
-function passesGate (gate, scene)
+// A gate is { requires: <registry key | (scene) => bool> }. Used two ways:
+// container-level (Container.isActionable, below -- ships unused in v1.5) and
+// content-item-level (the UI checks a selected item's own gate before applying
+// its effect -- v2's fridge OJ, gated on holding the glass). Exported so the UI
+// reads a gate the exact same way, one source of truth for the semantics.
+export function passesGate (gate, scene)
 {
     const req = gate.requires;
     return typeof req === 'function' ? req(scene) : !!scene.registry.get(req);
