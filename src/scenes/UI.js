@@ -1,4 +1,5 @@
 import { Scene, Input } from 'phaser';
+import { passesGate } from '../entities/Container.js';
 
 const BUTTON_ALPHA = 0.35;
 const BUTTON_RADIUS = 36;
@@ -181,7 +182,10 @@ export class UI extends Scene
         this.itemObjects = [];
         this.itemBoxes = [];
 
-        const startX = -ITEM_SPACING;
+        // Center any item count, not just 3: the middle item (or gap) lands on
+        // the panel's x=0. (Was hardcoded to -ITEM_SPACING, dead-center for 3
+        // only -- the cupboard/fridge carry a different count.)
+        const startX = -((contents.length - 1) / 2) * ITEM_SPACING;
 
         contents.forEach((item, i) => {
             const itemX = startX + i * ITEM_SPACING;
@@ -216,7 +220,17 @@ export class UI extends Scene
 
     selectItem (item, box)
     {
-        if (item.effect === 'takeSnack') {
+        // Content-item gate (v2): a gated item that fails its gate gives the
+        // gentle nope and the panel stays open -- the fridge OJ without the
+        // glass, or the glass while her hands are full. No stress, just a lead.
+        if (item.gate && !passesGate(item.gate, this)) {
+            this.audio?.play('nope');
+            this.playNopeShake(box);
+            return;
+        }
+
+        switch (item.effect) {
+        case 'takeSnack':
             this.audio?.play('collect');
             // Order matters: snack:collected must already be true before
             // peek:open flips false, since that triggers
@@ -225,7 +239,21 @@ export class UI extends Scene
             this.registry.set('snack:collected', true);
             this.registry.set('snack:count', 1);
             this.registry.set('peek:open', false);
-        } else {
+            break;
+        case 'takeHeld':
+            // Pick the item up into her hands (Pusheen re-derives the carry
+            // accessory + jump multiplier off held:item).
+            this.audio?.play('collect');
+            this.registry.set('held:item', item.give);
+            this.registry.set('peek:open', false);
+            break;
+        case 'fillHeld':
+            // Fill the carried glass -- gate above already confirmed she holds it.
+            this.audio?.play('collect');
+            this.registry.set('held:item', item.fill);
+            this.registry.set('peek:open', false);
+            break;
+        default:
             this.audio?.play('nope');
             this.playNopeShake(box);
         }

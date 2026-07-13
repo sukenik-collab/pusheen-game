@@ -1,5 +1,9 @@
 import { GameObjects } from 'phaser';
-import { MOVE, JUMP, LAND_SQUASH, IDLE, SNIFF_REACT, NAP, COSTUME } from '../config/feel.js';
+import { MOVE, JUMP, LAND_SQUASH, IDLE, SNIFF_REACT, NAP, COSTUME, CARRY } from '../config/feel.js';
+import { subscribeRegistry } from '../systems/registryHelpers.js';
+
+// The held-item accessory texture per held:item value. 'none' -> no accessory.
+const HELD_SPRITE = { glass: 'glass', juice: 'orangeJuice' };
 
 // The physics footprint. The sprite itself is pre-cropped and pre-scaled
 // (see the asset-prep step) to already match this at its native pixel size,
@@ -45,6 +49,17 @@ export class Pusheen extends GameObjects.Container
             this.setCostume(true);
         }
 
+        // Held item persists across rooms the same way -- and because Pusheen
+        // is reconstructed every room (which resets jumpVelocityMultiplier to
+        // 1), the constructor must re-derive BOTH the accessory sprite AND the
+        // carry multiplier from held:item, or the heavier carry-jump silently
+        // reverts on every door. A live subscription keeps it in sync when the
+        // item changes mid-room (pick up glass, fill juice, give to Sloth).
+        this.facing = 'left';           // matches the un-flipped visual
+        this.heldVisual = null;
+        this.applyHeldItem(scene.registry.get('held:item') ?? 'none');
+        subscribeRegistry(scene, 'held:item', (parent, value) => this.applyHeldItem(value));
+
         this.breatheTween = scene.tweens.add({
             targets: this.visual,
             scaleX: 1 + IDLE.breatheScale,
@@ -60,18 +75,56 @@ export class Pusheen extends GameObjects.Container
     moveLeft ()
     {
         this.body.setAccelerationX(-MOVE.accel);
-        this.visual.setFlipX(false);
+        this.setFacing('left');
     }
 
     moveRight ()
     {
         this.body.setAccelerationX(MOVE.accel);
-        this.visual.setFlipX(true);
+        this.setFacing('right');
     }
 
     stopMoving ()
     {
         this.body.setAccelerationX(0);
+    }
+
+    // Facing is stored on the visual (flipX), not the container -- so a
+    // container-child accessory does NOT turn with her for free. This flips
+    // the visual AND mirrors the accessory's x-offset so a carried item stays
+    // in front of her travel direction.
+    setFacing (dir)
+    {
+        this.facing = dir;
+        this.visual.setFlipX(dir === 'right');
+        this.positionHeldVisual();
+    }
+
+    positionHeldVisual ()
+    {
+        if (this.heldVisual) {
+            this.heldVisual.x = (this.facing === 'right' ? 1 : -1) * CARRY.offset.x;
+        }
+    }
+
+    // Re-derive the carry accessory + jump multiplier from held:item. Called
+    // from the constructor (every room) and live on held:item changes.
+    applyHeldItem (item)
+    {
+        if (this.heldVisual) {
+            this.heldVisual.destroy();
+            this.heldVisual = null;
+        }
+
+        const sprite = HELD_SPRITE[item];
+        if (sprite) {
+            this.heldVisual = this.scene.add.image(0, CARRY.offset.y, sprite).setScale(0.6);
+            this.add(this.heldVisual);
+            this.positionHeldVisual();
+            this.jumpVelocityMultiplier = CARRY.jumpMultiplier;
+        } else {
+            this.jumpVelocityMultiplier = 1;
+        }
     }
 
     // Costume = an absolute swap of the base jump (velocity + gravity); the
