@@ -1,5 +1,4 @@
 import { Scene, Input } from 'phaser';
-import { BACKYARD } from '../config/feel.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Sloth } from '../entities/Sloth.js';
 import { Door } from '../entities/Door.js';
@@ -15,10 +14,14 @@ const GROUND_HEIGHT = 40;
 // path once it's revealed. Each spawn clears its door's trigger so it can't
 // instantly re-fire on entry.
 const SPAWN_POINTS = {
-    default: { x: 560 },
+    default: { x: 980 },
     fromKitchen: { x: 1130 },
-    fromLivingRoom: { x: 450 }
+    fromLivingRoom: { x: 880 }
 };
+
+// Sloth hangs from the tree's low branch (tip ~mid-screen in the backdrop);
+// the gate is revealed directly behind that spot.
+const SLOTH_X = 700;
 
 export class Backyard extends Scene
 {
@@ -32,26 +35,28 @@ export class Backyard extends Scene
         const { width, height } = this.scale;
         const groundTop = height - GROUND_HEIGHT;
 
-        this.add.image(width / 2, height / 2, 'backyardBg');
+        this.add.image(width / 2, height / 2, 'backyardBg').setDisplaySize(width, height);
         this.solids = [];
 
-        // Hidden path to the LivingRoom -- built BEFORE Sloth so he draws over
-        // it, hanging in front of it. Placed behind where he hangs, and revealed
-        // as he ambles clear on waking. Inert until then (see bindReveal).
-        this.doorToLivingRoom = new Door(this, 300, groundTop, { side: 'right', to: 'LivingRoom', enterAt: 'fromBackyard', initiallyActive: false });
+        // Hidden garden gate to the LivingRoom -- built BEFORE Sloth so he draws
+        // over it, hanging in front of it. Placed behind where he hangs, and
+        // revealed as he ambles clear on waking. Inert until then (bindReveal).
+        this.doorToLivingRoom = new Door(this, SLOTH_X, groundTop, { texture: 'gardenGate', side: 'right', to: 'LivingRoom', enterAt: 'fromBackyard', initiallyActive: false });
 
         // The sleepy friend, dozing on the low tree branch.
-        this.sloth = new Sloth(this, 300, groundTop);
+        this.sloth = new Sloth(this, SLOTH_X, groundTop);
 
         // Right-wall screen door to the Kitchen.
-        this.doorToKitchen = new Door(this, 1240, groundTop, { side: 'left', to: 'Kitchen', enterAt: 'fromBackyard' });
+        this.doorToKitchen = new Door(this, 1240, groundTop, { texture: 'screenDoor', side: 'left', to: 'Kitchen', enterAt: 'fromBackyard' });
 
         // One dispatcher for E-press interactions here (just Sloth today). The
         // doors are walk-into triggers and stay out (see the controller's note).
         this.interactions = new InteractionController(this);
         this.interactions.register(this.sloth);
 
-        this.ground = this.add.rectangle(width / 2, groundTop + GROUND_HEIGHT / 2, width, GROUND_HEIGHT, BACKYARD.grass);
+        // Invisible physics floor -- the backdrop already draws the grass.
+        this.ground = this.add.rectangle(width / 2, groundTop + GROUND_HEIGHT / 2, width, GROUND_HEIGHT)
+            .setVisible(false);
         this.physics.add.existing(this.ground, true);
 
         const spawn = resolveSpawn(SPAWN_POINTS, data);
@@ -71,11 +76,35 @@ export class Backyard extends Scene
             this.doorToLivingRoom.alpha = 0;
             this.doorToLivingRoom.activate();
             this.tweens.add({ targets: this.doorToLivingRoom, alpha: 1, duration: 600, ease: 'Sine.easeOut' });
-            this.sloth.playWakeBeat();
+            // As he lets go of the branch he nudges Pusheen aside, so the gate
+            // he reveals isn't right under her -- she has to walk over to it.
+            this.sloth.playWakeBeat(() => this.shovePusheenAside());
         });
 
         this.transitioning = false;
         fadeInRoom(this);
+    }
+
+    // Sloth bumps Pusheen a little to the right as he drops, so the gate he
+    // uncovers isn't under her feet (which would auto-trigger the transition).
+    // A scripted slide: body off, tween across, hand back to physics -- the
+    // same off-then-reset pattern the costume box uses.
+    shovePusheenAside ()
+    {
+        const p = this.pusheen;
+        const toX = Math.min(Math.max(p.x, 760) + 160, 1150);
+        p.stopMoving();
+        p.body.enable = false;
+        this.tweens.add({
+            targets: p,
+            x: toX,
+            duration: 520,
+            ease: 'Quad.easeOut',
+            onComplete: () => {
+                p.body.enable = true;
+                p.body.reset(p.x, p.y);
+            }
+        });
     }
 
     update ()

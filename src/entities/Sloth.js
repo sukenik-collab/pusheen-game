@@ -2,7 +2,12 @@ import { GameObjects, Geom } from 'phaser';
 import { SLOTH, SLOTH_RADAR } from '../config/feel.js';
 
 const SPARKLE_COLOR = '#fff3b0';
-const BUBBLE_OFFSET_Y = -96;
+const BUBBLE_OFFSET_Y = -125;
+
+// The concept sloth art is a large transparent frame with the sloth centered;
+// prescale the image inside a wrapper container so the squash/yawn tweens stay
+// 1.0-based on the wrapper (and the awake swap can rescale independently later).
+const SLOTH_ART_SCALE = 0.31;
 
 // Flag-branched dialogue (mirrors Stormy's quest:complete pattern -- not a
 // named-dialogue-state engine, which is deferred).
@@ -27,17 +32,19 @@ export class Sloth extends GameObjects.Container
         this.audio = scene.registry.get('audio');
         this.verb = 'talk';
         this.busy = false;
-        this.groundY = groundTop - 50;   // standing centre, feet on the floor
+        this.groundY = groundTop - 80;   // standing centre, feet on the floor
 
         // Already awake if the juice was delivered earlier this run (revisit):
-        // he's dropped off the branch and ambled clear -- no sleeping bob, no
-        // wake-beat replay.
+        // he's dropped off the branch and ambled clear (to the left) -- no
+        // sleeping bob, no wake-beat replay.
         this.awake = !!scene.registry.get('juice:delivered');
         if (this.awake) {
-            this.setPosition(x + SLOTH.amblePx, this.groundY);
+            this.setPosition(x - SLOTH.amblePx, this.groundY);
         }
 
-        this.visual = scene.add.image(0, 0, this.awake ? 'slothAwake' : 'sloth');
+        // Real hanging-sloth art, prescaled inside a wrapper (see SLOTH_ART_SCALE).
+        this.visual = scene.add.container(0, 0);
+        this.visual.add(scene.add.image(0, 0, 'sloth').setScale(SLOTH_ART_SCALE));
         this.add(this.visual);
 
         // A slow sleeping bob while she dozes -- paused for good once she wakes.
@@ -122,7 +129,9 @@ export class Sloth extends GameObjects.Container
     // The one-time wake beat: yawn/stretch, hop off the hammock, amble a little
     // way clear, a burst of sparkles. Idempotent -- a no-op once she's awake
     // (so bindReveal firing immediately on room re-entry doesn't replay it).
-    playWakeBeat ()
+    // `onDrop` fires the instant he lets go of the branch -- the scene uses it
+    // to nudge Pusheen aside so the revealed gate isn't right under her feet.
+    playWakeBeat (onDrop)
     {
         if (this.awake) {
             return;
@@ -136,12 +145,11 @@ export class Sloth extends GameObjects.Container
         this.breatheTween?.stop();
         this.visual.setScale(1, 1);
         this.visual.y = 0;
-        this.visual.setTexture('slothAwake');
         this.showBubble(ACCEPT);
         this.audio?.play('collect');
 
-        // A big volume-conserving yawn, then drop off the branch to the ground
-        // and amble clear -- which reveals the hidden door behind where he hung.
+        // A big volume-conserving yawn, then let go: drop to the ground and
+        // amble off to the left, revealing the gate behind where he hung.
         this.scene.tweens.add({
             targets: this.visual,
             scaleX: SLOTH.yawnScaleX,
@@ -150,6 +158,7 @@ export class Sloth extends GameObjects.Container
             yoyo: true,
             ease: 'Sine.easeInOut',
             onComplete: () => {
+                onDrop?.();
                 this.scene.tweens.add({
                     targets: this,
                     y: this.groundY,
@@ -158,7 +167,7 @@ export class Sloth extends GameObjects.Container
                 });
                 this.scene.tweens.add({
                     targets: this,
-                    x: this.x + SLOTH.amblePx,
+                    x: this.x - SLOTH.amblePx,
                     delay: SLOTH.dropMs,
                     duration: SLOTH.ambleMs,
                     ease: 'Sine.easeInOut',

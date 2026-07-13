@@ -40,6 +40,12 @@ export class Preloader extends Scene
         // sprite, which swaps in for 'pusheen' when she wears the costume.
         this.load.image('pusheencorn', 'assets/sprites/pusheencorn.png');
 
+        // v2 real art (from docs/concept-art). Backdrops are ~1376x768, scaled
+        // to the 1280x720 canvas where they're placed. Sloth is a transparent
+        // hanging sprite, centered in its frame.
+        this.load.image('backyardBg', 'assets/sprites/backyard-bg.png');
+        this.load.image('sloth', 'assets/sprites/sloth-sleeping.png');
+
         // A tiny soft dot, reused as the sunbeam's dust-mote particle texture.
         const g = this.add.graphics();
         g.fillStyle(0xffffff, 1);
@@ -52,22 +58,22 @@ export class Preloader extends Scene
         // into real art later. Each is sized to its intended footprint. The
         // room backdrops are full 1280x720 images that the real art replaces.
 
-        // Backyard backdrop: afternoon sky, sun + cloud, and a large tree on
-        // the left with a low thick branch Sloth hangs from.
-        this.makeTexture('backyardBg', 1280, 720, (gfx) => {
-            gfx.fillStyle(0xbfe0e8, 1);
-            gfx.fillRect(0, 0, 1280, 720);                 // sky
-            gfx.fillStyle(0xf7e26b, 1);
-            gfx.fillCircle(1030, 150, 72);                 // sun
-            gfx.fillStyle(0xffffff, 1);
-            gfx.fillRoundedRect(620, 130, 230, 70, 35);    // cloud
-            gfx.fillStyle(0x9ac96b, 1);
-            gfx.fillRect(0, 640, 1280, 80);                // grass
-            gfx.fillStyle(0x6b4a2b, 1);
-            gfx.fillRect(120, 200, 74, 480);               // trunk
-            gfx.fillRoundedRect(170, 430, 260, 42, 21);    // low thick branch
-            gfx.fillStyle(0x4f8f43, 1);
-            gfx.fillCircle(175, 190, 185);                 // canopy
+        // Dedicated door art (placeholders): a screen door for the room-to-room
+        // screen doorways, and a garden gate for the backyard's revealed path.
+        this.makeTexture('screenDoor', 76, 150, (gfx) => {
+            gfx.fillStyle(0x8a6d4f, 1);
+            gfx.fillRoundedRect(0, 0, 76, 150, 8);          // frame
+            gfx.fillStyle(0xcfe3d8, 1);
+            gfx.fillRect(8, 8, 60, 134);                    // mesh panel
+            gfx.lineStyle(1, 0x9fb8ad, 1);
+            for (let mx = 14; mx < 68; mx += 8) gfx.lineBetween(mx, 8, mx, 142);
+            for (let my = 14; my < 142; my += 8) gfx.lineBetween(8, my, 68, my);
+        });
+        this.makeTexture('gardenGate', 76, 150, (gfx) => {
+            gfx.fillStyle(0xb98c5a, 1);
+            for (let px = 6; px < 70; px += 20) gfx.fillRoundedRect(px, 20, 12, 128, 4);  // pickets
+            gfx.fillRoundedRect(2, 46, 72, 12, 4);          // rails
+            gfx.fillRoundedRect(2, 104, 72, 12, 4);
         });
         // Kitchen backdrop: warm wall, a window onto the backyard (continuity
         // -- same sun + tree), and a countertop the glass/fridge sit on.
@@ -89,22 +95,9 @@ export class Preloader extends Scene
             gfx.fillStyle(0xb08e5f, 1);
             gfx.fillRect(0, 644, 1280, 76);                // cabinets below
         });
-        // Sloth: a sleepy lump. Asleep = eyes as closed lines; awake = open
-        // dots. Drawn hanging in the backyard; same footprint for both states.
-        this.makeTexture('sloth', 130, 110, (gfx) => {
-            gfx.fillStyle(0x9b8b76, 1);
-            gfx.fillEllipse(65, 62, 122, 88);
-            gfx.lineStyle(3, 0x5c5347, 1);
-            gfx.lineBetween(44, 58, 58, 58);       // closed eyes
-            gfx.lineBetween(72, 58, 86, 58);
-        });
-        this.makeTexture('slothAwake', 130, 110, (gfx) => {
-            gfx.fillStyle(0xb0a086, 1);
-            gfx.fillEllipse(65, 62, 122, 88);
-            gfx.fillStyle(0x3e2c23, 1);
-            gfx.fillCircle(51, 56, 5);             // open eyes
-            gfx.fillCircle(79, 56, 5);
-        });
+        // (Sloth's sleeping sprite is real art, loaded above. His awake sprite
+        // is still pending -- for now the wake beat conveys it via animation.)
+
         // The closed fridge in the room. Sized like the LivingRoom cabinet (160
         // tall, on the floor) so its centre-anchored zone is reachable.
         this.makeTexture('fridge', 150, 160, (gfx) => {
