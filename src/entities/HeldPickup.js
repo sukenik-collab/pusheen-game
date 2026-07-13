@@ -3,11 +3,10 @@ import { SNIFF_CUE } from '../config/feel.js';
 
 const CUE_COLOR = '#fff6d8';
 
-// Wider than the cabinet's 140/64: an item rests up on a waist-high counter,
-// so she reaches for it from the floor a little below -- the inner zone has to
-// span that vertical gap. Outer still leads inner.
-const PICKUP_SNIFF = 160;
-const PICKUP_INTERACT = 100;
+// Tight enough that the glass is only grabbable while she's actually standing
+// on the counter beside it -- not from the step box a hop below. Outer leads.
+const PICKUP_SNIFF = 140;
+const PICKUP_INTERACT = 70;
 
 // An item sitting out in the open (the glass on the kitchen counter) that she
 // walks up to and picks up straight into her hands -- no peek panel, unlike a

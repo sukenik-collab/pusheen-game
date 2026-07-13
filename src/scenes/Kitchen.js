@@ -4,11 +4,10 @@ import { Container } from '../entities/Container.js';
 import { HeldPickup } from '../entities/HeldPickup.js';
 import { Door } from '../entities/Door.js';
 import { InteractionController } from '../systems/InteractionController.js';
+import { buildLayout } from '../systems/roomBuilder.js';
 import { fadeToRoom, fadeInRoom, resolveSpawn } from './roomTransition.js';
 
 const GROUND_HEIGHT = 40;
-const FLOOR_COLOR = 0xd8c39a;
-const FRIDGE_HEIGHT = 160;
 
 // Only reached from the Backyard, so default == fromBackyard: just inside the
 // left screen door, clear of its trigger.
@@ -17,12 +16,32 @@ const SPAWN_POINTS = {
     fromBackyard: { x: 150 }
 };
 
-// The fridge opens to its lit interior (panel: 'fridgeInside') showing several
-// things. The OJ pitcher fills the glass she's carrying (fillHeld), gated on
-// actually holding the glass -- without it the pitcher gives the gentle nope,
-// leading her to grab the glass off the counter first. The rest are cozy decoys
-// that also nope. `gate.requires` is a predicate (scene) => bool (M5 shape);
-// UI.selectItem checks it before applying the effect.
+// Two little steps up to the high counter: floor -> stool -> box -> counter top.
+// Each rise is within a normal hop (~82px apex). Heights are tuned to the
+// counter in the kitchen backdrop -- expect a small pass once art is final
+// (the counter body currently sits ~20px below the painted counter surface).
+const STOOL_H = 80;                 // top at groundTop - 80
+const BOX_H = 160;                  // top at groundTop - 160
+const COUNTER_TOP_FROM_GROUND = 240; // top at groundTop - 240
+const COUNTER_X = 875;
+const COUNTER_W = 350;              // spans ~700..1050
+
+// One-way climbing steps (top-face only) so she walks freely past them and only
+// lands on their tops. The counter itself is an invisible one-way body built in
+// create() (the backdrop draws the counter); the fridge is in the backdrop too.
+// Wide + adjacent so each hop is mostly vertical: the stool (450..590) meets the
+// box (590..710), which meets the counter's left end (~700). Body widths come
+// from the textures (140, 120); h here just sets yFromGround.
+const LAYOUT = [
+    { name: 'stepStool', role: 'standable', oneWay: true, sprite: 'stepStool', x: 520, h: STOOL_H, yFromGround: STOOL_H / 2 },
+    { name: 'stepBox', role: 'standable', oneWay: true, sprite: 'stepBox', x: 650, h: BOX_H, yFromGround: BOX_H / 2 }
+];
+
+// The fridge opens to its lit interior (panel: 'fridgeInside'). The OJ pitcher
+// fills the glass she's carrying (fillHeld), gated on holding the glass --
+// without it, the pitcher gives the gentle nope, leading her to get the glass
+// first. The rest are cozy decoys that also nope. `gate.requires` is a predicate
+// (scene) => bool (M5 shape); UI.selectItem checks it before applying the effect.
 const FRIDGE_CONTENTS = [
     {
         key: 'oj',
@@ -49,32 +68,43 @@ export class Kitchen extends Scene
         const { width, height } = this.scale;
         const groundTop = height - GROUND_HEIGHT;
 
-        // Full backdrop: warm wall, a window onto the backyard (continuity),
-        // and a countertop the glass + fridge stand on.
-        this.add.image(width / 2, height / 2, 'kitchenBg');
-        this.solids = [];
+        this.add.image(width / 2, height / 2, 'kitchenBg').setDisplaySize(width, height);
 
-        // The glass sits out on the counter -- a direct pick-up (no cupboard):
-        // walk up, press E, it goes into her hands. Gone once taken (glass:taken)
-        // so it doesn't respawn on re-entry.
-        // Seated on the counter (its base on the countertop surface in the
-        // backdrop). Tune this y to the counter height in the final art.
-        this.glass = new HeldPickup(this, 400, groundTop - 116, { sprite: 'glass', gives: 'glass', flag: 'glass:taken' });
+        this.solids = buildLayout(this, LAYOUT, groundTop);
 
-        // The refrigerator: a Container that opens to its lit interior.
-        this.fridge = new Container(this, 1050, groundTop - FRIDGE_HEIGHT / 2, {
+        // The counter top she climbs onto: an invisible one-way platform over
+        // the backdrop's painted countertop. She walks off either end to drop
+        // back down (no climbing back down the steps needed).
+        const counterTop = groundTop - COUNTER_TOP_FROM_GROUND;
+        const counter = this.add.rectangle(COUNTER_X, counterTop + 12, COUNTER_W, 24).setVisible(false);
+        this.physics.add.existing(counter, true);
+        counter.body.checkCollision.down = false;
+        counter.body.checkCollision.left = false;
+        counter.body.checkCollision.right = false;
+        this.solids.push(counter);
+
+        // The glass sits out on the counter -- only reachable once she's climbed
+        // up beside it. Gone once taken (glass:taken) so it doesn't respawn.
+        this.glass = new HeldPickup(this, COUNTER_X - 25, counterTop - 42, { sprite: 'glass', gives: 'glass', flag: 'glass:taken' });
+
+        // The refrigerator is drawn into the backdrop (right side); this is its
+        // invisible interaction zone, opening to the lit interior.
+        this.fridge = new Container(this, 1200, groundTop - 80, {
             sprite: 'fridge',
+            hidden: true,
             panel: 'fridgeInside',
             contents: FRIDGE_CONTENTS
         });
 
         // Left-wall screen door back to the Backyard.
-        this.doorToBackyard = new Door(this, 40, groundTop, { side: 'right', to: 'Backyard', enterAt: 'fromKitchen' });
+        this.doorToBackyard = new Door(this, 40, groundTop, { texture: 'screenDoor', side: 'right', to: 'Backyard', enterAt: 'fromKitchen' });
 
         this.interactions = new InteractionController(this);
         [this.glass, this.fridge].forEach((item) => this.interactions.register(item));
 
-        this.ground = this.add.rectangle(width / 2, groundTop + GROUND_HEIGHT / 2, width, GROUND_HEIGHT, FLOOR_COLOR);
+        // Invisible physics floor -- the backdrop already draws it.
+        this.ground = this.add.rectangle(width / 2, groundTop + GROUND_HEIGHT / 2, width, GROUND_HEIGHT)
+            .setVisible(false);
         this.physics.add.existing(this.ground, true);
 
         const spawn = resolveSpawn(SPAWN_POINTS, data);
