@@ -3,7 +3,6 @@ import { BACKYARD } from '../config/feel.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Sloth } from '../entities/Sloth.js';
 import { Door } from '../entities/Door.js';
-import { buildLayout } from '../systems/roomBuilder.js';
 import { InteractionController } from '../systems/InteractionController.js';
 import { bindReveal } from '../systems/Reveal.js';
 import { fadeToRoom, fadeInRoom, resolveSpawn } from './roomTransition.js';
@@ -18,16 +17,8 @@ const GROUND_HEIGHT = 40;
 const SPAWN_POINTS = {
     default: { x: 560 },
     fromKitchen: { x: 1130 },
-    fromLivingRoom: { x: 260 }
+    fromLivingRoom: { x: 450 }
 };
-
-// Passive scenery as data. Tree + hammock are drawn only (background) -- the
-// small room stays walkable end to end; Sloth rests on the hammock, built as an
-// entity in create().
-const LAYOUT = [
-    { name: 'tree', role: 'background', sprite: 'tree', x: 1080, yFromGround: 115 },
-    { name: 'hammock', role: 'background', sprite: 'hammock', x: 350, yFromGround: 48 }
-];
 
 export class Backyard extends Scene
 {
@@ -41,17 +32,19 @@ export class Backyard extends Scene
         const { width, height } = this.scale;
         const groundTop = height - GROUND_HEIGHT;
 
-        this.add.rectangle(width / 2, height / 2, width, height, BACKYARD.sky);
+        this.add.image(width / 2, height / 2, 'backyardBg');
+        this.solids = [];
 
-        this.solids = buildLayout(this, LAYOUT, groundTop);
+        // Hidden path to the LivingRoom -- built BEFORE Sloth so he draws over
+        // it, hanging in front of it. Placed behind where he hangs, and revealed
+        // as he ambles clear on waking. Inert until then (see bindReveal).
+        this.doorToLivingRoom = new Door(this, 300, groundTop, { side: 'right', to: 'LivingRoom', enterAt: 'fromBackyard', initiallyActive: false });
 
-        // The sleepy friend, dozing on the hammock.
-        this.sloth = new Sloth(this, 350, groundTop);
+        // The sleepy friend, dozing on the low tree branch.
+        this.sloth = new Sloth(this, 300, groundTop);
 
-        // Right-wall screen door to the Kitchen. Left-wall hidden path to the
-        // LivingRoom -- inert until waking Sloth reveals it (see bindReveal).
+        // Right-wall screen door to the Kitchen.
         this.doorToKitchen = new Door(this, 1240, groundTop, { side: 'left', to: 'Kitchen', enterAt: 'fromBackyard' });
-        this.doorToLivingRoom = new Door(this, 140, groundTop, { side: 'right', to: 'LivingRoom', enterAt: 'fromBackyard', initiallyActive: false });
 
         // One dispatcher for E-press interactions here (just Sloth today). The
         // doors are walk-into triggers and stay out (see the controller's note).

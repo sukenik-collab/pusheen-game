@@ -1,15 +1,14 @@
 import { Scene, Input } from 'phaser';
-import { KITCHEN } from '../config/feel.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Container } from '../entities/Container.js';
+import { HeldPickup } from '../entities/HeldPickup.js';
 import { Door } from '../entities/Door.js';
-import { buildLayout } from '../systems/roomBuilder.js';
 import { InteractionController } from '../systems/InteractionController.js';
 import { fadeToRoom, fadeInRoom, resolveSpawn } from './roomTransition.js';
 
 const GROUND_HEIGHT = 40;
+const FLOOR_COLOR = 0xd8c39a;
 const FRIDGE_HEIGHT = 160;
-const CUPBOARD_HEIGHT = 130;
 
 // Only reached from the Backyard, so default == fromBackyard: just inside the
 // left screen door, clear of its trigger.
@@ -18,39 +17,24 @@ const SPAWN_POINTS = {
     fromBackyard: { x: 150 }
 };
 
-// A wooden counter run as background scenery.
-const LAYOUT = [
-    { name: 'counter', role: 'background', color: 0xc9a97a, x: 640, w: 1000, h: 64, yFromGround: 32 }
-];
-
-// The cupboard holds the glass. `takeHeld` picks it up, but only while her
-// hands are empty (gate: held:item === 'none'); a cozy mug sits alongside as a
-// gentle decoy. `gate.requires` is a predicate (scene) => bool, same shape v1.5
-// read (M5) -- UI.selectItem checks it before applying the effect.
-const CUPBOARD_CONTENTS = [
-    {
-        key: 'glass',
-        label: 'Glass',
-        sprite: 'glass',
-        effect: 'takeHeld',
-        give: 'glass',
-        gate: { requires: (scene) => scene.registry.get('held:item') === 'none' }
-    },
-    { key: 'mug', label: 'Mug', sprite: 'mug', effect: 'nope' }
-];
-
-// The fridge always opens and shows the OJ; selecting it fills the glass she's
-// carrying. Gated on holding the glass -- without it, the OJ gives the gentle
-// `nope` (no stress), leading her to go find the glass first.
+// The fridge opens to its lit interior (panel: 'fridgeInside') showing several
+// things. The OJ pitcher fills the glass she's carrying (fillHeld), gated on
+// actually holding the glass -- without it the pitcher gives the gentle nope,
+// leading her to grab the glass off the counter first. The rest are cozy decoys
+// that also nope. `gate.requires` is a predicate (scene) => bool (M5 shape);
+// UI.selectItem checks it before applying the effect.
 const FRIDGE_CONTENTS = [
     {
         key: 'oj',
         label: 'Orange Juice',
-        sprite: 'orangeJuice',
+        sprite: 'juicePitcher',
         effect: 'fillHeld',
         fill: 'juice',
         gate: { requires: (scene) => scene.registry.get('held:item') === 'glass' }
-    }
+    },
+    { key: 'milk', label: 'Milk', sprite: 'itemMilk', effect: 'nope' },
+    { key: 'cheese', label: 'Cheese', sprite: 'itemCheese', effect: 'nope' },
+    { key: 'leftovers', label: 'Leftovers', sprite: 'itemLeftovers', effect: 'nope' }
 ];
 
 export class Kitchen extends Scene
@@ -65,17 +49,22 @@ export class Kitchen extends Scene
         const { width, height } = this.scale;
         const groundTop = height - GROUND_HEIGHT;
 
-        this.add.rectangle(width / 2, height / 2, width, height, KITCHEN.wall);
+        // Full backdrop: warm wall, a window onto the backyard (continuity),
+        // and a countertop the glass + fridge stand on.
+        this.add.image(width / 2, height / 2, 'kitchenBg');
+        this.solids = [];
 
-        this.solids = buildLayout(this, LAYOUT, groundTop);
+        // The glass sits out on the counter -- a direct pick-up (no cupboard):
+        // walk up, press E, it goes into her hands. Gone once taken (glass:taken)
+        // so it doesn't respawn on re-entry.
+        // Seated on the counter (its base on the countertop surface in the
+        // backdrop). Tune this y to the counter height in the final art.
+        this.glass = new HeldPickup(this, 400, groundTop - 116, { sprite: 'glass', gives: 'glass', flag: 'glass:taken' });
 
-        // Left -- the cupboard with the glass. Right -- the refrigerator.
-        this.cupboard = new Container(this, 300, groundTop - CUPBOARD_HEIGHT / 2, {
-            sprite: 'cupboard',
-            contents: CUPBOARD_CONTENTS
-        });
+        // The refrigerator: a Container that opens to its lit interior.
         this.fridge = new Container(this, 1050, groundTop - FRIDGE_HEIGHT / 2, {
             sprite: 'fridge',
+            panel: 'fridgeInside',
             contents: FRIDGE_CONTENTS
         });
 
@@ -83,9 +72,9 @@ export class Kitchen extends Scene
         this.doorToBackyard = new Door(this, 40, groundTop, { side: 'right', to: 'Backyard', enterAt: 'fromKitchen' });
 
         this.interactions = new InteractionController(this);
-        [this.cupboard, this.fridge].forEach((item) => this.interactions.register(item));
+        [this.glass, this.fridge].forEach((item) => this.interactions.register(item));
 
-        this.ground = this.add.rectangle(width / 2, groundTop + GROUND_HEIGHT / 2, width, GROUND_HEIGHT, KITCHEN.floor);
+        this.ground = this.add.rectangle(width / 2, groundTop + GROUND_HEIGHT / 2, width, GROUND_HEIGHT, FLOOR_COLOR);
         this.physics.add.existing(this.ground, true);
 
         const spawn = resolveSpawn(SPAWN_POINTS, data);
