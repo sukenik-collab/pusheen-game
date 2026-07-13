@@ -5,15 +5,21 @@ import { Door } from '../entities/Door.js';
 import { YarnBall } from '../entities/YarnBall.js';
 import { Pillow, PILLOW_HEIGHT } from '../entities/Pillow.js';
 import { CostumeBox } from '../entities/CostumeBox.js';
-import { fadeToRoom, fadeInRoom } from './roomTransition.js';
+import { buildLayout } from '../systems/roomBuilder.js';
+import { InteractionController } from '../systems/InteractionController.js';
+import { fadeToRoom, fadeInRoom, resolveSpawn } from './roomTransition.js';
 
 const GROUND_HEIGHT = 40;
 const WALL_COLOR = 0x55486b;   // dusky lavender -- night-time contrast to the living room
 const GROUND_COLOR = 0x46394f;
 
-// Where she appears when walking in from the living room (just inside the
-// right-wall door, clear of its trigger zone so it can't instantly re-fire).
-const SPAWN_X_FROM_LIVING_ROOM = 1130;
+// Named entry points. Bedroom is only reached from the living room (and is
+// never the boot room), so default == fromLivingRoom: just inside the right-
+// wall door, clear of its trigger zone so it can't instantly re-fire.
+const SPAWN_POINTS = {
+    default: { x: 1130 },
+    fromLivingRoom: { x: 1130 }
+};
 
 // The bed's *mattress* surface -- where she actually stands -- is not the top
 // of the bed sprite. The sprite is 64 tall but its mattress top sits at the
@@ -83,32 +89,61 @@ export class Bedroom extends Scene
         // Tucked toward the left end of the shelf, clear of the bed below.
         this.spawnYarn('shelf', 70, groundTop - SHELF_SURFACE_HEIGHT - 14);
 
-        this.solids = [];
-        LAYOUT.forEach((item) => this.buildLayoutItem(item, groundTop));
+        this.solids = buildLayout(this, LAYOUT, groundTop);
 
         // The bed's standable surface: a solid body whose top is the mattress
         // (not the sprite top), so she stands on the sheets instead of floating
-        // at the headboard-post height. Full-height so she can't walk through
-        // the frame; invisible (the bed sprite draws the bed).
+        // at the headboard-post height. Inset and only mattress-high on purpose;
+        // the raised end frame is handled by the posts below. Invisible (the
+        // bed sprite draws the bed).
         const mattressTop = groundTop - BED_SURFACE_HEIGHT;
         this.bedBody = this.add.rectangle(400, (mattressTop + groundTop) / 2, 240, BED_SURFACE_HEIGHT)
             .setVisible(false);
         this.physics.add.existing(this.bedBody, true);
         this.solids.push(this.bedBody);
 
+        // Headboard (left) and footboard (right) are DIFFERENT heights in the
+        // art -- measured from bed.png, whose bottom sits on the floor: the
+        // headboard rises ~63px (nearly the full 64), the footboard only ~46px
+        // (a low foot, barely above the 44px mattress). Two posts so each blocks
+        // to the height it's actually drawn: at floor level both stop her
+        // walking into the frame; up on the sheets the tall headboard walls off
+        // the head end while the low footboard lets her step off the foot. She
+        // still mounts the bed by hopping onto the mattress.
+        const POST_W = 20;   // frame inset: (spriteW 280 - mattress 240) / 2
+        [
+            { x: 270, h: 63 },   // headboard, left
+            { x: 530, h: 46 }    // footboard, right
+        ].forEach(({ x, h }) => {
+            const top = groundTop - h;
+            const post = this.add.rectangle(x, (top + groundTop) / 2, POST_W, h)
+                .setVisible(false);
+            this.physics.add.existing(post, true);
+            this.solids.push(post);
+        });
+
         // Squishy pillow -- a small raised step on the left of the mattress she
         // hops onto. Built after the layout so it renders over the bed's art.
         this.pillow = new Pillow(this, 330, groundTop - PILLOW_SURFACE_HEIGHT + PILLOW_HEIGHT / 2);
 
-        this.doorToLivingRoom = new Door(this, 1240, groundTop, 'left');
+        this.doorToLivingRoom = new Door(this, 1240, groundTop, { side: 'left', to: 'LivingRoom', enterAt: 'fromBedroom' });
 
         // The Pusheencorn box, between the dresser and the door.
         this.costumeBox = new CostumeBox(this, 970, groundTop);
 
+        // One dispatcher for every E-press interaction in this room. Register
+        // yarn before the box to preserve the old yarn-first tie-break (moot
+        // today -- their zones don't overlap -- but explicit). The door is a
+        // walk-into trigger and stays out (see InteractionController's note).
+        this.interactions = new InteractionController(this);
+        this.yarnBalls.forEach((ball) => this.interactions.register(ball));
+        this.interactions.register(this.costumeBox);
+
         this.ground = this.add.rectangle(width / 2, groundTop + GROUND_HEIGHT / 2, width, GROUND_HEIGHT, GROUND_COLOR);
         this.physics.add.existing(this.ground, true);
 
-        this.pusheen = new Pusheen(this, data?.spawnX ?? SPAWN_X_FROM_LIVING_ROOM, height - 200);
+        const spawn = resolveSpawn(SPAWN_POINTS, data);
+        this.pusheen = new Pusheen(this, spawn.x, height - 200);
         this.physics.add.collider(this.pusheen, this.ground);
         this.solids.forEach((solid) => this.physics.add.collider(this.pusheen, solid));
         this.physics.add.collider(this.pusheen, this.pillow, () => this.pillow.onCollide());
@@ -129,28 +164,6 @@ export class Bedroom extends Scene
         }
     }
 
-    buildLayoutItem (item, groundTop)
-    {
-        const y = groundTop - (item.yFromGround ?? item.h / 2);
-        const obj = item.sprite
-            ? this.add.image(item.x, y, item.sprite)
-            : this.add.rectangle(item.x, y, item.w, item.h, item.color);
-
-        if (item.role === 'solid' || item.role === 'standable') {
-            this.physics.add.existing(obj, true);
-
-            if (item.oneWay) {
-                // Land on the top face only -- she can jump up through it
-                // instead of bonking the underside.
-                obj.body.checkCollision.down = false;
-                obj.body.checkCollision.left = false;
-                obj.body.checkCollision.right = false;
-            }
-
-            this.solids.push(obj);
-        }
-    }
-
     update ()
     {
         if (this.transitioning) {
@@ -165,14 +178,9 @@ export class Bedroom extends Scene
             return;
         }
 
-        this.yarnBalls.forEach((ball) => ball.update(this.pusheen));
-        this.costumeBox.update(this.pusheen);
-
-        const interactAvailable = this.yarnBalls.some((ball) => ball.inInnerZone) ||
-            this.costumeBox.inInnerZone;
-        if (interactAvailable !== this.registry.get('interact:available')) {
-            this.registry.set('interact:available', interactAvailable);
-        }
+        // Updates every registered interactable's zones/cues and publishes
+        // interact:available (guarded).
+        this.interactions.update(this.pusheen);
 
         const interactPressed = Input.Keyboard.JustDown(this.keys.E) || this.registry.get('input:interactPressed');
         this.registry.set('input:interactPressed', false);
@@ -195,17 +203,13 @@ export class Bedroom extends Scene
         }
 
         if (interactPressed) {
-            const ball = this.yarnBalls.find((b) => b.inInnerZone);
-
-            if (ball) {
-                ball.collect();
-            } else if (this.costumeBox.inInnerZone) {
-                this.costumeBox.interact(this.pusheen);
-            }
+            this.interactions.pressInteract(this.pusheen);
         }
 
+        // The door is a walk-into trigger, handled here rather than through the
+        // interaction controller (see the controller's note on triggers).
         if (this.doorToLivingRoom.checkTrigger(this.pusheen)) {
-            fadeToRoom(this, 'LivingRoom', { spawnX: 150, fadeIn: true });
+            fadeToRoom(this, this.doorToLivingRoom.to, { spawn: this.doorToLivingRoom.enterAt, fadeIn: true });
         }
 
         this.pusheen.update();

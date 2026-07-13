@@ -5,6 +5,11 @@ every room here is expressed in v1.5's vocabulary (data layout + typed
 interactable factory + interaction controller + container/gate/reveal + named
 spawn points + the jump-modifier seam). Only **three** genuinely new systems.
 
+> **v1.5 is now implemented** (branch `feat/v1.5-refactor`, pending playtest +
+> merge as of 2026-07-13). Building it surfaced several concrete lessons that
+> revise the sections below — they're marked ⚠️ inline (S1, S2, §2a) and
+> collected in **§7**. Read those before starting a phase.
+
 Golden rules still bind: **no fail states, no timers, no urgency.** Placeholder
 art is fine. Tweens for expressive motion; arcade physics only for movement.
 
@@ -32,10 +37,23 @@ hammock, and a **hidden path** is revealed. Permanent (within the run; a
 - Registry key **`held:item`** ∈ `'none' | 'glass' | 'juice'`. Add to
   `resetRunState`.
 - **Visual:** a small accessory sprite parented to the **Pusheen container**
-  (not to `this.visual`) at a `CARRY.offset`, so it moves/flips with her and is
-  *not* scaled by the squash/idle tweens that target `this.visual` — same
-  reasoning as the costume-sprite note. On room `create()` it re-attaches itself
-  from `held:item`, exactly like the costume re-applies from its registry flag.
+  (not to `this.visual`) at a `CARRY.offset`, so it is *not* scaled by the
+  squash/idle tweens that target `this.visual` — same reasoning as the costume-
+  sprite note.
+  - ⚠️ **Flip is NOT automatic (v1.5 lesson).** Facing is stored as
+    `this.visual.setFlipX(...)` inside `moveLeft`/`moveRight` — on the *visual*,
+    not the container. A container-child accessory therefore does **not** turn
+    with her for free (the "flips with her" assumption is wrong against the real
+    code). Cleanest fix: add a `Pusheen.setFacing(dir)` that flips `this.visual`
+    **and** the accessory (mirroring its x-offset), and call it from
+    `moveLeft`/`moveRight`.
+- ⚠️ **Re-apply in the Pusheen *constructor*, not room `create()` (v1.5
+  lesson).** Pusheen is **reconstructed every room**, and `jumpVelocityMultiplier`
+  resets to its default `1` on each construction. So the constructor must
+  re-derive *both* the accessory sprite **and** the carry multiplier from
+  `held:item` — the same place and pattern by which the costume re-applies from
+  `costume:pusheencorn`. Miss the multiplier and the carry jump silently reverts
+  to normal on every single door transition.
 - **Feel:** while carrying, `Pusheen.jumpVelocityMultiplier = CARRY.jumpMultiplier`
   (`< 1`) via the v1.5 seam (M8). **Purely feel — no gating** (decided): the
   return path is always reachable while carrying; zero soft-lock risk.
@@ -55,6 +73,18 @@ hammock, and a **hidden path** is revealed. Permanent (within the run; a
 - **Refrigerator:** a `Container`; opening it always shows the OJ, but selecting
   it while not holding the glass gives the gentle `nope` reaction (no stress, no
   scolding) — the gate leads you to find the glass first.
+- ⚠️ **This gate is CONTENT-ITEM-level — new work, not the shipped seam (v1.5
+  lesson).** v1.5 shipped only a **container-level** gate (folded into
+  `Container.isActionable`, and deliberately left unused). The fridge instead
+  needs the *OJ content item* gated at **selection** time: `UI.selectItem` must
+  check the item's `gate` before applying its `effect` and give `nope` if it
+  fails (so the fridge still opens and shows the OJ). Budget this as new `UI`
+  code, alongside the new `takeHeld` / `fillHeld` `effect` branches (they sit
+  beside the existing `takeSnack` / `nope` in the same `selectItem` dispatch).
+- ⚠️ **`gate.requires` is a registry key OR a predicate `(scene) => bool`** —
+  that's how v1.5's `passesGate` reads it. "`held:item === 'glass'`" is a
+  *predicate*, so write `requires: (scene) => scene.registry.get('held:item')
+  === 'glass'`, not a bare string.
 
 ### S3 — Reveal / unlock (permanent world change)
 - On delivery, set **`juice:delivered = true`**. A `Reveal` (v1.5 M6) bound to
@@ -83,11 +113,22 @@ single house:
 
 **Consequences (be deliberate about these):**
 
-- **Boot room moves to the Backyard.** `main.js` starts in `Backyard` (not
-  `LivingRoom`); `resetRunState` + the nap's "Play again" restart target move to
-  the garden start. The LivingRoom keeps working exactly as built, just reached
-  later and now owning **two** doors (Bedroom + the revealed Backyard door — the
-  reason v1.5 M7 added multi-door / named-spawn support).
+- **Boot room moves to the Backyard.** `Preloader` starts `Backyard`, not
+  `LivingRoom` (it currently ends with `this.scene.start('LivingRoom')`). The
+  LivingRoom keeps working exactly as built, just reached later. Two concrete
+  v1.5-grounded changes fall out of this:
+  - ⚠️ **Play-again changes *mechanism*, not just target (v1.5 lesson).** Today
+    the nap's Play-again handler (`LivingRoom.update`, on `game:restartRequested`)
+    does `resetRunState(...)` + `this.scene.restart({ fadeIn: false })` — it
+    restarts LivingRoom *in place*. For the connected house it must reset run
+    state and then **transition to the Backyard start** (`fadeToRoom(this,
+    'Backyard', …)` / scene-start), since a fresh lap now begins in the garden.
+  - **LivingRoom gains a `fromBackyard` spawn point + a second door.** Its
+    `SPAWN_POINTS` is `{ default, fromBedroom }` today — add `fromBackyard`, and
+    add the revealed hidden path as a **second `Door` in LivingRoom** pointing
+    back to the Backyard, placed clear of the existing far-left Bedroom door
+    (x≈40). This is exactly the multi-door / named-spawn case v1.5 M7 was built
+    for.
 - **The emotional arc re-frames.** Flow becomes: garden → **wake Sloth (gateway
   / midpoint)** → house opens → LivingRoom → snack → **nap (finale)**. The juice
   quest is the appetizer; the existing nap payoff stays the dessert. Nothing
@@ -188,3 +229,37 @@ carried), + extras (butterfly, flower, lemon, open-cupboard). Add to Preloader.
 3. **Fridge without the glass:** OJ shown-but-gated (`nope`) vs not offered?
    Default: shown-but-gently-gated, so the fridge still reads as "the juice is
    here — go find a glass."
+
+---
+
+## 7. v1.5 implementation lessons (cross-cutting gotchas to budget for)
+
+These surfaced while building v1.5 and don't belong to a single system above, so
+budget for them up front. (The system-specific lessons live inline: held-item
+flip + constructor re-apply in **S1**; content-item gate in **S2**; Play-again +
+LivingRoom door/spawn in **§2a**.)
+
+- **The peek panel centers for exactly 3 items.** `UI.populatePeekPanel` lays
+  contents out as `startX = -ITEM_SPACING; itemX = startX + i * ITEM_SPACING` —
+  dead-center only for 3 items. A cupboard or fridge with a different count will
+  render off-center. Generalize the layout to N (`startX = -(n - 1) / 2 *
+  ITEM_SPACING`) before shipping any container whose contents length ≠ 3.
+- **A container room needs the peek-modal branch in its `update()`.** LivingRoom
+  handles an open panel with a dedicated branch (`if (peekOpen) { stopMoving();
+  E-to-cancel }`) that sits *outside* the InteractionController. Bedroom has no
+  container, so it has none. The **Kitchen** (fridge + cupboards) is the second
+  such room and needs that same branch. That makes two callers — if it reads as
+  copy-paste, lift it into a small shared helper; otherwise inline is fine
+  (Backyard has no container, so it stays at two).
+- **Modal beats must freeze input.** Sloth's wake beat — and any multi-second
+  scripted tween that owns Pusheen — needs the scene to stop reading input while
+  it runs. Mirror `CostumeBox.busy` (the scene `return`s early from `update`
+  while the flag is set) and/or use `InteractionController.update(pusheen,
+  { suppress: true })` so the interact button can't flicker under the beat (the
+  `suppress` option was added in v1.5 for exactly this, for the nap).
+- **The reveal seam is already in place.** `Door` ships `initiallyActive:false` +
+  `activate()` (M7), and `bindReveal(scene, flag, onReveal)` (M6, in
+  `systems/Reveal.js`) runs `onReveal` once when a flag flips true — or
+  immediately on room re-entry if it's already true. So S3's reveal is just:
+  `bindReveal(scene, 'juice:delivered', () => { tween in the hidden door's art;
+  door.activate(); run Sloth's wake beat })`. Nothing new to build here.

@@ -21,3 +21,11 @@ export function fadeInRoom (scene)
 {
     scene.cameras.main.fadeIn(DOOR.fadeMs, ...FADE_RGB);
 }
+
+// Resolve a room's entry position from transition data: the named spawn the
+// incoming door asked for, falling back to the room's default (a fresh boot or
+// Play again passes no spawn). spawnPoints: { default: { x }, <name>: { x } }.
+export function resolveSpawn (spawnPoints, data)
+{
+    return spawnPoints[data?.spawn] ?? spawnPoints.default;
+}
