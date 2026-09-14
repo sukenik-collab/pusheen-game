@@ -28,6 +28,19 @@ export class InteractionController
         return interactable;
     }
 
+    // Drop an interactable that's removing itself from the room (the yarn and
+    // the counter glass both destroy themselves once taken). Without this they
+    // stay in `items` and get update()d as destroyed objects every frame --
+    // inert today only because each one's own taken/collected guard returns
+    // first.
+    unregister (interactable)
+    {
+        const index = this.items.indexOf(interactable);
+        if (index !== -1) {
+            this.items.splice(index, 1);
+        }
+    }
+
     isActionable (item)
     {
         return item.isActionable ? item.isActionable(this.scene) : true;

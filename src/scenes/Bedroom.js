@@ -172,6 +172,12 @@ export class Bedroom extends Scene
             return;
         }
 
+        // Consume any queued interact press before the box-beat gate below, so
+        // a tap made *during* the beat can't survive it and re-open the box the
+        // moment it ends.
+        const interactPressed = Input.Keyboard.JustDown(this.keys.E) || this.registry.get('input:interactPressed');
+        this.registry.set('input:interactPressed', false);
+
         // While the box beat runs, tweens own Pusheen (her body is off) --
         // no input, no zone updates, no land-squash detection.
         if (this.costumeBox.busy) {
@@ -181,9 +187,6 @@ export class Bedroom extends Scene
         // Updates every registered interactable's zones/cues and publishes
         // interact:available (guarded).
         this.interactions.update(this.pusheen);
-
-        const interactPressed = Input.Keyboard.JustDown(this.keys.E) || this.registry.get('input:interactPressed');
-        this.registry.set('input:interactPressed', false);
 
         const left = this.cursors.left.isDown || this.keys.A.isDown || this.registry.get('input:left');
         const right = this.cursors.right.isDown || this.keys.D.isDown || this.registry.get('input:right');
