@@ -115,15 +115,24 @@ export class Backyard extends Scene
             return;
         }
 
+        // Consume any queued interact press before the wake-beat gate below,
+        // so a tap made *during* the beat can't survive it and fire the moment
+        // it ends.
+        const interactPressed = Input.Keyboard.JustDown(this.keys.E) || this.registry.get('input:interactPressed');
+        this.registry.set('input:interactPressed', false);
+
         // Sloth's wake beat owns the screen -- freeze input while it plays.
+        // Must clear her acceleration every frame, not just skip the input
+        // read: a held move button stays applied otherwise (unlike the costume
+        // box, the wake beat doesn't take her body off physics) and she walks
+        // out from under the beat.
         if (this.sloth.busy) {
+            this.pusheen.stopMoving();
+            this.pusheen.update();
             return;
         }
 
         this.interactions.update(this.pusheen);
-
-        const interactPressed = Input.Keyboard.JustDown(this.keys.E) || this.registry.get('input:interactPressed');
-        this.registry.set('input:interactPressed', false);
 
         const left = this.cursors.left.isDown || this.keys.A.isDown || this.registry.get('input:left');
         const right = this.cursors.right.isDown || this.keys.D.isDown || this.registry.get('input:right');

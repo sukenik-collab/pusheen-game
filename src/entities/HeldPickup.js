@@ -74,6 +74,7 @@ export class HeldPickup extends GameObjects.Container
 
         this.taken = true;
         this.inInnerZone = false;
+        scene.interactions?.unregister(this);
         scene.registry.set('held:item', this.gives);
         if (this.flag) {
             scene.registry.set(this.flag, true);
@@ -102,6 +103,14 @@ export class HeldPickup extends GameObjects.Container
 
     spawnNote ()
     {
+        // The cue's notes are staggered over ~440ms, so one can still be
+        // pending when she takes the item -- by which point this has already
+        // destroyed itself and `this.scene` is gone. Taken means no more
+        // "ooh, what's that" notes anyway.
+        if (this.taken) {
+            return;
+        }
+
         const note = this.scene.add.text(this.x, this.y - this.visual.height / 2, '♪', {
             fontSize: '30px',
             color: CUE_COLOR

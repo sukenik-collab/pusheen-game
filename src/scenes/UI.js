@@ -44,6 +44,18 @@ export class UI extends Scene
         this.interactButton = this.addPressButton(width / 2, buttonY, 'E', 'input:interactPressed');
         this.updateInteractButtonVisibility();
 
+        // A hold button only clears on pointerup/pointerout, so a touch that
+        // ends while the game is backgrounded (app switch, notification) never
+        // reports its release and leaves her walking with no way to stop but
+        // re-tapping. Release everything held when focus or visibility goes.
+        const releaseHeldInputs = () => {
+            this.registry.set('input:left', false);
+            this.registry.set('input:right', false);
+            this.registry.set('input:jump', false);
+        };
+        this.game.events.on('blur', releaseHeldInputs);
+        this.game.events.on('hidden', releaseHeldInputs);
+
         this.counterText = this.add.text(20, 20, 'Snack: 0/1', {
             fontSize: '22px',
             color: '#3e2c23'

@@ -69,8 +69,8 @@ export class LivingRoom extends Scene
         const { width, height } = this.scale;
         const groundTop = height - GROUND_HEIGHT;
 
-        // Restart can happen mid-nap-swell (Play again) -- put the bed back to
-        // its base volume before the fresh loop begins.
+        // Re-entering through a door after a nap (the swell leaves the bed
+        // above its base volume) -- put it back before this visit begins.
         this.audio = this.registry.get('audio');
         this.audio?.resetMusicVolume();
 
@@ -175,6 +175,12 @@ export class LivingRoom extends Scene
         if (this.registry.get('game:restartRequested')) {
             this.registry.set('game:restartRequested', false);
             resetRunState(this.registry);
+
+            // The nap swell leaves the music above its base volume, and a fresh
+            // lap now leaves for the Backyard instead of restarting this room
+            // -- so reset it here, on the path out, rather than relying on this
+            // room's create() (which a new lap may not reach again for a while).
+            this.audio?.resetMusicVolume();
 
             // A fresh lap now begins in the garden, not here -- so Play again
             // transitions to the Backyard rather than restarting in place.
