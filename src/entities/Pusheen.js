@@ -35,6 +35,7 @@ export class Pusheen extends GameObjects.Container
         this.body.setCollideWorldBounds(true);
 
         this.wasGrounded = false;
+        this.peakFallSpeed = 0;
 
         // A composable multiplier on whatever the current jump is -- the seam
         // for v2's held item, which scales jump height while carrying. Stays 1
@@ -57,9 +58,10 @@ export class Pusheen extends GameObjects.Container
         // item changes mid-room (pick up glass, fill juice, give to Sloth).
         this.facing = 'left';           // matches the un-flipped visual
         this.heldVisual = null;
-        this.applyHeldItem(scene.registry.get('held:item') ?? 'none');
-        subscribeRegistry(scene, 'held:item', (parent, value) => this.applyHeldItem(value));
 
+        // Built before the held-item wiring below, which eases this tween off
+        // while she's carrying -- so arriving in a room already holding the
+        // glass gets the careful bob too, not just picking one up mid-room.
         this.breatheTween = scene.tweens.add({
             targets: this.visual,
             scaleX: 1 + IDLE.breatheScale,
@@ -70,6 +72,9 @@ export class Pusheen extends GameObjects.Container
             repeat: -1,
             ease: 'Sine.easeInOut'
         });
+
+        this.applyHeldItem(scene.registry.get('held:item') ?? 'none');
+        subscribeRegistry(scene, 'held:item', (parent, value) => this.applyHeldItem(value));
     }
 
     moveLeft ()
@@ -125,6 +130,10 @@ export class Pusheen extends GameObjects.Container
         } else {
             this.jumpVelocityMultiplier = 1;
         }
+
+        // Carrying reads as careful: the idle bob eases off while her paws are
+        // full, the visible partner to the heavier carry-jump above.
+        this.breatheTween.timeScale = sprite ? CARRY.breatheTimeScale : 1;
     }
 
     // Costume = an absolute swap of the base jump (velocity + gravity); the
@@ -168,8 +177,16 @@ export class Pusheen extends GameObjects.Container
     {
         const grounded = this.isGrounded();
 
+        // Remember the fastest she fell this airtime: by the time the landing
+        // is detected the collision has already zeroed velocity, so the squash
+        // has nothing left to size itself from.
+        if (!grounded) {
+            this.peakFallSpeed = Math.max(this.peakFallSpeed, this.body.velocity.y);
+        }
+
         if (grounded && !this.wasGrounded) {
-            this.playLandSquash();
+            this.playLandSquash(this.peakFallSpeed);
+            this.peakFallSpeed = 0;
         }
 
         this.wasGrounded = grounded;
@@ -211,17 +228,24 @@ export class Pusheen extends GameObjects.Container
         });
     }
 
-    playLandSquash ()
+    playLandSquash (fallSpeed = 0)
     {
         this.breatheTween.pause();
         this.visual.setScale(1, 1);
         this.visual.y = 0;
         this.audio?.play('land');
 
+        // Scale the squash to the impact (see LAND_SQUASH's note): one factor
+        // drives both axes, so a heavier landing squashes deeper and stretches
+        // wider together instead of just flattening.
+        const span = LAND_SQUASH.hardSpeed - LAND_SQUASH.softSpeed;
+        const t = Math.min(Math.max((fallSpeed - LAND_SQUASH.softSpeed) / span, 0), 1);
+        const depth = LAND_SQUASH.softDepth + (LAND_SQUASH.hardDepth - LAND_SQUASH.softDepth) * t;
+
         this.scene.tweens.add({
             targets: this.visual,
-            scaleY: LAND_SQUASH.scaleY,
-            scaleX: LAND_SQUASH.scaleX,
+            scaleY: 1 - (1 - LAND_SQUASH.scaleY) * depth,
+            scaleX: 1 + (LAND_SQUASH.scaleX - 1) * depth,
             duration: LAND_SQUASH.downMs,
             ease: 'Quad.easeOut',
             onComplete: () => {

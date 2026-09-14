@@ -1,4 +1,5 @@
 import { Scene, Input } from 'phaser';
+import { SPAWN } from '../config/feel.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Sloth } from '../entities/Sloth.js';
 import { Door } from '../entities/Door.js';
@@ -60,7 +61,7 @@ export class Backyard extends Scene
         this.physics.add.existing(this.ground, true);
 
         const spawn = resolveSpawn(SPAWN_POINTS, data);
-        this.pusheen = new Pusheen(this, spawn.x, height - 200);
+        this.pusheen = new Pusheen(this, spawn.x, groundTop - SPAWN.heightAboveGround);
         this.physics.add.collider(this.pusheen, this.ground);
         this.solids.forEach((solid) => this.physics.add.collider(this.pusheen, solid));
 
@@ -72,9 +73,18 @@ export class Backyard extends Scene
         // Waking Sloth opens the house: reveal the hidden path (activate + fade
         // its art in) and run her wake beat. Runs once when juice:delivered
         // flips true, or immediately on re-entry if it already happened.
-        bindReveal(this, 'juice:delivered', () => {
-            this.doorToLivingRoom.alpha = 0;
+        bindReveal(this, 'juice:delivered', (alreadyRevealed) => {
             this.doorToLivingRoom.activate();
+
+            // Coming back to a yard where he's already up: the gate is just
+            // part of the room now. The fade and the wake beat belong to the
+            // moment it opens, not to every visit afterwards. (Play again
+            // clears juice:delivered, so a fresh lap earns the reveal again.)
+            if (alreadyRevealed) {
+                return;
+            }
+
+            this.doorToLivingRoom.alpha = 0;
             this.tweens.add({ targets: this.doorToLivingRoom, alpha: 1, duration: 600, ease: 'Sine.easeOut' });
             // As he lets go of the branch he nudges Pusheen aside, so the gate
             // he reveals isn't right under her -- she has to walk over to it.

@@ -1,5 +1,5 @@
 import { Scene, Input } from 'phaser';
-import { NAP, JUMP } from '../config/feel.js';
+import { NAP, JUMP, SPAWN } from '../config/feel.js';
 import { resetRunState } from '../config/gameState.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Cushion, CUSHION_HEIGHT } from '../entities/Cushion.js';
@@ -127,7 +127,7 @@ export class LivingRoom extends Scene
         // Start near the sunbeam (right), not the cabinet -- playtest moved
         // the spawn; see the design doc's scene-layout note for why.
         const spawn = resolveSpawn(SPAWN_POINTS, data);
-        this.pusheen = new Pusheen(this, spawn.x, height - 200);
+        this.pusheen = new Pusheen(this, spawn.x, groundTop - SPAWN.heightAboveGround);
         this.physics.add.collider(this.pusheen, this.ground);
         this.solids.forEach((solid) => this.physics.add.collider(this.pusheen, solid));
         this.physics.add.collider(this.pusheen, this.cushion, () => this.cushion.onCollide());
