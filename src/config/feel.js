@@ -17,7 +17,16 @@ export const LAND_SQUASH = {
     scaleX: 1.12,
     downMs: 90,
     upMs: 120,
-    upEase: 'Back.easeOut'
+    upEase: 'Back.easeOut',
+    // How hard she hits scales the squash: a step down off the pillow and a
+    // drop from the kitchen counter shouldn't land identically. `depth`
+    // multiplies both the scaleY and scaleX offsets above by the SAME factor,
+    // so a harder landing stays volume-conserving rather than just flatter.
+    // Speeds are px/s of fall at the moment of impact.
+    softSpeed: 300,      // a gentle step-down
+    hardSpeed: 850,      // off the counter top (~240px)
+    softDepth: 0.5,
+    hardDepth: 1.25
 };
 
 export const CUSHION_SQUASH = {
@@ -52,6 +61,14 @@ export const SNIFF_CUE = {
 
 export const DOOR = {
     fadeMs: 260
+};
+
+// Where she arrives in a room, as her centre's height above the floor. Her
+// body is 78 tall, so this is a ~20px step down: enough to settle with a soft
+// land squash (under LAND_SQUASH.softSpeed) rather than the long drop from
+// off-screen that read as falling into the room rather than walking into it.
+export const SPAWN = {
+    heightAboveGround: 60
 };
 
 // Yarn balls sit flush against furniture, so both radii are wider than the
@@ -123,7 +140,10 @@ export const NAP = {
 // front of her travel direction (mirrored by setFacing).
 export const CARRY = {
     jumpMultiplier: 0.82,
-    offset: { x: 34, y: 20 }
+    offset: { x: 34, y: 20 },
+    // The visible half of "this is a bit heavy": her idle bob slows while her
+    // paws are full, so carrying reads before she ever jumps.
+    breatheTimeScale: 0.8
 };
 
 // Sloth's sensor zones -- wide like Stormy's, and a touch wider so you can
@@ -148,7 +168,12 @@ export const SLOTH = {
     sparkleCount: 8,
     sparkleStaggerMs: 90,
     sparkleRisePx: 70,
-    sparkleMs: 900
+    sparkleMs: 900,
+    // The approach cue when she's actually carrying the juice -- bigger and
+    // quicker than the three-sparkle hello, so the payoff moment announces
+    // itself before she even presses E.
+    juiceCueCount: 7,
+    juiceCueStaggerMs: 70
 };
 
 // Room palettes -- lazy-summer-afternoon warmth.

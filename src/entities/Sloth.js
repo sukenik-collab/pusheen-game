@@ -82,7 +82,7 @@ export class Sloth extends GameObjects.Container
         this.inInnerZone = Geom.Circle.Contains(this.innerZone, pusheen.x, pusheen.y);
 
         if (nowOuter && !this.inOuterZone) {
-            this.playCue();
+            this.playCue(pusheen);
         }
 
         this.inOuterZone = nowOuter;
@@ -94,8 +94,24 @@ export class Sloth extends GameObjects.Container
         return !this.busy;
     }
 
-    playCue ()
+    // Same approach language as everything else she walks up to -- a sniff and
+    // her little sniff-react, not a silent shimmer.
+    playCue (pusheen)
     {
+        this.audio?.play('sniff');
+        pusheen.playSniffReact();
+
+        // Walking up holding the juice is the moment the whole errand was for
+        // -- give that arrival a real flourish instead of the passing hello.
+        if (!this.awake && this.scene.registry.get('held:item') === 'juice') {
+            for (let i = 0; i < SLOTH.juiceCueCount; i++) {
+                this.scene.time.delayedCall(i * SLOTH.juiceCueStaggerMs, () => {
+                    this.spawnSparkle((Math.random() * 2 - 1) * 30);
+                });
+            }
+            return;
+        }
+
         this.spawnSparkle(0);
         this.spawnSparkle(-24);
         this.spawnSparkle(24);

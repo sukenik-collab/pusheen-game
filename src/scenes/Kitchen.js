@@ -1,4 +1,5 @@
 import { Scene, Input } from 'phaser';
+import { SPAWN } from '../config/feel.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Container } from '../entities/Container.js';
 import { HeldPickup } from '../entities/HeldPickup.js';
@@ -108,7 +109,7 @@ export class Kitchen extends Scene
         this.physics.add.existing(this.ground, true);
 
         const spawn = resolveSpawn(SPAWN_POINTS, data);
-        this.pusheen = new Pusheen(this, spawn.x, height - 200);
+        this.pusheen = new Pusheen(this, spawn.x, groundTop - SPAWN.heightAboveGround);
         this.physics.add.collider(this.pusheen, this.ground);
         this.solids.forEach((solid) => this.physics.add.collider(this.pusheen, solid));
 

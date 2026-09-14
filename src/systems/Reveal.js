@@ -7,27 +7,31 @@ import { subscribeRegistry } from './registryHelpers.js';
 // needing a re-trigger. Auto-cleans its listener on scene shutdown via
 // subscribeRegistry.
 //
+// `onReveal(alreadyRevealed)` is told which of those two it is, so a caller
+// can save the ceremony (a fade, a one-time beat) for the moment the thing
+// actually opens and just show the finished state on later visits.
+//
 // Net-new for v2 (Sloth's `juice:delivered` flag -> activate the backyard
 // hidden-path Door + reveal its art). Ships unused in v1.5.
 export function bindReveal (scene, flag, onReveal)
 {
     let done = false;
-    const run = () => {
+    const run = (alreadyRevealed) => {
         if (done) {
             return;
         }
         done = true;
-        onReveal();
+        onReveal(alreadyRevealed);
     };
 
     if (scene.registry.get(flag)) {
-        run();
+        run(true);
         return;
     }
 
     subscribeRegistry(scene, flag, (parent, value) => {
         if (value) {
-            run();
+            run(false);
         }
     });
 }
