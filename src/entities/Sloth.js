@@ -4,10 +4,14 @@ import { SLOTH, SLOTH_RADAR } from '../config/feel.js';
 const SPARKLE_COLOR = '#fff3b0';
 const BUBBLE_OFFSET_Y = -125;
 
-// The concept sloth art is a large transparent frame with the sloth centered;
-// prescale the image inside a wrapper container so the squash/yawn tweens stay
-// 1.0-based on the wrapper (and the awake swap can rescale independently later).
+// The hanging art is a large frame with the sloth centered, so it's prescaled
+// inside a wrapper container and the squash/yawn tweens stay 1.0-based on the
+// wrapper. The awake poses are pre-cropped to their display size (the same
+// convention as Pusheen's sprite), so they swap in at scale 1.
 const SLOTH_ART_SCALE = 0.31;
+const POSE_HANGING = { texture: 'sloth', scale: SLOTH_ART_SCALE };
+const POSE_STANDING = { texture: 'slothAwake', scale: 1 };
+const POSE_SITTING = { texture: 'slothSitting', scale: 1 };
 
 // Flag-branched dialogue (mirrors Stormy's quest:complete pattern -- not a
 // named-dialogue-state engine, which is deferred).
@@ -32,20 +36,23 @@ export class Sloth extends GameObjects.Container
         this.audio = scene.registry.get('audio');
         this.verb = 'talk';
         this.busy = false;
-        this.groundY = groundTop - 80;   // standing centre, feet on the floor
+        this.groundTop = groundTop;
+
+        // Real sloth art, in a wrapper so the squash/yawn tweens stay 1.0-based
+        // on the wrapper while the pose underneath swaps (see SLOTH_ART_SCALE).
+        this.art = scene.add.image(0, 0, POSE_HANGING.texture).setScale(POSE_HANGING.scale);
+        this.visual = scene.add.container(0, 0);
+        this.visual.add(this.art);
+        this.add(this.visual);
 
         // Already awake if the juice was delivered earlier this run (revisit):
-        // he's dropped off the branch and ambled clear (to the left) -- no
-        // sleeping bob, no wake-beat replay.
+        // he dropped off the branch, plodded clear and sat down -- so he's
+        // found sitting where he settled, with no bob and no wake-beat replay.
         this.awake = !!scene.registry.get('juice:delivered');
         if (this.awake) {
-            this.setPosition(x - SLOTH.amblePx, this.groundY);
+            this.usePose(POSE_SITTING);
+            this.setPosition(x - SLOTH.amblePx, this.restingY());
         }
-
-        // Real hanging-sloth art, prescaled inside a wrapper (see SLOTH_ART_SCALE).
-        this.visual = scene.add.container(0, 0);
-        this.visual.add(scene.add.image(0, 0, 'sloth').setScale(SLOTH_ART_SCALE));
-        this.add(this.visual);
 
         // A slow sleeping bob while she dozes -- paused for good once she wakes.
         if (!this.awake) {
@@ -92,6 +99,19 @@ export class Sloth extends GameObjects.Container
     isActionable ()
     {
         return !this.busy;
+    }
+
+    usePose (pose)
+    {
+        this.art.setTexture(pose.texture).setScale(pose.scale);
+    }
+
+    // Where his centre sits so the current pose's feet meet the floor. The
+    // standing and sitting art are different heights, so this is read per pose
+    // rather than kept as one constant.
+    restingY ()
+    {
+        return this.groundTop - this.art.displayHeight / 2;
     }
 
     // Same approach language as everything else she walks up to -- a sniff and
@@ -164,8 +184,8 @@ export class Sloth extends GameObjects.Container
         this.showBubble(ACCEPT);
         this.audio?.play('collect');
 
-        // A big volume-conserving yawn, then let go: drop to the ground and
-        // amble off to the left, revealing the gate behind where he hung.
+        // A big volume-conserving yawn on the branch, then let go: stand up,
+        // plod a few steps clear of the gate he was hiding, and flop down.
         this.scene.tweens.add({
             targets: this.visual,
             scaleX: SLOTH.yawnScaleX,
@@ -175,27 +195,14 @@ export class Sloth extends GameObjects.Container
             ease: 'Sine.easeInOut',
             onComplete: () => {
                 onDrop?.();
+                this.usePose(POSE_STANDING);
                 this.scene.tweens.add({
                     targets: this,
-                    y: this.groundY,
+                    y: this.restingY(),
                     duration: SLOTH.dropMs,
                     ease: 'Bounce.easeOut'
                 });
-                this.scene.tweens.add({
-                    targets: this,
-                    x: this.x - SLOTH.amblePx,
-                    delay: SLOTH.dropMs,
-                    duration: SLOTH.ambleMs,
-                    ease: 'Sine.easeInOut',
-                    onComplete: () => {
-                        // Move his sensor zones to where he settles, so a later
-                        // "thanks" chat works beside him -- not under the empty
-                        // branch he left.
-                        this.outerZone.setPosition(this.x, this.y);
-                        this.innerZone.setPosition(this.x, this.y);
-                        this.busy = false;
-                    }
-                });
+                this.walkOff();
             }
         });
 
@@ -204,6 +211,58 @@ export class Sloth extends GameObjects.Container
                 this.spawnSparkle((Math.random() * 2 - 1) * 40);
             });
         }
+    }
+
+    // The plod. There's no walk-cycle art, so the steps are carried by a slow
+    // side-to-side waddle over the travel tween -- which is the right register
+    // for a sloth anyway: he is in no hurry.
+    walkOff ()
+    {
+        this.waddleTween = this.scene.tweens.add({
+            targets: this.visual,
+            angle: { from: -SLOTH.waddleDeg, to: SLOTH.waddleDeg },
+            duration: SLOTH.waddleMs,
+            delay: SLOTH.dropMs,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+
+        this.scene.tweens.add({
+            targets: this,
+            x: this.x - SLOTH.amblePx,
+            delay: SLOTH.dropMs,
+            duration: SLOTH.ambleMs,
+            ease: 'Sine.easeInOut',
+            onComplete: () => this.sitDown()
+        });
+    }
+
+    // He arrives, settles onto his belly and stays there for the rest of the run.
+    sitDown ()
+    {
+        this.waddleTween?.stop();
+        this.visual.angle = 0;
+        this.usePose(POSE_SITTING);
+        this.y = this.restingY();
+        this.audio?.play('sigh');
+
+        this.scene.tweens.add({
+            targets: this.visual,
+            scaleY: SLOTH.sitSquashY,
+            scaleX: SLOTH.sitSquashX,
+            duration: SLOTH.sitMs,
+            yoyo: true,
+            ease: 'Quad.easeOut',
+            onComplete: () => {
+                // Move his sensor zones to where he settles, so a later
+                // "thanks" chat works beside him -- not under the empty
+                // branch he left.
+                this.outerZone.setPosition(this.x, this.y);
+                this.innerZone.setPosition(this.x, this.y);
+                this.busy = false;
+            }
+        });
     }
 
     spawnSparkle (offsetX)

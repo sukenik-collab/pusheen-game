@@ -165,6 +165,14 @@ export const SLOTH = {
     dropMs: 320,           // drop off the branch to the ground (a soft bounce)
     amblePx: 180,          // amble clear along the ground, revealing the door
     ambleMs: 1500,
+    // The plod: with no walk-cycle art, a slow side-to-side lean over the
+    // travel carries the steps. Slow and wide reads as a sloth, not a scurry.
+    waddleDeg: 5,
+    waddleMs: 280,
+    // ...and the flop as he settles onto his belly at the end of it.
+    sitSquashY: 0.92,
+    sitSquashX: 1.06,
+    sitMs: 200,
     sparkleCount: 8,
     sparkleStaggerMs: 90,
     sparkleRisePx: 70,
