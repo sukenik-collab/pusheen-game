@@ -50,8 +50,13 @@ playtest; the art rework below is what's freshest.
 
 ## Real art wired (from `docs/concept-art`)
 
-- `backyard-bg.png` (garden), `kitchen-bg.png`, `sloth-sleeping.png` — all in
-  `public/assets/sprites/`, loaded in `Preloader`.
+- `backyard-bg.png` (garden), `kitchen-bg.png`, and all three Sloth poses —
+  `sloth-sleeping.png` (hanging), `sloth-awake.png` (standing mid-stretch) and
+  `sloth-sitting.png` (settled on his belly) — all in
+  `public/assets/sprites/`, loaded in `Preloader`. The two awake poses were cut
+  from `docs/concept-art/sloth3.png` and `sloth1.png` and are pre-cropped to
+  their display size, so they swap in at scale 1 (the hanging frame is still
+  the big centred image at `SLOTH_ART_SCALE`).
 
 ## TODO when you pick this up
 
@@ -61,11 +66,13 @@ playtest; the art rework below is what's freshest.
    - **Kitchen counter climb:** the standable counter body sits ~20px below the
      painted counter surface, and the hop margins are tight by design — nudge
      `COUNTER_TOP_FROM_GROUND` + `STOOL_H`/`BOX_H` in Kitchen.js.
-2. **Missing art:** the **awake Sloth** sprite (`slothAwake`) — the wake beat
-   currently plays with the sleeping sprite. Other placeholders (screenDoor,
-   gardenGate, stepStool, stepBox, fridgeInside, glass, orangeJuice,
-   juicePitcher, item decoys) are generated shapes; see the punch-list.
+2. **Missing art:** the remaining placeholders (screenDoor, gardenGate,
+   stepStool, stepBox, fridgeInside, glass, orangeJuice, juicePitcher, item
+   decoys) are generated shapes; see the punch-list.
    → **`docs/pusheen-v2-art-assets.md`** (status + sizes + tuning knobs).
+   The awake Sloth poses are done — the wake beat now stretches, plods clear
+   on the standing pose (a waddle tween carries the steps; there's no
+   walk-cycle art) and flops onto the sitting pose where he stops.
 3. **Optional P4 cozy extras** (spec §5): butterflies, flowers, hammock/lemon —
    only if desired.
 4. **Merge:** open a PR `feat/v2-room-pair-2` → `main` and merge when happy.

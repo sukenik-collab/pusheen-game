@@ -46,6 +46,11 @@ export class Preloader extends Scene
         this.load.image('backyardBg', 'assets/sprites/backyard-bg.png');
         this.load.image('kitchenBg', 'assets/sprites/kitchen-bg.png');
         this.load.image('sloth', 'assets/sprites/sloth-sleeping.png');
+        // His awake poses, cut from the same concept set and pre-cropped to
+        // their display size (so they swap in at scale 1, unlike the big
+        // hanging frame): standing mid-stretch, then settled on his belly.
+        this.load.image('slothAwake', 'assets/sprites/sloth-awake.png');
+        this.load.image('slothSitting', 'assets/sprites/sloth-sitting.png');
 
         // A tiny soft dot, reused as the sunbeam's dust-mote particle texture.
         const g = this.add.graphics();
@@ -76,9 +81,8 @@ export class Preloader extends Scene
             gfx.fillRoundedRect(2, 46, 72, 12, 4);          // rails
             gfx.fillRoundedRect(2, 104, 72, 12, 4);
         });
-        // (Backyard + kitchen backdrops and Sloth are real art, loaded above.
-        // Sloth's awake sprite is still pending -- for now the wake beat conveys
-        // it via animation.)
+        // (Backyard + kitchen backdrops and all three Sloth poses are real art,
+        // loaded above.)
 
         // The two climbing steps up to the counter (stool -> box -> counter
         // top). Wide + adjacent, so the horizontal hop between them is small.
