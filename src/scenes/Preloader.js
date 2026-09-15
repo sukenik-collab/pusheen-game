@@ -8,6 +8,20 @@ import { AudioController } from '../audio/AudioController.js';
 // they read as not-in-style next to the drawn sprites.
 const ITEM_OUTLINE = 0x5a3a24;
 
+// The Backyard's scenery palette, sampled from the tree art so the generated
+// layers sit in the same world as it. Sky and grass are flat fills the scene
+// draws itself (Backyard.js) rather than images; bushLine is where the horizon
+// sits inside the bushes strip, so the scene can place it by that line.
+export const BACKYARD = {
+    sky: 0xbacbf4,
+    grass: 0x80a56f,
+    outline: 0x5a3018,
+    sun: 0xf9bd56,
+    cloud: 0xfbe8d5,
+    bushHeight: 96,
+    bushLine: 70
+};
+
 export class Preloader extends Scene
 {
     constructor ()
@@ -45,15 +59,18 @@ export class Preloader extends Scene
         // sprite, which swaps in for 'pusheen' when she wears the costume.
         this.load.image('pusheencorn', 'assets/sprites/pusheencorn.png');
 
-        // v2 real art (from docs/concept-art). Backdrops are ~1376x768, scaled
-        // to the 1280x720 canvas where they're placed. Sloth is a transparent
-        // hanging sprite, centered in its frame.
-        this.load.image('backyardBg', 'assets/sprites/backyard-bg.png');
+        // v2 real art (from docs/concept-art). The kitchen backdrop is 1376x768,
+        // scaled to the 1280x720 canvas. All three Sloth poses are transparent
+        // sprites pre-cropped to their display size.
         this.load.image('kitchenBg', 'assets/sprites/kitchen-bg.png');
-        this.load.image('sloth', 'assets/sprites/sloth-sleeping.png');
-        // His awake poses, cut from the same concept set and pre-cropped to
-        // their display size (so they swap in at scale 1, unlike the big
-        // hanging frame): standing mid-stretch, then settled on his belly.
+        // The Backyard is layered rather than a single backdrop: sky, grass and
+        // the bushes/sun/clouds are generated below, and only the tree is art.
+        // That is what lets the branch be scaled and placed to the pixel where
+        // Sloth grips it, instead of the sloth being posed to fit a painting.
+        this.load.image('tree', 'assets/sprites/backyard-tree.png');
+        this.load.image('slothHanging', 'assets/sprites/sloth-hanging.png');
+        // His awake poses, cut from the same concept set: standing mid-stretch,
+        // then settled on his belly.
         this.load.image('slothAwake', 'assets/sprites/sloth-awake.png');
         this.load.image('slothSitting', 'assets/sprites/sloth-sitting.png');
 
@@ -86,8 +103,57 @@ export class Preloader extends Scene
             gfx.fillRoundedRect(2, 46, 72, 12, 4);          // rails
             gfx.fillRoundedRect(2, 104, 72, 12, 4);
         });
-        // (Backyard + kitchen backdrops and all three Sloth poses are real art,
-        // loaded above.)
+        // The Backyard's scenery, in the same flat style as the tree art it sits
+        // with: thick dark outline, flat fill, no shading. Sky and grass are
+        // rectangles in the scene, so only these three need textures.
+        this.makeTexture('sun', 190, 190, (gfx) => {
+            const c = 95;
+            gfx.fillStyle(BACKYARD.outline, 1);
+            for (let i = 0; i < 8; i++) {                  // chunky rounded rays
+                const a = (i * Math.PI) / 4;
+                gfx.fillCircle(c + Math.cos(a) * 78, c + Math.sin(a) * 78, 11);
+            }
+            gfx.fillCircle(c, c, 58);
+            gfx.fillStyle(BACKYARD.sun, 1);
+            for (let i = 0; i < 8; i++) {
+                const a = (i * Math.PI) / 4;
+                gfx.fillCircle(c + Math.cos(a) * 78, c + Math.sin(a) * 78, 7);
+            }
+            gfx.fillCircle(c, c, 52);
+        });
+        // Drawn as an outline blob with the fill laid back over it, so the
+        // lumps merge into one silhouette instead of showing their own seams.
+        this.makeTexture('cloud', 210, 116, (gfx) => {
+            const puff = [[62, 58, 46], [118, 50, 38], [162, 66, 32]];
+            for (const [color, grow] of [[BACKYARD.outline, 5], [BACKYARD.cloud, 0]]) {
+                gfx.fillStyle(color, 1);
+                puff.forEach(([x, y, r]) => gfx.fillCircle(x, y, r + grow));
+                gfx.fillRoundedRect(16 - grow, 58 - grow, 178 + grow * 2, 46 + grow * 2, 22);
+            }
+        });
+        // The scalloped hedge along the horizon. The strip carries the horizon
+        // line itself at `bushLine`, with the lumps drawn over it so they
+        // interrupt it the way they do in the tree art.
+        this.makeTexture('bushes', 1280, BACKYARD.bushHeight, (gfx) => {
+            const line = BACKYARD.bushLine;
+            gfx.fillStyle(BACKYARD.grass, 1);
+            gfx.fillRect(0, line, 1280, BACKYARD.bushHeight - line);
+            gfx.fillStyle(BACKYARD.outline, 1);
+            gfx.fillRect(0, line, 1280, 5);
+            const radii = [26, 17, 30, 21, 15, 28, 19, 24];
+            const lumps = [];
+            for (let i = 0, x = 10; x < 1290; i++) {
+                const r = radii[i % radii.length];
+                lumps.push({ x, r });
+                x += r + 14;
+            }
+            for (const [color, grow] of [[BACKYARD.outline, 5], [BACKYARD.grass, 0]]) {
+                gfx.fillStyle(color, 1);
+                lumps.forEach(({ x, r }) => gfx.fillCircle(x, line + 12, r + grow));
+            }
+            gfx.fillStyle(BACKYARD.grass, 1);        // keep the line's underside clean
+            gfx.fillRect(0, line + 5, 1280, BACKYARD.bushHeight - line - 5);
+        });
 
         // The two climbing steps up to the counter (stool -> box -> counter
         // top). Wide + adjacent, so the horizontal hop between them is small.

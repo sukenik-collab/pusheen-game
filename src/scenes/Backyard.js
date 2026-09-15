@@ -6,8 +6,20 @@ import { Door } from '../entities/Door.js';
 import { InteractionController } from '../systems/InteractionController.js';
 import { bindReveal } from '../systems/Reveal.js';
 import { fadeToRoom, fadeInRoom, resolveSpawn } from './roomTransition.js';
+import { BACKYARD } from './Preloader.js';
 
 const GROUND_HEIGHT = 40;
+
+// The horizon. Pusheen walks at groundTop, well below it, so the band between
+// the two reads as ground running back to the hedge.
+const GRASS_TOP = 596;
+
+// The tree is its own layer, scaled and placed so its branch lands exactly in
+// the gap Sloth's paws wrap (SLOTH.restHeight is derived from the same numbers
+// -- see the note there). Its trunk base sits on groundTop, 2px of transparent
+// padding included.
+const TREE_X = 560;
+const TREE_SCALE = 0.8;
 
 // The boot room. Named entry points: default = fresh boot / Play again (out in
 // the yard, to Sloth's right so approaching her fires the lead cue); fromKitchen
@@ -20,8 +32,8 @@ const SPAWN_POINTS = {
     fromLivingRoom: { x: 880 }
 };
 
-// Sloth hangs from the tree's low branch (tip ~mid-screen in the backdrop);
-// the gate is revealed directly behind that spot.
+// Sloth hangs from the tree's low branch, out along its level stretch and clear
+// of the leaf sprigs at the tip; the gate is revealed directly behind that spot.
 const SLOTH_X = 700;
 
 export class Backyard extends Scene
@@ -36,7 +48,16 @@ export class Backyard extends Scene
         const { width, height } = this.scale;
         const groundTop = height - GROUND_HEIGHT;
 
-        this.add.image(width / 2, height / 2, 'backyardBg').setDisplaySize(width, height);
+        // Scenery, back to front -- creation order is depth order here as it is
+        // everywhere else in this codebase.
+        this.add.rectangle(width / 2, height / 2, width, height, BACKYARD.sky);
+        this.add.image(210, 140, 'cloud').setScale(0.85);
+        this.add.image(1105, 205, 'cloud').setScale(0.6);
+        this.add.image(940, 125, 'sun');
+        this.add.rectangle(width / 2, (GRASS_TOP + height) / 2, width, height - GRASS_TOP, BACKYARD.grass);
+        this.add.image(width / 2, GRASS_TOP, 'bushes').setOrigin(0.5, BACKYARD.bushLine / BACKYARD.bushHeight);
+        this.add.image(TREE_X, groundTop + 2, 'tree').setOrigin(0.5, 1).setScale(TREE_SCALE);
+
         this.solids = [];
 
         // Hidden garden gate to the LivingRoom -- built BEFORE Sloth so he draws
