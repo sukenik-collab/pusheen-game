@@ -24,7 +24,8 @@ The game is fully playable either way.
 |---|---|---|---|
 | `backyardBg` | 1376×768 | ✅ `backyard-bg.png` | Tree + low branch (left), sun, clouds, grass. Sloth hangs from the branch (~x=700). |
 | `sloth` | 1376×768 frame | ✅ `sloth-sleeping.png` | Transparent hanging sloth, prescaled 0.31 in-engine. |
-| `slothAwake` | ~like sloth | ▫️ **still needed** | Awake/standing sloth for after he drops off the branch (eyes open, upright). Currently the wake beat plays with the sleeping sprite. |
+| `slothAwake` | 124×170 | ✅ `sloth-awake.png` | Standing mid-stretch, arms up (from `concept-art/sloth3.png`). Swapped in as he drops off the branch, and worn for the plod. There's no walk-cycle art, so the steps are a waddle tween (`SLOTH.waddleDeg`/`waddleMs`) — real walk frames would replace that, not add to it. |
+| `slothSitting` | 190×110 | ✅ `sloth-sitting.png` | Settled on his belly, eyes open (from `concept-art/sloth1.png`). Where the plod ends, and how he's found on re-entry. |
 | `gardenGate` | 76×150 | ▫️ placeholder | The revealed hidden path, behind where Sloth hangs. |
 | `screenDoor` | 76×150 | ▫️ placeholder | The Backyard→Kitchen screen door (shared with the Kitchen side). |
 
