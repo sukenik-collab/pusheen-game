@@ -48,21 +48,33 @@ playtest; the art rework below is what's freshest.
   `bindReveal('juice:delivered', …)`.
 - **Doors:** `Door` takes a `texture` option; screen doors + garden gate use it.
 
-## Real art wired (from `docs/concept-art`)
+## Real art wired
 
-- `backyard-bg.png` (garden), `kitchen-bg.png`, and all three Sloth poses —
-  `sloth-sleeping.png` (hanging), `sloth-awake.png` (standing mid-stretch) and
-  `sloth-sitting.png` (settled on his belly) — all in
-  `public/assets/sprites/`, loaded in `Preloader`. The two awake poses were cut
-  from `docs/concept-art/sloth3.png` and `sloth1.png` and are pre-cropped to
-  their display size, so they swap in at scale 1 (the hanging frame is still
-  the big centred image at `SLOTH_ART_SCALE`).
+- **The Backyard is layered**, not one painted backdrop. `Backyard.create()`
+  stacks sky → clouds → sun → grass → hedge → tree back to front (creation order
+  is depth order). Sky and grass are `add.rectangle` fills; hedge, sun and cloud
+  are generated in `Preloader`; only `backyard-tree.png` is art. That split is
+  what lets the branch be scaled and placed to the pixel, which is how Sloth
+  came to actually grip it instead of hanging near it.
+- **`sloth-hanging.png`** replaces `sloth-sleeping.png`: a draped four-limb grip,
+  cut from art generated *with* a branch drawn through it. The branch is keyed
+  back out, so the gap under his paws is a hole the tree's own branch fills.
+  `SLOTH.restHeight` is derived from that registration — see the comment on it.
+- `kitchen-bg.png` and the two awake poses (`sloth-awake.png` standing
+  mid-stretch, `sloth-sitting.png` settled on his belly, cut from
+  `docs/concept-art/sloth3.png` and `sloth1.png`) are unchanged. All three Sloth
+  poses are now pre-cropped to display size and swap in at scale 1.
+- **Known mismatch:** the hanging pose's fur reads cooler than the two awake
+  ones (`#BF9E7B` vs `#D9AF87`/`#E0B179`), so he changes shade when he wakes.
+  Pre-existing — the retired `sloth-sleeping.png` was `#C8A180` — but still
+  visible. Fix by tinting one side to the other; which way is a taste call.
 
 ## TODO when you pick this up
 
 1. **Playtest-tune placements** (I couldn't pixel-verify without rendering):
-   - **Sloth** size/hang: `SLOTH_ART_SCALE` (Sloth.js), `SLOTH.restHeight`
-     (feel.js), `SLOTH_X` (Backyard.js).
+   - **Sloth** hang: `SLOTH.restHeight` (feel.js), `SLOTH_X` (Backyard.js), and
+     `TREE_X`/`TREE_SCALE`/`GRASS_TOP` for the scenery around him. `restHeight`
+     is derived from `TREE_SCALE`, so re-derive it if the tree is rescaled.
    - **Kitchen counter climb:** the standable counter body sits ~20px below the
      painted counter surface, and the hop margins are tight by design — nudge
      `COUNTER_TOP_FROM_GROUND` + `STOOL_H`/`BOX_H` in Kitchen.js.

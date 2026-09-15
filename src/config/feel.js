@@ -157,7 +157,11 @@ export const SLOTH_RADAR = {
 // (all tween-driven). restHeight = how far his center sits above the floor
 // while he hangs; tune to the branch in the final backdrop art.
 export const SLOTH = {
-    restHeight: 120,
+    // Where he hangs, measured so the tree's branch sits in the gap his paws
+    // wrap: the branch art's underside is 237px above the trunk base and the
+    // branch is 45px thick, both at TREE_SCALE, and the grip gap is rows 11-47
+    // of the 160px-tall sprite. Re-derive this if TREE_SCALE moves.
+    restHeight: 158,
     bubbleHoldMs: 3000,
     yawnScaleX: 1.14,      // a big volume-conserving yawn/stretch
     yawnScaleY: 0.88,

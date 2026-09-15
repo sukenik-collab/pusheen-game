@@ -4,12 +4,19 @@ import { SLOTH, SLOTH_RADAR } from '../config/feel.js';
 const SPARKLE_COLOR = '#fff3b0';
 const BUBBLE_OFFSET_Y = -125;
 
-// The hanging art is a large frame with the sloth centered, so it's prescaled
-// inside a wrapper container and the squash/yawn tweens stay 1.0-based on the
-// wrapper. The awake poses are pre-cropped to their display size (the same
-// convention as Pusheen's sprite), so they swap in at scale 1.
-const SLOTH_ART_SCALE = 0.31;
-const POSE_HANGING = { texture: 'sloth', scale: SLOTH_ART_SCALE };
+// Hanging, his origin is up at the branch while his body drapes below it, so
+// the sensor circles centred there would only reach Pusheen in a narrow slot
+// directly underneath. Drop them to his hanging body's mass instead -- the
+// Stormy.js BODY_MID_DY precedent -- rather than inflating the radii, which
+// would eat the lead margin between the sniff and interact rings. Once he's
+// down and sitting, his origin is already at body height and the offset goes.
+const HANG_ZONE_DY = 58;
+
+// All three poses are pre-cropped to their display size (the same convention as
+// Pusheen's sprite), so they swap in at scale 1. The art still lives in a
+// wrapper container so the squash/yawn tweens stay 1.0-based on the wrapper and
+// are unaffected by a pose swap underneath them.
+const POSE_HANGING = { texture: 'slothHanging', scale: 1 };
 const POSE_STANDING = { texture: 'slothAwake', scale: 1 };
 const POSE_SITTING = { texture: 'slothSitting', scale: 1 };
 
@@ -39,7 +46,7 @@ export class Sloth extends GameObjects.Container
         this.groundTop = groundTop;
 
         // Real sloth art, in a wrapper so the squash/yawn tweens stay 1.0-based
-        // on the wrapper while the pose underneath swaps (see SLOTH_ART_SCALE).
+        // on the wrapper while the pose underneath swaps.
         this.art = scene.add.image(0, 0, POSE_HANGING.texture).setScale(POSE_HANGING.scale);
         this.visual = scene.add.container(0, 0);
         this.visual.add(this.art);
@@ -77,8 +84,9 @@ export class Sloth extends GameObjects.Container
         this.add(this.bubble);
         this.bubbleHideTimer = null;
 
-        this.outerZone = new Geom.Circle(this.x, this.y, SLOTH_RADAR.sniffRadius);
-        this.innerZone = new Geom.Circle(this.x, this.y, SLOTH_RADAR.interactRadius);
+        const zoneY = this.y + (this.awake ? 0 : HANG_ZONE_DY);
+        this.outerZone = new Geom.Circle(this.x, zoneY, SLOTH_RADAR.sniffRadius);
+        this.innerZone = new Geom.Circle(this.x, zoneY, SLOTH_RADAR.interactRadius);
         this.inOuterZone = false;
         this.inInnerZone = false;
     }

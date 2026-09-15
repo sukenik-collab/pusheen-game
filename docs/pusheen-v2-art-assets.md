@@ -20,13 +20,22 @@ The game is fully playable either way.
 
 ## Backyard
 
+The Backyard is **layered**, not a single backdrop: the scene stacks sky, clouds,
+sun, grass, hedge and tree back-to-front (creation order = depth order). That is
+what lets the branch be scaled and placed to the pixel where Sloth grips it.
+Sky (`#BACBF4`) and grass (`#80A56F`) are `add.rectangle` fills, not images.
+
 | Key | Size | Status | Notes |
 |---|---|---|---|
-| `backyardBg` | 1376×768 | ✅ `backyard-bg.png` | Tree + low branch (left), sun, clouds, grass. Sloth hangs from the branch (~x=700). |
-| `sloth` | 1376×768 frame | ✅ `sloth-sleeping.png` | Transparent hanging sloth, prescaled 0.31 in-engine. |
+| `tree` | 850×771 | ✅ `backyard-tree.png` | Trunk + canopy + the low branch, transparent. Drawn at `TREE_SCALE` with its base on `groundTop` (Backyard.js). The branch is level and 45px thick over the stretch Sloth hangs from; leaf sprigs sit past it at the tip. |
+| `bushes` | 1280×96 | ▫️ generated | The scalloped hedge along the horizon, carrying the horizon line at `BACKYARD.bushLine`. |
+| `sun` | 190×190 | ▫️ generated | Flat disc + eight chunky rays. |
+| `cloud` | 210×116 | ▫️ generated | One lump, placed twice at different scales. |
+| `slothHanging` | 180×160 | ✅ `sloth-hanging.png` | Draped over the branch, all four limbs gripping. Cut from art generated *with* a branch through it — the branch is keyed out so the gap under his paws is the tree's branch to fill. |
 | `slothAwake` | 124×170 | ✅ `sloth-awake.png` | Standing mid-stretch, arms up (from `concept-art/sloth3.png`). Swapped in as he drops off the branch, and worn for the plod. There's no walk-cycle art, so the steps are a waddle tween (`SLOTH.waddleDeg`/`waddleMs`) — real walk frames would replace that, not add to it. |
 | `slothSitting` | 190×110 | ✅ `sloth-sitting.png` | Settled on his belly, eyes open (from `concept-art/sloth1.png`). Where the plod ends, and how he's found on re-entry. |
 | `gardenGate` | 76×150 | ▫️ placeholder | The revealed hidden path, behind where Sloth hangs. |
+| `backyardBg` | — | ⛔ retired | Replaced by the layer stack above. |
 | `screenDoor` | 76×150 | ▫️ placeholder | The Backyard→Kitchen screen door (shared with the Kitchen side). |
 
 ## Kitchen
@@ -60,8 +69,15 @@ panel), `pusheen` / `pusheencorn` (carry accessory is a separate child sprite).
 
 ## Tuning notes (placement tied to the real backdrops)
 
-- **Sloth** hang height/scale: `SLOTH.restHeight` (feel.js) + `SLOTH_ART_SCALE`
-  (Sloth.js) + `SLOTH_X` (Backyard.js).
+- **Sloth** hang height: `SLOTH.restHeight` (feel.js) + `SLOTH_X` (Backyard.js).
+  `restHeight` is *derived*, not eyeballed — it lines the gap under his paws up
+  with the branch, from `TREE_SCALE` and the branch's offsets in the tree art.
+  Re-derive it if `TREE_SCALE` moves; the comment on it in feel.js has the
+  numbers. The sprite size is baked into `sloth-hanging.png`, so changing how big
+  he is means re-cutting it, and the grip gap scales with him.
+- **Tree** placement: `TREE_X` / `TREE_SCALE`, and `GRASS_TOP` for the horizon
+  (all Backyard.js). The branch must stay at least as thick as his grip gap —
+  thicker is fine and reads naturally, thinner shows sky through the gap.
 - **Kitchen counter** climb: the standable counter body sits ~20px below the
   painted counter surface — nudge `COUNTER_TOP_FROM_GROUND` / step heights in
   `Kitchen.js` to line up once art placement is confirmed.
