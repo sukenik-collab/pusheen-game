@@ -3,6 +3,11 @@ import { TRACKS, SFX_SETS } from '../config/audioManifest.js';
 import { resetRunState } from '../config/gameState.js';
 import { AudioController } from '../audio/AudioController.js';
 
+// The dark brown the real art outlines everything with. The generated item
+// placeholders were flat fills with no outline at all, which is most of why
+// they read as not-in-style next to the drawn sprites.
+const ITEM_OUTLINE = 0x5a3a24;
+
 export class Preloader extends Scene
 {
     constructor ()
@@ -132,31 +137,67 @@ export class Preloader extends Scene
             gfx.fillStyle(0xbfe0ef, 0.55);
             gfx.fillRoundedRect(12, 6, 42, 74, 8);    // glass over it
         });
-        // The OJ pitcher inside the fridge (fill the glass from it).
-        this.makeTexture('juicePitcher', 96, 112, (gfx) => {
+        // The OJ pitcher inside the fridge (fill the glass from it). Handle on
+        // the LEFT, spout on the RIGHT -- they were both on the right, stacked
+        // on top of each other, which is not a shape a jug can be.
+        this.makeTexture('juicePitcher', 112, 112, (gfx) => {
+            // Handle first so the body covers its inner half and it reads as
+            // attached rather than as a ring parked beside the jug.
+            gfx.lineStyle(11, 0xffb861, 1);
+            gfx.strokeCircle(32, 66, 20);
+            gfx.lineStyle(4, ITEM_OUTLINE, 1);
+            gfx.strokeCircle(32, 66, 26);
+            gfx.strokeCircle(32, 66, 15);
+
             gfx.fillStyle(0xff9d2e, 1);
-            gfx.fillRoundedRect(14, 26, 60, 78, 12);   // body of juice
+            gfx.fillRoundedRect(34, 24, 58, 80, 13);   // body of juice
             gfx.fillStyle(0xffb861, 1);
-            gfx.fillRoundedRect(14, 26, 60, 20, 10);   // lighter top
-            gfx.fillStyle(0xff9d2e, 1);
-            gfx.fillTriangle(74, 34, 92, 40, 74, 52);  // spout
-            gfx.lineStyle(8, 0xff8a00, 1);
-            gfx.strokeCircle(78, 70, 14);              // handle
+            gfx.fillRoundedRect(34, 24, 58, 20, 11);   // lighter juice line
+            gfx.lineStyle(4, ITEM_OUTLINE, 1);
+            gfx.strokeRoundedRect(34, 24, 58, 80, 13);
+
+            // Spout last, so it sits over the body outline it grows out of.
+            gfx.fillStyle(0xffb861, 1);
+            gfx.fillTriangle(86, 34, 108, 44, 86, 58);
+            gfx.lineStyle(4, ITEM_OUTLINE, 1);
+            gfx.beginPath();
+            gfx.moveTo(86, 34);
+            gfx.lineTo(108, 44);
+            gfx.lineTo(86, 58);
+            gfx.strokePath();                          // outer edges only
         });
         // Cozy fridge decoys -- selecting any of these gives the gentle nope.
-        this.makeTexture('itemMilk', 72, 96, (gfx) => {
-            gfx.fillStyle(0xffffff, 1);
-            gfx.fillRoundedRect(10, 22, 52, 68, 6);
-            gfx.fillTriangle(10, 22, 62, 22, 36, 2);   // carton peak
+        // Warm off-white, NOT #ffffff: the fridge interior behind it is pure
+        // white, so the old carton was invisible apart from its label band.
+        this.makeTexture('itemMilk', 72, 100, (gfx) => {
+            gfx.fillStyle(0xf6efe2, 1);
+            gfx.fillRoundedRect(10, 32, 52, 60, 7);
             gfx.fillStyle(0x7db7e8, 1);
-            gfx.fillRect(10, 62, 52, 16);              // label
+            gfx.fillTriangle(10, 34, 62, 34, 36, 8);   // gable roof
+            gfx.fillRoundedRect(16, 58, 40, 18, 4);    // label band
+            gfx.lineStyle(4, ITEM_OUTLINE, 1);
+            gfx.strokeRoundedRect(10, 32, 52, 60, 7);
+            gfx.strokeTriangle(10, 34, 62, 34, 36, 8);
         });
-        this.makeTexture('itemCheese', 88, 66, (gfx) => {
+        // A blunt-nosed wedge rather than a bare right triangle, with the
+        // outline and real outlined holes -- the flat sharp triangle with two
+        // darker dots read as a smudge, not as cheese.
+        this.makeTexture('itemCheese', 96, 76, (gfx) => {
+            const wedge = [
+                { x: 22, y: 60 }, { x: 68, y: 60 }, { x: 82, y: 48 },
+                { x: 82, y: 28 }, { x: 70, y: 22 }, { x: 20, y: 52 }
+            ];
             gfx.fillStyle(0xf6c945, 1);
-            gfx.fillTriangle(6, 60, 82, 60, 82, 12);   // wedge
-            gfx.fillStyle(0xe6b52f, 1);
-            gfx.fillCircle(52, 44, 6);                 // holes
-            gfx.fillCircle(68, 34, 5);
+            gfx.fillPoints(wedge, true);
+            gfx.lineStyle(4, ITEM_OUTLINE, 1);
+            gfx.strokePoints(wedge, true);
+
+            gfx.fillStyle(0xe0a91f, 1);
+            gfx.lineStyle(3, ITEM_OUTLINE, 1);
+            [[54, 44, 7], [70, 38, 5], [42, 50, 4]].forEach(([hx, hy, r]) => {
+                gfx.fillCircle(hx, hy, r);
+                gfx.strokeCircle(hx, hy, r);
+            });
         });
         this.makeTexture('itemLeftovers', 86, 68, (gfx) => {
             gfx.fillStyle(0xbcdce6, 0.85);
