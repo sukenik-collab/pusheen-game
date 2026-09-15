@@ -46,9 +46,9 @@ The game is fully playable either way.
 |---|---|---|---|
 | `glass` | 66×84 | ▫️ placeholder | Empty glass — sits on the counter (climb up to take it) + carried accessory. |
 | `orangeJuice` | 66×84 | ▫️ placeholder | Filled glass — carried accessory after filling. |
-| `juicePitcher` | 96×112 | ▫️ placeholder | The OJ pitcher inside the fridge. |
-| `itemMilk` | 72×96 | ▫️ placeholder | Fridge decoy (gentle "nope"). |
-| `itemCheese` | 88×66 | ▫️ placeholder | Fridge decoy. |
+| `juicePitcher` | 112×112 | ▫️ placeholder | The OJ pitcher inside the fridge. |
+| `itemMilk` | 72×100 | ▫️ placeholder | Fridge decoy (gentle "nope"). |
+| `itemCheese` | 96×76 | ▫️ placeholder | Fridge decoy. |
 | `itemLeftovers` | 86×68 | ▫️ placeholder | Fridge decoy. |
 
 ---
