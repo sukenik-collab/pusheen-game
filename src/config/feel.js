@@ -166,13 +166,13 @@ export const SLOTH = {
     yawnScaleX: 1.14,      // a big volume-conserving yawn/stretch
     yawnScaleY: 0.88,
     yawnMs: 420,
-    dropMs: 320,           // drop off the branch to the ground (a soft bounce)
+    dropMs: 550,           // lower himself off the branch (a soft bounce)
     amblePx: 180,          // amble clear along the ground, revealing the door
-    ambleMs: 1500,
+    ambleMs: 3000,         // 60px/s -- half Pusheen's top speed. A plod.
     // The plod: with no walk-cycle art, a slow side-to-side lean over the
     // travel carries the steps. Slow and wide reads as a sloth, not a scurry.
     waddleDeg: 5,
-    waddleMs: 280,
+    waddleMs: 550,
     // ...and the flop as he settles onto his belly at the end of it.
     sitSquashY: 0.92,
     sitSquashX: 1.06,

@@ -1,5 +1,5 @@
 import { Scene, Input } from 'phaser';
-import { SPAWN } from '../config/feel.js';
+import { SLOTH, SPAWN } from '../config/feel.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Sloth } from '../entities/Sloth.js';
 import { Door } from '../entities/Door.js';
@@ -105,8 +105,18 @@ export class Backyard extends Scene
                 return;
             }
 
+            // Fade the gate in as he actually clears it. Starting the fade now
+            // would finish it while he's still yawning on top of the thing it
+            // reveals, so hold until the amble begins and then run it over most
+            // of the plod -- the gate arrives with the move that uncovers it.
             this.doorToLivingRoom.alpha = 0;
-            this.tweens.add({ targets: this.doorToLivingRoom, alpha: 1, duration: 600, ease: 'Sine.easeOut' });
+            this.tweens.add({
+                targets: this.doorToLivingRoom,
+                alpha: 1,
+                delay: SLOTH.yawnMs * 2 + SLOTH.dropMs,     // the yawn yoyos
+                duration: SLOTH.ambleMs * 0.6,
+                ease: 'Sine.easeOut'
+            });
             // As he lets go of the branch he nudges Pusheen aside, so the gate
             // he reveals isn't right under her -- she has to walk over to it.
             this.sloth.playWakeBeat(() => this.shovePusheenAside());
