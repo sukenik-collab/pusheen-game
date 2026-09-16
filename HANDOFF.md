@@ -70,14 +70,13 @@ playtest; the art rework below is what's freshest.
   cut from art generated *with* a branch drawn through it. The branch is keyed
   back out, so the gap under his paws is a hole the tree's own branch fills.
   `SLOTH.restHeight` is derived from that registration — see the comment on it.
+  Now cut (via `tools/cut_sloth.py --simple`) from a second-pass source with the
+  branch repainted bright green and the fur re-matched to the awake poses,
+  which fixed the shade mismatch the first cut had — see `tools/README.md`.
 - `kitchen-bg.png` and the two awake poses (`sloth-awake.png` standing
   mid-stretch, `sloth-sitting.png` settled on his belly, cut from
   `docs/concept-art/sloth3.png` and `sloth1.png`) are unchanged. All three Sloth
   poses are now pre-cropped to display size and swap in at scale 1.
-- **Known mismatch:** the hanging pose's fur reads cooler than the two awake
-  ones (`#BF9E7B` vs `#D9AF87`/`#E0B179`), so he changes shade when he wakes.
-  Pre-existing — the retired `sloth-sleeping.png` was `#C8A180` — but still
-  visible. Fix by tinting one side to the other; which way is a taste call.
 
 ## TODO when you pick this up
 
