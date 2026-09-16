@@ -3,9 +3,12 @@ import { RADAR, SNIFF_CUE } from '../config/feel.js';
 
 const CUE_COLOR = '#fff6d8';
 
-// A gate is { requires: <registry key | (scene) => bool> }. Ships unused in
-// v1.5 (the cabinet is ungated); v2 gates e.g. a container on holding an item.
-function passesGate (gate, scene)
+// A gate is { requires: <registry key | (scene) => bool> }. Used two ways:
+// container-level (Container.isActionable, below -- ships unused in v1.5) and
+// content-item-level (the UI checks a selected item's own gate before applying
+// its effect -- v2's fridge OJ, gated on holding the glass). Exported so the UI
+// reads a gate the exact same way, one source of truth for the semantics.
+export function passesGate (gate, scene)
 {
     const req = gate.requires;
     return typeof req === 'function' ? req(scene) : !!scene.registry.get(req);
@@ -34,11 +37,21 @@ export class Container extends GameObjects.Container
 
         this.verb = 'peek';
         this.contents = opts.contents ?? [];
+        // Which peek-panel background to show (the UI swaps its panel art to
+        // this on open) -- e.g. the fridge shows its lit interior, the cabinet
+        // its default drawer.
+        this.panel = opts.panel ?? 'drawer';
         this._isActionable = opts.isActionable ?? null;
         this.gate = opts.gate ?? null;
         this.audio = scene.registry.get('audio');
 
+        // `hidden` = the container is drawn into the room backdrop already (the
+        // kitchen fridge); keep the sprite for zone geometry + cue height, but
+        // don't draw a second copy over the art.
         this.visual = scene.add.image(0, 0, opts.sprite);
+        if (opts.hidden) {
+            this.visual.setVisible(false);
+        }
         this.add(this.visual);
 
         // Outer must be strictly larger than inner so the cue leads the
@@ -78,8 +91,9 @@ export class Container extends GameObjects.Container
 
     interact (pusheen, scene)
     {
-        // Contents first, then open -- UI's open handler reads peek:contents.
+        // Contents + panel first, then open -- UI's open handler reads both.
         scene.registry.set('peek:contents', this.contents);
+        scene.registry.set('peek:panel', this.panel);
         scene.registry.set('peek:open', true);
     }
 

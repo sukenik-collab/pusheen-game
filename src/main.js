@@ -1,5 +1,7 @@
 import { AUTO, Game, Scale } from 'phaser';
 import { Preloader } from './scenes/Preloader';
+import { Backyard } from './scenes/Backyard';
+import { Kitchen } from './scenes/Kitchen';
 import { LivingRoom } from './scenes/LivingRoom';
 import { Bedroom } from './scenes/Bedroom';
 import { UI } from './scenes/UI';
@@ -31,6 +33,8 @@ const config = {
     },
     scene: [
         Preloader,
+        Backyard,
+        Kitchen,
         LivingRoom,
         Bedroom,
         UI

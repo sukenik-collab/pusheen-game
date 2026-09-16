@@ -1,4 +1,5 @@
 import { Scene, Input } from 'phaser';
+import { passesGate } from '../entities/Container.js';
 
 const BUTTON_ALPHA = 0.35;
 const BUTTON_RADIUS = 36;
@@ -43,6 +44,18 @@ export class UI extends Scene
         this.interactButton = this.addPressButton(width / 2, buttonY, 'E', 'input:interactPressed');
         this.updateInteractButtonVisibility();
 
+        // A hold button only clears on pointerup/pointerout, so a touch that
+        // ends while the game is backgrounded (app switch, notification) never
+        // reports its release and leaves her walking with no way to stop but
+        // re-tapping. Release everything held when focus or visibility goes.
+        const releaseHeldInputs = () => {
+            this.registry.set('input:left', false);
+            this.registry.set('input:right', false);
+            this.registry.set('input:jump', false);
+        };
+        this.game.events.on('blur', releaseHeldInputs);
+        this.game.events.on('hidden', releaseHeldInputs);
+
         this.counterText = this.add.text(20, 20, 'Snack: 0/1', {
             fontSize: '22px',
             color: '#3e2c23'
@@ -56,7 +69,7 @@ export class UI extends Scene
         this.createPeekPanel();
         this.createNapCard();
         this.createAudioMenu();
-        this.numberKeys = this.input.keyboard.addKeys('ONE,TWO,THREE');
+        this.numberKeys = this.input.keyboard.addKeys('ONE,TWO,THREE,FOUR');
 
         // The E button is needed both to open the panel (in range) and to
         // close it again (cancel) -- gating visibility on interact:available
@@ -71,6 +84,7 @@ export class UI extends Scene
             this.updateInteractButtonVisibility();
 
             if (value) {
+                this.panelBg.setTexture(this.registry.get('peek:panel') ?? 'drawer');
                 this.populatePeekPanel(this.registry.get('peek:contents') ?? []);
                 this.openPeekPanel();
             } else {
@@ -112,6 +126,7 @@ export class UI extends Scene
         if (Input.Keyboard.JustDown(this.numberKeys.ONE)) this.selectItemByIndex(0);
         if (Input.Keyboard.JustDown(this.numberKeys.TWO)) this.selectItemByIndex(1);
         if (Input.Keyboard.JustDown(this.numberKeys.THREE)) this.selectItemByIndex(2);
+        if (Input.Keyboard.JustDown(this.numberKeys.FOUR)) this.selectItemByIndex(3);
     }
 
     createButtonVisual (x, y, label)
@@ -165,7 +180,10 @@ export class UI extends Scene
             .setScale(0.8)
             .setAlpha(0);
 
-        this.peekPanel.add(this.add.image(0, 0, 'drawer'));
+        // The panel backdrop -- swapped per container on open (drawer for the
+        // cabinet, the lit fridge interior for the fridge, etc.).
+        this.panelBg = this.add.image(0, 0, 'drawer');
+        this.peekPanel.add(this.panelBg);
 
         // Item boxes are (re)built from peek:contents each time the panel
         // opens, so the same panel can show any container's contents.
@@ -181,7 +199,10 @@ export class UI extends Scene
         this.itemObjects = [];
         this.itemBoxes = [];
 
-        const startX = -ITEM_SPACING;
+        // Center any item count, not just 3: the middle item (or gap) lands on
+        // the panel's x=0. (Was hardcoded to -ITEM_SPACING, dead-center for 3
+        // only -- the cupboard/fridge carry a different count.)
+        const startX = -((contents.length - 1) / 2) * ITEM_SPACING;
 
         contents.forEach((item, i) => {
             const itemX = startX + i * ITEM_SPACING;
@@ -216,7 +237,17 @@ export class UI extends Scene
 
     selectItem (item, box)
     {
-        if (item.effect === 'takeSnack') {
+        // Content-item gate (v2): a gated item that fails its gate gives the
+        // gentle nope and the panel stays open -- the fridge OJ without the
+        // glass, or the glass while her hands are full. No stress, just a lead.
+        if (item.gate && !passesGate(item.gate, this)) {
+            this.audio?.play('nope');
+            this.playNopeShake(box);
+            return;
+        }
+
+        switch (item.effect) {
+        case 'takeSnack':
             this.audio?.play('collect');
             // Order matters: snack:collected must already be true before
             // peek:open flips false, since that triggers
@@ -225,7 +256,21 @@ export class UI extends Scene
             this.registry.set('snack:collected', true);
             this.registry.set('snack:count', 1);
             this.registry.set('peek:open', false);
-        } else {
+            break;
+        case 'takeHeld':
+            // Pick the item up into her hands (Pusheen re-derives the carry
+            // accessory + jump multiplier off held:item).
+            this.audio?.play('collect');
+            this.registry.set('held:item', item.give);
+            this.registry.set('peek:open', false);
+            break;
+        case 'fillHeld':
+            // Fill the carried glass -- gate above already confirmed she holds it.
+            this.audio?.play('collect');
+            this.registry.set('held:item', item.fill);
+            this.registry.set('peek:open', false);
+            break;
+        default:
             this.audio?.play('nope');
             this.playNopeShake(box);
         }

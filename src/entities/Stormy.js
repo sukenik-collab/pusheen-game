@@ -81,15 +81,20 @@ export class Stormy extends GameObjects.Container
         this.inInnerZone = Geom.Circle.Contains(this.innerZone, pusheen.x, pusheen.y);
 
         if (nowOuter && !this.inOuterZone) {
-            this.playHeartCue();
+            this.playHeartCue(pusheen);
         }
 
         this.inOuterZone = nowOuter;
     }
 
-    // She notices you: a little flutter of hearts, once per approach.
-    playHeartCue ()
+    // She notices you: a little flutter of hearts, once per approach. Sounds
+    // and reads like every other approach cue -- a friend shouldn't be the one
+    // thing in the room Pusheen walks up to in silence.
+    playHeartCue (pusheen)
     {
+        this.audio?.play('sniff');
+        pusheen.playSniffReact();
+
         for (let i = 0; i < 3; i++) {
             this.scene.time.delayedCall(i * STORMY.heartStaggerMs, () => this.spawnHeart(0));
         }

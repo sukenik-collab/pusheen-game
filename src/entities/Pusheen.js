@@ -1,5 +1,9 @@
 import { GameObjects } from 'phaser';
-import { MOVE, JUMP, LAND_SQUASH, IDLE, SNIFF_REACT, NAP, COSTUME } from '../config/feel.js';
+import { MOVE, JUMP, LAND_SQUASH, IDLE, SNIFF_REACT, NAP, COSTUME, CARRY } from '../config/feel.js';
+import { subscribeRegistry } from '../systems/registryHelpers.js';
+
+// The held-item accessory texture per held:item value. 'none' -> no accessory.
+const HELD_SPRITE = { glass: 'glass', juice: 'orangeJuice' };
 
 // The physics footprint. The sprite itself is pre-cropped and pre-scaled
 // (see the asset-prep step) to already match this at its native pixel size,
@@ -31,6 +35,7 @@ export class Pusheen extends GameObjects.Container
         this.body.setCollideWorldBounds(true);
 
         this.wasGrounded = false;
+        this.peakFallSpeed = 0;
 
         // A composable multiplier on whatever the current jump is -- the seam
         // for v2's held item, which scales jump height while carrying. Stays 1
@@ -45,6 +50,18 @@ export class Pusheen extends GameObjects.Container
             this.setCostume(true);
         }
 
+        // Held item persists across rooms the same way -- and because Pusheen
+        // is reconstructed every room (which resets jumpVelocityMultiplier to
+        // 1), the constructor must re-derive BOTH the accessory sprite AND the
+        // carry multiplier from held:item, or the heavier carry-jump silently
+        // reverts on every door. A live subscription keeps it in sync when the
+        // item changes mid-room (pick up glass, fill juice, give to Sloth).
+        this.facing = 'left';           // matches the un-flipped visual
+        this.heldVisual = null;
+
+        // Built before the held-item wiring below, which eases this tween off
+        // while she's carrying -- so arriving in a room already holding the
+        // glass gets the careful bob too, not just picking one up mid-room.
         this.breatheTween = scene.tweens.add({
             targets: this.visual,
             scaleX: 1 + IDLE.breatheScale,
@@ -55,23 +72,68 @@ export class Pusheen extends GameObjects.Container
             repeat: -1,
             ease: 'Sine.easeInOut'
         });
+
+        this.applyHeldItem(scene.registry.get('held:item') ?? 'none');
+        subscribeRegistry(scene, 'held:item', (parent, value) => this.applyHeldItem(value));
     }
 
     moveLeft ()
     {
         this.body.setAccelerationX(-MOVE.accel);
-        this.visual.setFlipX(false);
+        this.setFacing('left');
     }
 
     moveRight ()
     {
         this.body.setAccelerationX(MOVE.accel);
-        this.visual.setFlipX(true);
+        this.setFacing('right');
     }
 
     stopMoving ()
     {
         this.body.setAccelerationX(0);
+    }
+
+    // Facing is stored on the visual (flipX), not the container -- so a
+    // container-child accessory does NOT turn with her for free. This flips
+    // the visual AND mirrors the accessory's x-offset so a carried item stays
+    // in front of her travel direction.
+    setFacing (dir)
+    {
+        this.facing = dir;
+        this.visual.setFlipX(dir === 'right');
+        this.positionHeldVisual();
+    }
+
+    positionHeldVisual ()
+    {
+        if (this.heldVisual) {
+            this.heldVisual.x = (this.facing === 'right' ? 1 : -1) * CARRY.offset.x;
+        }
+    }
+
+    // Re-derive the carry accessory + jump multiplier from held:item. Called
+    // from the constructor (every room) and live on held:item changes.
+    applyHeldItem (item)
+    {
+        if (this.heldVisual) {
+            this.heldVisual.destroy();
+            this.heldVisual = null;
+        }
+
+        const sprite = HELD_SPRITE[item];
+        if (sprite) {
+            this.heldVisual = this.scene.add.image(0, CARRY.offset.y, sprite).setScale(0.6);
+            this.add(this.heldVisual);
+            this.positionHeldVisual();
+            this.jumpVelocityMultiplier = CARRY.jumpMultiplier;
+        } else {
+            this.jumpVelocityMultiplier = 1;
+        }
+
+        // Carrying reads as careful: the idle bob eases off while her paws are
+        // full, the visible partner to the heavier carry-jump above.
+        this.breatheTween.timeScale = sprite ? CARRY.breatheTimeScale : 1;
     }
 
     // Costume = an absolute swap of the base jump (velocity + gravity); the
@@ -115,8 +177,16 @@ export class Pusheen extends GameObjects.Container
     {
         const grounded = this.isGrounded();
 
+        // Remember the fastest she fell this airtime: by the time the landing
+        // is detected the collision has already zeroed velocity, so the squash
+        // has nothing left to size itself from.
+        if (!grounded) {
+            this.peakFallSpeed = Math.max(this.peakFallSpeed, this.body.velocity.y);
+        }
+
         if (grounded && !this.wasGrounded) {
-            this.playLandSquash();
+            this.playLandSquash(this.peakFallSpeed);
+            this.peakFallSpeed = 0;
         }
 
         this.wasGrounded = grounded;
@@ -158,17 +228,24 @@ export class Pusheen extends GameObjects.Container
         });
     }
 
-    playLandSquash ()
+    playLandSquash (fallSpeed = 0)
     {
         this.breatheTween.pause();
         this.visual.setScale(1, 1);
         this.visual.y = 0;
         this.audio?.play('land');
 
+        // Scale the squash to the impact (see LAND_SQUASH's note): one factor
+        // drives both axes, so a heavier landing squashes deeper and stretches
+        // wider together instead of just flattening.
+        const span = LAND_SQUASH.hardSpeed - LAND_SQUASH.softSpeed;
+        const t = Math.min(Math.max((fallSpeed - LAND_SQUASH.softSpeed) / span, 0), 1);
+        const depth = LAND_SQUASH.softDepth + (LAND_SQUASH.hardDepth - LAND_SQUASH.softDepth) * t;
+
         this.scene.tweens.add({
             targets: this.visual,
-            scaleY: LAND_SQUASH.scaleY,
-            scaleX: LAND_SQUASH.scaleX,
+            scaleY: 1 - (1 - LAND_SQUASH.scaleY) * depth,
+            scaleX: 1 + (LAND_SQUASH.scaleX - 1) * depth,
             duration: LAND_SQUASH.downMs,
             ease: 'Quad.easeOut',
             onComplete: () => {
