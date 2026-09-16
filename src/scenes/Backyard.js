@@ -24,8 +24,8 @@ const TREE_SCALE = 0.8;
 // The boot room. Named entry points: default = fresh boot / Play again (out in
 // the yard, to Sloth's right so approaching her fires the lead cue); fromKitchen
 // = just inside the right screen door; fromLivingRoom = just inside the hidden
-// path once it's revealed. Each spawn clears its door's trigger so it can't
-// instantly re-fire on entry.
+// path once it's revealed. Arriving inside a doorway can't re-fire it: a Door
+// arms only once she's clear of its zone.
 const SPAWN_POINTS = {
     default: { x: 980 },
     fromKitchen: { x: 1130 },

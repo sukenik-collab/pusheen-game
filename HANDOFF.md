@@ -47,6 +47,16 @@ playtest; the art rework below is what's freshest.
   revealed gate isn't under her feet — she has to walk to it. Reveal wired via
   `bindReveal('juice:delivered', …)`.
 - **Doors:** `Door` takes a `texture` option; screen doors + garden gate use it.
+  A door also **arms only once Pusheen is clear of its zone**, so it can't fire
+  on someone already standing in it. That is load-bearing, not defensive: the
+  garden gate is revealed at exactly the spot she stands to hand over the juice,
+  and without it the delivery yanked her to the LivingRoom in the same frame —
+  before the wake beat played or the gate had even faded in.
+- **Sloth's post-wake line is a costume Easter egg**, not an unreachable branch.
+  He settles past the gate, so hearing it takes the Pusheencorn high jump to
+  clear the gate (normal jump is 36px short; costumed clears by 75px). Spec §4
+  has the numbers and, importantly, the two things not to "fix" — a grounded-only
+  door trigger or a shorter `SLOTH.amblePx` would each quietly remove it.
 
 ## Real art wired
 
