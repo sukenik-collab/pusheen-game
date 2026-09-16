@@ -3,9 +3,10 @@ import { GameObjects, Geom } from 'phaser';
 const WIDTH = 76;
 const HEIGHT = 150;
 
-// A doorway against a room's edge wall. Walking into it fires the room
-// transition -- edge-triggered once per scene instance, the same fire-once
-// pattern as the sunbeam's nap trigger.
+// A doorway -- usually against a room's edge wall, though the backyard's garden
+// gate stands mid-room. Walking into it fires the room transition: edge-
+// triggered once per scene instance, the same fire-once pattern as the
+// sunbeam's nap trigger, and it must be entered from outside (see `armed`).
 //
 // opts:
 //   texture         : door art key (default 'door'); e.g. 'screenDoor',
@@ -33,6 +34,14 @@ export class Door extends GameObjects.Container
         this.zone = new Geom.Rectangle(x - WIDTH / 2, groundTop - HEIGHT, WIDTH, HEIGHT);
         this.triggered = false;
 
+        // Walking *into* a doorway is what opens it -- so it won't fire on
+        // someone already standing in it. It arms the first time Pusheen is
+        // clear of the zone, which makes a reveal-gated door safe to switch on
+        // under her feet (the garden gate is revealed exactly where she stands
+        // to hand Sloth the juice) and keeps a spawn point placed inside a
+        // doorway from bouncing her straight back out.
+        this.armed = false;
+
         // A hidden door stays inert and undrawn until revealed.
         this.enabled = opts.initiallyActive ?? true;
         this.setVisible(this.enabled);
@@ -44,7 +53,14 @@ export class Door extends GameObjects.Container
             return false;
         }
 
-        if (Geom.Rectangle.Contains(this.zone, pusheen.x, pusheen.y)) {
+        const inside = Geom.Rectangle.Contains(this.zone, pusheen.x, pusheen.y);
+
+        if (!this.armed) {
+            this.armed = !inside;
+            return false;
+        }
+
+        if (inside) {
             this.triggered = true;
             return true;
         }
