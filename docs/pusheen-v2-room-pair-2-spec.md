@@ -181,6 +181,43 @@ a little burst of sparkles. Constants in `feel.js` (`SLOTH`, `SLOTH_RADAR`).
 **Registry keys (new; add all to `resetRunState`):** `sloth:met`,
 `held:item`, `juice:delivered`.
 
+### Sloth's post-wake line is a costume Easter egg (intended, not a bug)
+
+After the beat Sloth settles at **x≈520**, which is on the far side of the
+garden gate (zone **x ∈ [662, 738]**) from every spawn point. His talk range is
+**[300, 645]**, so walking over to him means entering the gate first and leaving
+for the LivingRoom. Reaching his "so cozy now… thanks, Pusheen ♥" line therefore
+takes the **Pusheencorn costume**, whose high jump clears the gate outright:
+
+| | jump apex | gate top edge | outcome |
+|---|---|---|---|
+| Normal Pusheen | y=566 | y=530 | 36px short — always walks in |
+| Pusheencorn | y=455 | y=530 | clears by 75px, lands at x≈55 |
+
+This is the same gating principle as the Bedroom's high shelf and needs no
+constants of its own — it falls out of `COSTUME` (`gravity: 1000`,
+`jumpVelocity: -620`) against the door zone's height. The margin is forgiving:
+~0.8s above the gate's top edge against the ~0.42s needed to cross it.
+
+The ordering works out for free — the costume lives in the Bedroom, which is
+only reachable *through* the gate — so the egg can't be found early, and it
+gives the Backyard a reason to be revisited late in a lap.
+
+**Two things this rests on, so don't "fix" them:**
+
+1. **`Door.checkTrigger` tests Pusheen's centre point against the full-height
+   zone.** Making it require her to be grounded would read as tidier and would
+   quietly destroy the gate: a normal running jump covers ~123px of airtime
+   against a 76px zone, so she'd sail over it without the costume.
+2. **`SLOTH.amblePx` (180) is what puts him past the gate.** Shortening it to
+   bring him back within reach removes the egg.
+
+Known rough edge, deliberately left alone for now: there's no breadcrumb. She
+enters the gate zone at x=738 but Sloth's sniff cue doesn't fire until x=708, so
+she's pulled through 30px before the game hints he's over there. The cheap
+levers are `SLOTH.amblePx` and `SLOTH_RADAR.sniffRadius`; both were considered
+and deferred.
+
 ---
 
 ## 5. Optional cozy interactions (behind the core loop; each small)

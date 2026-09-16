@@ -17,7 +17,16 @@ export const LAND_SQUASH = {
     scaleX: 1.12,
     downMs: 90,
     upMs: 120,
-    upEase: 'Back.easeOut'
+    upEase: 'Back.easeOut',
+    // How hard she hits scales the squash: a step down off the pillow and a
+    // drop from the kitchen counter shouldn't land identically. `depth`
+    // multiplies both the scaleY and scaleX offsets above by the SAME factor,
+    // so a harder landing stays volume-conserving rather than just flatter.
+    // Speeds are px/s of fall at the moment of impact.
+    softSpeed: 300,      // a gentle step-down
+    hardSpeed: 850,      // off the counter top (~240px)
+    softDepth: 0.5,
+    hardDepth: 1.25
 };
 
 export const CUSHION_SQUASH = {
@@ -52,6 +61,14 @@ export const SNIFF_CUE = {
 
 export const DOOR = {
     fadeMs: 260
+};
+
+// Where she arrives in a room, as her centre's height above the floor. Her
+// body is 78 tall, so this is a ~20px step down: enough to settle with a soft
+// land squash (under LAND_SQUASH.softSpeed) rather than the long drop from
+// off-screen that read as falling into the room rather than walking into it.
+export const SPAWN = {
+    heightAboveGround: 60
 };
 
 // Yarn balls sit flush against furniture, so both radii are wider than the
@@ -114,4 +131,70 @@ export const NAP = {
     curlScale: 0.72,
     curlAngle: 8,
     cardHoldMs: 2000
+};
+
+// v2 -- carrying a held item (glass/juice). A gentle < 1 multiplier on the
+// jump (via Pusheen's jumpVelocityMultiplier seam) so a full glass reads a
+// touch heavier -- purely feel, no gating (the return path is always
+// reachable). `offset` positions the accessory sprite on the container, in
+// front of her travel direction (mirrored by setFacing).
+export const CARRY = {
+    jumpMultiplier: 0.82,
+    offset: { x: 34, y: 20 },
+    // The visible half of "this is a bit heavy": her idle bob slows while her
+    // paws are full, so carrying reads before she ever jumps.
+    breatheTimeScale: 0.8
+};
+
+// Sloth's sensor zones -- wide like Stormy's, and a touch wider so you can
+// talk standing on the ground beneath him while he hangs from the low branch.
+export const SLOTH_RADAR = {
+    sniffRadius: 190,
+    interactRadius: 130
+};
+
+// The sleepy friend hanging from the low tree branch + his one-time wake beat
+// (all tween-driven). restHeight = how far his center sits above the floor
+// while he hangs; tune to the branch in the final backdrop art.
+export const SLOTH = {
+    // Where he hangs, measured so the tree's branch sits in the gap his paws
+    // wrap: the branch art's underside is 237px above the trunk base and the
+    // branch is 45px thick, both at TREE_SCALE, and the grip gap is rows 11-47
+    // of the 160px-tall sprite. Re-derive this if TREE_SCALE moves.
+    restHeight: 158,
+    bubbleHoldMs: 3000,
+    yawnScaleX: 1.14,      // a big volume-conserving yawn/stretch
+    yawnScaleY: 0.88,
+    yawnMs: 420,
+    dropMs: 550,           // lower himself off the branch (a soft bounce)
+    amblePx: 180,          // amble clear along the ground, revealing the door
+    ambleMs: 3000,         // 60px/s -- half Pusheen's top speed. A plod.
+    // The plod: with no walk-cycle art, a slow side-to-side lean over the
+    // travel carries the steps. Slow and wide reads as a sloth, not a scurry.
+    waddleDeg: 5,
+    waddleMs: 550,
+    // ...and the flop as he settles onto his belly at the end of it.
+    sitSquashY: 0.92,
+    sitSquashX: 1.06,
+    sitMs: 200,
+    sparkleCount: 8,
+    sparkleStaggerMs: 90,
+    sparkleRisePx: 70,
+    sparkleMs: 900,
+    // The approach cue when she's actually carrying the juice -- bigger and
+    // quicker than the three-sparkle hello, so the payoff moment announces
+    // itself before she even presses E.
+    juiceCueCount: 7,
+    juiceCueStaggerMs: 70
+};
+
+// Room palettes -- lazy-summer-afternoon warmth.
+export const BACKYARD = {
+    sky: 0xbfe0e8,
+    grass: 0x9ac96b
+};
+
+export const KITCHEN = {
+    wall: 0xf2e4c9,
+    floor: 0xd8c39a
 };

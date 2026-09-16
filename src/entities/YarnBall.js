@@ -75,6 +75,12 @@ export class YarnBall extends GameObjects.Container
 
     spawnSparkle ()
     {
+        // Same staggered-cue race as HeldPickup: a pending sparkle can fire
+        // after she's collected this and it has destroyed itself.
+        if (this.collected) {
+            return;
+        }
+
         const sparkle = this.scene.add.text(this.x, this.y - 20, '✦', {
             fontSize: '26px',
             color: CUE_COLOR
@@ -98,6 +104,7 @@ export class YarnBall extends GameObjects.Container
 
         this.collected = true;
         this.inInnerZone = false;
+        this.scene.interactions?.unregister(this);
         this.audio?.play('collect');
 
         const registry = this.scene.registry;

@@ -1,5 +1,5 @@
 import { Scene, Input } from 'phaser';
-import { NAP, JUMP } from '../config/feel.js';
+import { NAP, JUMP, SPAWN } from '../config/feel.js';
 import { resetRunState } from '../config/gameState.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Cushion, CUSHION_HEIGHT } from '../entities/Cushion.js';
@@ -30,12 +30,14 @@ const CABINET_CONTENTS = [
     { key: 'tshirt', label: 'T-Shirt', sprite: 'itemShirt', effect: 'nope' },
     { key: 'popcorn', label: 'Popcorn', sprite: 'itemPopcorn', effect: 'takeSnack' }
 ];
-// Named entry points. default = a fresh lap / Play again, near the sunbeam;
-// fromBedroom = walking in through the left-wall door, just inside it and
-// clear of its trigger zone so it can't instantly re-fire.
+// Named entry points. default = a fresh lap near the sunbeam (now reached only
+// via a door -- a fresh boot/Play again starts in the Backyard); fromBedroom =
+// through the left-wall door; fromBackyard = through the right-wall hidden path,
+// just inside it and clear of its trigger.
 const SPAWN_POINTS = {
     default: { x: 950 },
-    fromBedroom: { x: 150 }
+    fromBedroom: { x: 150 },
+    fromBackyard: { x: 1130 }
 };
 // Derived from feel.js's own JUMP values (apex = v^2/2g) rather than a
 // hand-copied comment, so retuning JUMP can't silently strand the cushion
@@ -67,8 +69,8 @@ export class LivingRoom extends Scene
         const { width, height } = this.scale;
         const groundTop = height - GROUND_HEIGHT;
 
-        // Restart can happen mid-nap-swell (Play again) -- put the bed back to
-        // its base volume before the fresh loop begins.
+        // Re-entering through a door after a nap (the swell leaves the bed
+        // above its base volume) -- put it back before this visit begins.
         this.audio = this.registry.get('audio');
         this.audio?.resetMusicVolume();
 
@@ -88,6 +90,12 @@ export class LivingRoom extends Scene
 
         // Far left -- doorway to the bedroom
         this.doorToBedroom = new Door(this, 40, groundTop, { side: 'right', to: 'Bedroom', enterAt: 'fromLivingRoom' });
+
+        // Far right -- the revealed hidden path back to the Backyard. Always
+        // active here: the LivingRoom is only reachable at all once Sloth's been
+        // woken (the backyard side is reveal-gated), so arriving here already
+        // implies the path is open.
+        this.doorToBackyard = new Door(this, 1240, groundTop, { side: 'left', to: 'Backyard', enterAt: 'fromLivingRoom' });
 
         // Center -- couch base (built from LAYOUT below) + the one squashable
         // cushion, reachable with a hop. Quest: one yarn ball hides behind the
@@ -119,7 +127,7 @@ export class LivingRoom extends Scene
         // Start near the sunbeam (right), not the cabinet -- playtest moved
         // the spawn; see the design doc's scene-layout note for why.
         const spawn = resolveSpawn(SPAWN_POINTS, data);
-        this.pusheen = new Pusheen(this, spawn.x, height - 200);
+        this.pusheen = new Pusheen(this, spawn.x, groundTop - SPAWN.heightAboveGround);
         this.physics.add.collider(this.pusheen, this.ground);
         this.solids.forEach((solid) => this.physics.add.collider(this.pusheen, solid));
         this.physics.add.collider(this.pusheen, this.cushion, () => this.cushion.onCollide());
@@ -167,7 +175,23 @@ export class LivingRoom extends Scene
         if (this.registry.get('game:restartRequested')) {
             this.registry.set('game:restartRequested', false);
             resetRunState(this.registry);
-            this.scene.restart({ fadeIn: false });
+
+            // The nap swell leaves the music above its base volume, and a fresh
+            // lap now leaves for the Backyard instead of restarting this room
+            // -- so reset it here, on the path out, rather than relying on this
+            // room's create() (which a new lap may not reach again for a while).
+            this.audio?.resetMusicVolume();
+
+            // A fresh lap now begins in the garden, not here -- so Play again
+            // transitions to the Backyard rather than restarting in place.
+            // Clear the nap card/button first (they live on the persistent UI
+            // scene, which this transition doesn't restart) so they don't hang
+            // over the fade into the yard.
+            this.registry.set('nap:active', false);
+            this.registry.set('nap:showCard', false);
+            this.registry.set('nap:showPlayAgain', false);
+
+            fadeToRoom(this, 'Backyard', { fadeIn: true });
             return;
         }
 
@@ -228,6 +252,8 @@ export class LivingRoom extends Scene
 
             if (this.doorToBedroom.checkTrigger(this.pusheen)) {
                 fadeToRoom(this, this.doorToBedroom.to, { spawn: this.doorToBedroom.enterAt, fadeIn: true });
+            } else if (this.doorToBackyard.checkTrigger(this.pusheen)) {
+                fadeToRoom(this, this.doorToBackyard.to, { spawn: this.doorToBackyard.enterAt, fadeIn: true });
             }
         }
 
