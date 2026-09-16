@@ -34,9 +34,12 @@ flare picks up a green halo.
 **`cut_sloth.py`** — the art is generated *with* a branch drawn through it (a
 generator asked for a grip on nothing draws mush), and the scene draws its own
 branch, so the generated one has to come back out leaving the gap his paws wrap.
-In the current source that branch is tan with an outline in the same dark brown
-as the sloth's own, so no colour test separates them — hence the two outline
-passes and the sliver close described in the file.
+The shipped source paints that branch bright green, a colour the sloth's own
+palette never uses, so `--simple` (the default) takes it in one chromaticity
+key. The very first source instead painted it tan, close enough to the sloth's
+own outline colour to defeat a colour key outright — `--no-simple` keeps that
+harder path working: walk-out-then-sideways-grow outline passes and a sliver
+close, described in the file.
 
 ## The numbers they print
 
@@ -54,19 +57,10 @@ exists to avoid.
 | Source | Used by | Notes |
 |---|---|---|
 | `backyard-tree-source.png` | `cut_tree.py` | Whole scene on flat sky + grass. |
-| `hanging-sloth-source.png` | `cut_sloth.py` | Magenta background, **tan** branch. Cut the sprite in the game today. |
-| `updated_hanging_sloth_manual_edit.png` | — | Newer: fur matched to the awake poses, and the branch painted green so it keys in one pass. Not adopted yet. |
+| `updated_hanging_sloth_manual_edit.png` | `cut_sloth.py` (default) | Magenta background, **green** branch, fur re-matched to the awake poses. Cuts the sprite in the game today. |
+| `hanging-sloth-source.png` | `cut_sloth.py --no-simple` | The original source: magenta background, **tan** branch close enough to the sloth's own outline colour to defeat a plain colour key. Superseded, but its cut is still reproducible. |
 
-To cut the newer source, `--simple` swaps the outline passes for a single
-brightness-invariant key on the branch colour, which takes its fill and its
-darker outline together:
-
-```bash
-python3 tools/cut_sloth.py \
-  --src docs/concept-art/updated_hanging_sloth_manual_edit.png \
-  --branch 74,250,21 --branch-tol 70 --band 10,300 --simple
-```
-
-That produces a clean 180×159 sprite with no green left. It is **not** wired
-into the game — adopting it means re-deriving `SLOTH.restHeight` against its
-grip gap (45px, against the current sprite's 42px) and a playtest.
+`SLOTH.restHeight` in `feel.js` is derived from whichever sprite is currently
+cut in — re-derive it (the comment on that constant shows the working) after
+switching sources, even though in practice the two so far have landed within a
+pixel of each other.

@@ -7,23 +7,22 @@ is there on purpose -- an image generator asked for a grip on nothing draws mush
 generated one back out and leave the gap his paws wrap. Backyard.js then lines
 the real branch up with that gap (SLOTH.restHeight is derived from it).
 
-Keying the branch's flat fill is easy. Its *outline* is the fiddly part, because
-in the current source it is the same dark brown as the sloth's own, so no colour
-test separates them. Two passes do it:
+The shipped source paints that branch a bright green the sloth's own palette
+never uses, so a single chromaticity key (colour normalised by brightness, via
+--simple) takes its flat fill and its darker outline together in one pass.
 
-  1. Walk out from the fill and take the dark run only where background lies
-     beyond it. At a paw the walk reaches fur or claw instead, and that outline
-     belongs to the sloth, so it stays.
-  2. Grow what pass 1 found sideways along its own rows, sweeping up the stubs
-     flanking each paw that pass 1 had to refuse.
-
-Then a third pass closes the fill-to-outline anti-aliasing, which is neither
-flat enough for the colour key nor dark enough for the outline test and
-otherwise survives as a hairline stretched across the grip.
-
-If your source paints the branch a colour the sloth doesn't use -- a bright
-green, say -- all of that is unnecessary: a single --branch key takes the fill
-and the outline together, and --simple skips passes 1 and 2.
+The very first source instead painted the branch a *tan* close to the sloth's
+own outline colour, which defeated a colour key outright -- no --simple there.
+Kept working via two extra passes: walk out from the fill and take the dark run
+only where background lies beyond it (at a paw the walk reaches fur or claw
+instead, and that outline is his, so it stays), then grow what was found
+sideways along its own rows to sweep up the stubs flanking each paw that the
+walk had to refuse. A third pass then closes the fill-to-outline anti-aliasing,
+which is neither flat enough for the colour key nor dark enough for the outline
+test and otherwise survives as a hairline stretched across the grip. That
+source and method are kept working (pass --src, --branch, --branch-tol, --band
+and drop --simple) in case a future source paints the branch a sloth-adjacent
+colour again.
 
 Usage:
     python3 tools/cut_sloth.py [--width 180] [--src IN.png] [--out OUT.png]
@@ -44,23 +43,25 @@ RIM = 3              # px of anti-aliasing to un-mix around the silhouette
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--src', default='docs/concept-art/hanging-sloth-source.png')
+    ap.add_argument('--src', default='docs/concept-art/updated_hanging_sloth_manual_edit.png')
     ap.add_argument('--out', default='public/assets/sprites/sloth-hanging.png')
     ap.add_argument('--width', type=int, default=180,
                     help='display width; the sprite is baked to size and drawn at scale 1')
-    ap.add_argument('--branch', default='197,138,98',
-                    help='the branch fill colour to key out')
-    ap.add_argument('--branch-tol', type=int, default=12)
-    ap.add_argument('--band', default='215,360',
+    ap.add_argument('--branch', default='74,250,21',
+                    help='the branch colour to key out (fill only, unless --simple)')
+    ap.add_argument('--branch-tol', type=int, default=70)
+    ap.add_argument('--band', default='10,300',
                     help='rows the branch crosses, as "top,bottom"')
-    ap.add_argument('--simple', action='store_true',
-                    help='branch outline is its own colour, so skip the outline passes')
+    ap.add_argument('--simple', action=argparse.BooleanOptionalAction, default=True,
+                    help='branch is its own colour (fill+outline in one key); '
+                         '--no-simple for a source where it is closer to the sloth\'s '
+                         'own palette and needs the two outline passes')
     ap.add_argument('--preview', help='also composite the result on a mock branch')
     args = ap.parse_args()
 
     BRANCH = np.array([float(v) for v in args.branch.split(',')])
     BAND = tuple(int(v) for v in args.band.split(','))
-    K = 16               # the branch outline is ~12px thick in the current source
+    K = 16               # the tan source's branch outline is ~12px thick (--no-simple only)
 
     a = np.array(Image.open(args.src).convert('RGB')).astype(float)
     h, w, _ = a.shape
