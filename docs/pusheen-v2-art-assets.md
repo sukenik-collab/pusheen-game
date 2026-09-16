@@ -13,6 +13,10 @@ The game is fully playable either way.
   PNGs, subject centered.
 - Loaded in `Preloader.preload()` — real art via `this.load.image('<key>',
   'assets/sprites/<file>.png')`, placeholders via `this.makeTexture('<key>', …)`.
+- The two cut assets (`backyard-tree.png`, `sloth-hanging.png`) are generated
+  from `docs/concept-art/` by **`tools/`** — see `tools/README.md`. Re-run those
+  rather than hand-editing if you change the source art; they also print the
+  geometry `SLOTH.restHeight` is derived from.
 - Style: *flat cartoon Pusheen style — thick clean outlines, flat solid colors,
   no gradients/shading, soft rounded corners, chunky cute proportions.*
 
