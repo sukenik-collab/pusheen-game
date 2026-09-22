@@ -70,9 +70,21 @@ playtest; the art rework below is what's freshest.
   cut from art generated *with* a branch drawn through it. The branch is keyed
   back out, so the gap under his paws is a hole the tree's own branch fills.
   `SLOTH.restHeight` is derived from that registration — see the comment on it.
-  Now cut (via `tools/cut_sloth.py --simple`) from a second-pass source with the
-  branch repainted bright green and the fur re-matched to the awake poses,
-  which fixed the shade mismatch the first cut had — see `tools/README.md`.
+  Cut (via `tools/cut_sloth.py --simple`) from a source with the branch
+  repainted bright green and the fur re-matched to the awake poses, which
+  fixed the first cut's shade mismatch. Re-cut again to fix two follow-up
+  problems flagged against that cut: a magenta halo around the silhouette
+  (a Lanczos resize artefact, not a keying one — see `tools/README.md`), and
+  a missing ink stroke in each arm's inner crook, where the source itself
+  never inked the seam between fur and the branch it expected the game's own
+  branch to cover. `cut_sloth.py` now synthesises that stroke and resizes
+  colour-correctly; see `tools/README.md`.
+- **`backyard-tree.png`** re-cut from a second tree source, drawn alone on flat
+  magenta rather than fused into a whole-scene mockup. `cut_tree.py` keys that
+  by default now (`--no-magenta` keeps the original whole-scene source
+  working); same halo fix as the sloth's. Branch geometry moved by a couple
+  of px (`SLOTH.restHeight` 159 → 160) — re-derived, not eyeballed; see the
+  comment on it.
 - `kitchen-bg.png` and the two awake poses (`sloth-awake.png` standing
   mid-stretch, `sloth-sitting.png` settled on his belly, cut from
   `docs/concept-art/sloth3.png` and `sloth1.png`) are unchanged. All three Sloth

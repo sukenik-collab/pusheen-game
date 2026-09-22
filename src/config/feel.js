@@ -158,11 +158,12 @@ export const SLOTH_RADAR = {
 // while he hangs; tune to the branch in the final backdrop art.
 export const SLOTH = {
     // Where he hangs, measured so the tree's branch sits in the gap his paws
-    // wrap: the branch art's underside is 237px above the trunk base and the
-    // branch is 45px thick, both at TREE_SCALE, and the grip gap is rows 10-55
-    // of the 159px-tall sprite (tools/cut_sloth.py prints this on every re-cut).
-    // Re-derive this if TREE_SCALE moves or the sloth art is re-cut.
-    restHeight: 159,
+    // wrap: the branch art's underside is 241px above the trunk base and the
+    // branch is 44px thick, both at TREE_SCALE, and the grip gap is rows 10-53
+    // of the 159px-tall sprite (tools/cut_tree.py and tools/cut_sloth.py print
+    // this on every re-cut). Re-derive this if TREE_SCALE moves or either is
+    // re-cut.
+    restHeight: 160,
     bubbleHoldMs: 3000,
     yawnScaleX: 1.14,      // a big volume-conserving yawn/stretch
     yawnScaleY: 0.88,
