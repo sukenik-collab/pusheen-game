@@ -31,11 +31,11 @@ Sky (`#BACBF4`) and grass (`#80A56F`) are `add.rectangle` fills, not images.
 
 | Key | Size | Status | Notes |
 |---|---|---|---|
-| `tree` | 850×771 | ✅ `backyard-tree.png` | Trunk + canopy + the low branch, transparent. Drawn at `TREE_SCALE` with its base on `groundTop` (Backyard.js). The branch is level and 45px thick over the stretch Sloth hangs from; leaf sprigs sit past it at the tip. |
+| `tree` | 850×771 | ✅ `backyard-tree.png` | Trunk + canopy + the low branch, transparent. Drawn at `TREE_SCALE` with its base on `groundTop` (Backyard.js). The branch is level and 44px thick over the stretch Sloth hangs from; leaf sprigs sit past it at the tip. Re-cut (via `tools/cut_tree.py`) from a clean tree-alone-on-magenta source — see `tools/README.md`. |
 | `bushes` | 1280×96 | ▫️ generated | The scalloped hedge along the horizon, carrying the horizon line at `BACKYARD.bushLine`. |
 | `sun` | 190×190 | ▫️ generated | Flat disc + eight chunky rays. |
 | `cloud` | 210×116 | ▫️ generated | One lump, placed twice at different scales. |
-| `slothHanging` | 180×159 | ✅ `sloth-hanging.png` | Draped over the branch, all four limbs gripping. Cut from art generated *with* a branch through it — the branch is keyed out so the gap under his paws is the tree's branch to fill. Fur matches the awake poses' tone (a second-pass source fixed the first cut's cooler shade). |
+| `slothHanging` | 180×159 | ✅ `sloth-hanging.png` | Draped over the branch, all four limbs gripping. Cut from art generated *with* a branch through it — the branch is keyed out so the gap under his paws is the tree's branch to fill. Fur matches the awake poses' tone. Re-cut (via `tools/cut_sloth.py`) to synthesise the ink stroke missing from each arm's inner crook and to clear a soft-edged magenta halo — see `tools/README.md`. |
 | `slothAwake` | 124×170 | ✅ `sloth-awake.png` | Standing mid-stretch, arms up (from `concept-art/sloth3.png`). Swapped in as he drops off the branch, and worn for the plod. There's no walk-cycle art, so the steps are a waddle tween (`SLOTH.waddleDeg`/`waddleMs`) — real walk frames would replace that, not add to it. |
 | `slothSitting` | 190×110 | ✅ `sloth-sitting.png` | Settled on his belly, eyes open (from `concept-art/sloth1.png`). Where the plod ends, and how he's found on re-entry. |
 | `gardenGate` | 76×150 | ▫️ placeholder | The revealed hidden path, behind where Sloth hangs. |
