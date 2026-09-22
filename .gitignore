@@ -25,3 +25,4 @@ dist-ssr
 # Claude Code session-local files (not project content)
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
+scratchpad/

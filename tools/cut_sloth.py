@@ -40,6 +40,30 @@ MIN_PIECE = 500      # px; below this a leftover component is a speck, not a lim
 RIM = 3              # px of anti-aliasing to un-mix around the silhouette
 
 
+def resize_rgba(arr, size):
+    """Resize an RGBA array the colour-correct way: premultiplied, so a fully
+    transparent neighbour's colour (arbitrary -- ours is background bleed, but
+    it doesn't have to be) never leaks into a partly-opaque output pixel.
+    PIL's own Image.resize on RGBA resizes colour and alpha independently,
+    which is exactly that leak.
+
+    Box, not Lanczos: this is a big downsample (about 7x, source to sprite),
+    and Lanczos's negative lobes ring on a sharp edge at that ratio -- even
+    premultiplied, un-dividing by a resized alpha that itself rang low
+    amplifies the ring into a faint colour fringe along every edge. Box
+    averaging has no negative lobes, so nothing to amplify, and it's the
+    textbook-correct filter for a downsample this size anyway.
+    """
+    a = arr[..., 3].astype(np.float32) / 255
+    premult = arr[..., :3].astype(np.float32) * a[..., None]
+    chans = [np.array(Image.fromarray(premult[..., i], mode='F').resize(size, Image.BOX))
+             for i in range(3)]
+    a_r = np.clip(np.array(Image.fromarray(a, mode='F').resize(size, Image.BOX)), 0, 1)
+    with np.errstate(divide='ignore', invalid='ignore'):
+        rgb_r = np.clip(np.stack(chans, axis=-1) / np.clip(a_r[..., None], 1e-6, None), 0, 255)
+    return np.dstack([rgb_r, a_r * 255]).astype(np.uint8)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -62,12 +86,20 @@ def main():
     BRANCH = np.array([float(v) for v in args.branch.split(',')])
     BAND = tuple(int(v) for v in args.band.split(','))
     K = 16               # the tan source's branch outline is ~12px thick (--no-simple only)
+    SEAM = 16            # measured against this source's own ink weight elsewhere
 
     a = np.array(Image.open(args.src).convert('RGB')).astype(float)
     h, w, _ = a.shape
     rows = np.arange(h)[:, None]
 
-    magenta = (a[..., 0] > 190) & (a[..., 2] > 190) & (a[..., 1] < 90)
+    # Most of the magenta edge is a crisp ~3px anti-alias, but the manual edit
+    # (this source's own retouch of the left rear foot) left at least one spot
+    # with a soft, decades-of-px fade toward magenta instead -- a flat R>190/
+    # B>190/G<90 box only catches the last few px of that and keeps the rest
+    # as fully opaque fur in the wrong colour. What actually marks a magenta
+    # blend, at any strength, is green suppressed relative to red and blue --
+    # real fur never has that -- so key on that instead.
+    magenta = np.minimum(a[..., 0], a[..., 2]) - a[..., 1] > 40
     if args.simple:
         # A branch painted in its own colour is shaded: the fill is bright and
         # its outline is a darker version of the same hue. Compare chromaticity
@@ -146,12 +178,35 @@ def main():
     keep &= ~stray
     drop |= stray
 
+    # The source only inked the part of the branch-fur seam meant to stay
+    # visible (the grip over the top) -- everywhere else fur sits flush
+    # against branch fill with nothing drawn between them, since the game's
+    # own branch was always going to cover it. Once the branch is keyed out
+    # that leaves a bare, un-outlined edge (worst at each forearm's inner
+    # crook). Detect fur touching fill with no ink between -- a real seam
+    # always has ink there already, so this only fires on the bare ones --
+    # and stroke one in, matching the sprite's own line weight and colour.
+    bare = ndimage.binary_dilation(fill, iterations=2) & keep & ~dark
+    if bare.any():
+        outline_color = np.median(a[dark & keep], axis=0)
+        seam = ndimage.binary_dilation(bare, iterations=SEAM) & fill
+        keep |= seam
+        drop &= ~seam
+        a[seam] = outline_color
+        print(f'synthesised {int(seam.sum())}px of outline along the bare branch seam')
+
     # Un-mix the rim against whichever background it fades into: magenta on the
-    # outside, the branch's own colour inside the grip.
+    # outside, the branch's own colour inside the grip. The reference colour is
+    # sourced a few px inside `keep` rather than right at its boundary, since a
+    # boundary pixel can itself still be a half-magenta anti-aliased blend --
+    # un-mixing against a contaminated reference just relocates the halo.
     alpha = keep.astype(float)
     rgb = a.copy()
     rim = (ndimage.distance_transform_edt(~keep) <= RIM) & ~keep
-    idx_f = ndimage.distance_transform_edt(~keep, return_distances=False, return_indices=True)
+    core = ndimage.binary_erosion(keep, iterations=2, border_value=1)
+    if not core.any():
+        core = keep
+    idx_f = ndimage.distance_transform_edt(~core, return_distances=False, return_indices=True)
     idx_b = ndimage.distance_transform_edt(~drop, return_distances=False, return_indices=True)
     fg, bg = a[idx_f[0], idx_f[1]], a[idx_b[0], idx_b[1]]
 
@@ -164,8 +219,14 @@ def main():
     t = np.clip(t, 0.0, 1.0)
     t[resid > 40] = 1.0
     alpha[rim] = t[rim]
+    # At low alpha the un-mix divides by a near-zero fraction, amplifying any
+    # noise in the observed pixel into a wrong colour -- a halo of the
+    # background tint. Below that the rim is thin enough that the nearest
+    # solid colour reads the same and carries none of that noise.
     with np.errstate(divide='ignore', invalid='ignore'):
         un = bg + (a - bg) / np.clip(alpha, 1e-3, 1)[..., None]
+    low = alpha < 0.25
+    un = np.where(low[..., None], fg, un)
     rgb[rim] = np.clip(un[rim], 0, 255)
 
     solid = alpha > 0.01
@@ -177,7 +238,7 @@ def main():
     crop = out[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
     ch, cw = crop.shape[:2]
     th = round(ch * args.width / cw)
-    Image.fromarray(crop).resize((args.width, th), Image.LANCZOS).save(args.out)
+    Image.fromarray(resize_rgba(crop, (args.width, th))).save(args.out)
     print(f'wrote {args.out}  {args.width}x{th}  (from {cw}x{ch})')
 
     # The grip gap, measured on the finished sprite. The scene's branch must be
