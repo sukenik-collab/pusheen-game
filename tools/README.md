@@ -1,15 +1,15 @@
 # tools — art cutting
 
 Two scripts that turn the concept art in `docs/concept-art/` into the
-transparent PNGs the game loads. They are how `backyard-tree.png` and
-`sloth-hanging.png` were made; re-running either with no arguments reproduces
-the shipped file byte for byte.
+transparent PNGs the game loads. They are how `backyard-tree.png` and the two
+hanging-sloth layers were made; re-running either with no arguments
+reproduces the shipped files byte for byte.
 
 ```bash
 pip install pillow scipy          # not part of the npm toolchain
 
 python3 tools/cut_tree.py         # -> public/assets/sprites/backyard-tree.png
-python3 tools/cut_sloth.py        # -> public/assets/sprites/sloth-hanging.png
+python3 tools/cut_sloth.py        # -> public/assets/sprites/sloth-hanging-{front,back}.png
 ```
 
 Add `--preview out.png` to either to composite the result on the scene's
@@ -42,18 +42,25 @@ grass below so the root flare doesn't pick up a green halo.
 
 **`cut_sloth.py`** — the art is generated *with* a branch drawn through it (a
 generator asked for a grip on nothing draws mush), and the scene draws its own
-branch, so the generated one has to come back out leaving the gap his paws wrap.
-The shipped source paints that branch bright green, a colour the sloth's own
-palette never uses, so `--simple` (the default) takes it in one chromaticity
-key. The very first source instead painted it tan, close enough to the sloth's
-own outline colour to defeat a colour key outright — `--no-simple` keeps that
-harder path working: walk-out-then-sideways-grow outline passes and a sliver
-close, described in the file. The green branch also isn't drawn all the way
-into the crook of each bent arm -- that part was always meant to sit under the
-game's own branch and so was never inked -- so once it's keyed out the fur
-there is left with a bare, un-outlined edge. `--simple` detects that (fur
-touching keyed branch with no ink between; a real seam always has ink there
-already) and strokes one in, matching the sprite's own line weight and colour.
+branch, so the generated one has to come back out. The shipped source paints
+that branch bright green, a colour the sloth's own palette never uses, so
+`--simple` (the default) takes it in one chromaticity key. The very first
+source instead painted it tan, close enough to the sloth's own outline colour
+to defeat a colour key outright — `--no-simple` keeps that harder path
+working: walk-out-then-sideways-grow outline passes and a sliver close,
+described in the file.
+
+He *wraps* the branch, so the cut is two same-size layers the scene draws
+either side of the tree: a **back** layer holding just his far arms, and a
+**front** layer with everything else (head, body, near arms, and all four paws
+where they hook over the top). The far arms are the only regions of their
+darker shade that touch the branch -- the same shade also shades his head and
+belly, but never there -- plus the ink along their open sides; ink an arm
+shares with his near arm or head stays with that near shape, in front. Each
+far arm's top was cut flat by the generated branch, so it's extended a few px
+up behind where that branch ran, to tuck under the scene's branch rather than
+stop on its lower edge. The legacy tan source paints its far arms a different
+shade -- pass `--far` to split them.
 
 **Both scripts**, and this is what a hand-authored vector source never
 exposed: (1) a background pixel can still read as fully opaque with the
@@ -74,13 +81,14 @@ big downsample either way and box has no lobes to ring.
 ## The numbers they print
 
 `cut_tree.py` reports the trunk base row and the branch's thickness and height
-above it. `cut_sloth.py` reports the grip gap. **`SLOTH.restHeight` in
-`feel.js` is derived from exactly these**, so if you re-cut either asset with
-different geometry, re-derive it — the comment on that constant shows the
-working. The rule: the scene's branch must be at least as thick as the grip gap.
-Thicker is fine and reads naturally, since the surplus shows between his arms.
-Thinner shows sky through the grip, which is the failure this whole arrangement
-exists to avoid.
+above it. `cut_sloth.py` reports the band his art's own branch ran through
+(rows, measured under the paws) and how high the far arms reach. **`SLOTH.
+restHeight` and `SLOTH.gripRow` in `feel.js` are derived from exactly these**,
+so if you re-cut either asset with different geometry, re-derive them — the
+comments on those constants show the working. The rules: the scene's branch
+must cover the far arms' cut tops and their extension (or they show), and its
+top edge sits a few px above his art's branch so his paws hook over it rather
+than rest on it.
 
 ## Sources
 
@@ -88,10 +96,9 @@ exists to avoid.
 |---|---|---|
 | `new_tree.jpeg` | `cut_tree.py` (default) | Tree alone on flat magenta, JPEG. Cuts the tree in the game today. |
 | `backyard-tree-source.png` | `cut_tree.py --no-magenta` | The original source: a whole scene on flat sky + grass, tree fused to the hedge. Superseded, but its cut is still reproducible. |
-| `updated_hanging_sloth_manual_edit.png` | `cut_sloth.py` (default) | Magenta background, **green** branch, fur re-matched to the awake poses. Cuts the sprite in the game today. |
-| `hanging-sloth-source.png` | `cut_sloth.py --no-simple` | The original source: magenta background, **tan** branch close enough to the sloth's own outline colour to defeat a plain colour key. Superseded, but its cut is still reproducible. |
+| `updated_hanging_sloth_manual_edit.png` | `cut_sloth.py` (default) | Magenta background, **green** branch, fur re-matched to the awake poses. Cuts both layers in the game today. |
+| `hanging-sloth-source.png` | `cut_sloth.py --no-simple` | The original source: magenta background, **tan** branch close enough to the sloth's own outline colour to defeat a plain colour key. Superseded, but it still cuts (its far arms need `--far`). |
 
-`SLOTH.restHeight` in `feel.js` is derived from whichever sprites are
-currently cut in — re-derive it (the comment on that constant shows the
-working) after switching sources, even though in practice they've all landed
-within a couple of px of each other.
+`SLOTH.restHeight` and `SLOTH.gripRow` in `feel.js` are derived from whichever
+sprites are currently cut in — re-derive them (the comments on those
+constants show the working) after switching sources.

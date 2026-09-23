@@ -68,7 +68,9 @@ export class Preloader extends Scene
         // That is what lets the branch be scaled and placed to the pixel where
         // Sloth grips it, instead of the sloth being posed to fit a painting.
         this.load.image('tree', 'assets/sprites/backyard-tree.png');
-        this.load.image('slothHanging', 'assets/sprites/sloth-hanging.png');
+        // Hanging, he's two layers the tree draws between (see Sloth.js).
+        this.load.image('slothHangingFront', 'assets/sprites/sloth-hanging-front.png');
+        this.load.image('slothHangingBack', 'assets/sprites/sloth-hanging-back.png');
         // His awake poses, cut from the same concept set: standing mid-stretch,
         // then settled on his belly.
         this.load.image('slothAwake', 'assets/sprites/sloth-awake.png');
