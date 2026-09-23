@@ -1,4 +1,4 @@
-import { GameObjects, Geom } from 'phaser';
+import { GameObjects, Geom, Scenes } from 'phaser';
 import { SLOTH, SLOTH_RADAR } from '../config/feel.js';
 
 const SPARKLE_COLOR = '#fff3b0';
@@ -16,9 +16,19 @@ const HANG_ZONE_DY = 58;
 // Pusheen's sprite), so they swap in at scale 1. The art still lives in a
 // wrapper container so the squash/yawn tweens stay 1.0-based on the wrapper and
 // are unaffected by a pose swap underneath them.
-const POSE_HANGING = { texture: 'slothHanging', scale: 1 };
+//
+// Hanging, he wraps the branch: his far arms pass behind it, everything else
+// is in front. So that pose is two same-size layers with the tree drawn
+// between them, and it pivots on the line where his claws hook over the branch
+// -- breathing and yawning there keeps his paws put instead of lifting them off.
+const POSE_HANGING = { texture: 'slothHangingFront', back: 'slothHangingBack', scale: 1, pivotRow: SLOTH.gripRow };
 const POSE_STANDING = { texture: 'slothAwake', scale: 1 };
 const POSE_SITTING = { texture: 'slothSitting', scale: 1 };
+
+function copyTransform (from, to)
+{
+    to.setPosition(from.x, from.y).setScale(from.scaleX, from.scaleY).setRotation(from.rotation).setAlpha(from.alpha);
+}
 
 // Flag-branched dialogue (mirrors Stormy's quest:complete pattern -- not a
 // named-dialogue-state engine, which is deferred).
@@ -35,7 +45,9 @@ const THANKS = 'so cozy now...\nthanks, Pusheen ♥';
 // mirroring CostumeBox).
 export class Sloth extends GameObjects.Container
 {
-    constructor (scene, x, groundTop)
+    // `behind` is what his back layer draws under -- the tree, so the branch
+    // lands between his far arms and the rest of him.
+    constructor (scene, x, groundTop, { behind } = {})
     {
         super(scene, x, groundTop - SLOTH.restHeight);
         scene.add.existing(this);
@@ -47,25 +59,41 @@ export class Sloth extends GameObjects.Container
 
         // Real sloth art, in a wrapper so the squash/yawn tweens stay 1.0-based
         // on the wrapper while the pose underneath swaps.
-        this.art = scene.add.image(0, 0, POSE_HANGING.texture).setScale(POSE_HANGING.scale);
+        this.art = scene.add.image(0, 0, POSE_HANGING.texture);
         this.visual = scene.add.container(0, 0);
         this.visual.add(this.art);
         this.add(this.visual);
+
+        // The back layer can't be a child of this container -- a container
+        // draws all its children at its own depth -- so it's a mirror of the
+        // same wrapper/art nesting, slotted in under `behind` and handed this
+        // container's transforms every frame (syncBackLayer). Whatever moves,
+        // scales or turns him, now or later, moves both layers as one.
+        this.backArt = scene.add.image(0, 0, POSE_HANGING.back);
+        this.backVisual = scene.add.container(0, 0, [this.backArt]);
+        this.back = scene.add.container(0, 0, [this.backVisual]);
+        scene.children.moveBelow(this.back, behind ?? this);
+        scene.events.on(Scenes.Events.POST_UPDATE, this.syncBackLayer, this);
+        this.once(GameObjects.Events.DESTROY, () => {
+            scene.events.off(Scenes.Events.POST_UPDATE, this.syncBackLayer, this);
+            this.back.destroy();
+        });
 
         // Already awake if the juice was delivered earlier this run (revisit):
         // he dropped off the branch, plodded clear and sat down -- so he's
         // found sitting where he settled, with no bob and no wake-beat replay.
         this.awake = !!scene.registry.get('juice:delivered');
+        this.usePose(this.awake ? POSE_SITTING : POSE_HANGING);
         if (this.awake) {
-            this.usePose(POSE_SITTING);
             this.setPosition(x - SLOTH.amblePx, this.restingY());
         }
+        this.syncBackLayer();
 
-        // A slow sleeping bob while she dozes -- paused for good once she wakes.
+        // A slow sleeping breath while he dozes, from his grip down (see
+        // POSE_HANGING) -- paused for good once he wakes.
         if (!this.awake) {
             this.breatheTween = scene.tweens.add({
                 targets: this.visual,
-                y: -3,
                 scaleY: 0.98,
                 duration: 1800,
                 yoyo: true,
@@ -111,7 +139,32 @@ export class Sloth extends GameObjects.Container
 
     usePose (pose)
     {
+        this.pose = pose;
         this.art.setTexture(pose.texture).setScale(pose.scale);
+        if (pose.back) {
+            this.backArt.setTexture(pose.back).setScale(pose.scale);
+        }
+        // Tweens scale and turn the wrapper about its own origin, so put that
+        // origin where this pose should pivot -- its pivotRow, counted down from
+        // the art's top edge, or its middle -- and shift the art the other way
+        // so where it's drawn doesn't move.
+        const pivotY = pose.pivotRow === undefined ? 0 : pose.pivotRow * pose.scale - this.art.displayHeight / 2;
+        this.visual.y = pivotY;
+        this.art.y = -pivotY;
+    }
+
+    // Mirror this container, the pose wrapper and the art onto the back layer.
+    // Runs after the frame's tweens (POST_UPDATE), so the layers never drift.
+    syncBackLayer ()
+    {
+        const shown = !!this.pose.back && this.visible;
+        this.back.setVisible(shown);
+        if (!shown) {
+            return;
+        }
+        copyTransform(this, this.back);
+        copyTransform(this.visual, this.backVisual);
+        copyTransform(this.art, this.backArt);
     }
 
     // Where his centre sits so the current pose's feet meet the floor. The
@@ -188,7 +241,6 @@ export class Sloth extends GameObjects.Container
 
         this.breatheTween?.stop();
         this.visual.setScale(1, 1);
-        this.visual.y = 0;
         this.showBubble(ACCEPT);
         this.audio?.play('collect');
 
