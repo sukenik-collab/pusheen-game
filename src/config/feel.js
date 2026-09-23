@@ -157,13 +157,20 @@ export const SLOTH_RADAR = {
 // (all tween-driven). restHeight = how far his center sits above the floor
 // while he hangs; tune to the branch in the final backdrop art.
 export const SLOTH = {
-    // Where he hangs, measured so the tree's branch sits in the gap his paws
-    // wrap: the branch art's underside is 241px above the trunk base and the
-    // branch is 44px thick, both at TREE_SCALE, and the grip gap is rows 10-53
-    // of the 159px-tall sprite (tools/cut_tree.py and tools/cut_sloth.py print
-    // this on every re-cut). Re-derive this if TREE_SCALE moves or either is
-    // re-cut.
+    // Where he hangs, measured so the tree's branch sits where his art's own
+    // branch was: the branch art's underside is 241px above the trunk base and
+    // it's 44px thick, both at TREE_SCALE, and his art's branch ran rows 18-33
+    // of the 159px-tall sprites (tools/cut_tree.py and tools/cut_sloth.py print
+    // these on every re-cut). The scene's branch is thicker, so rather than
+    // centring it on that band its top edge sits ~4px above the band's (row
+    // 13.5 at 160): his paw domes clear it and his claws land on its face.
+    // 156 slumps the paws onto the face, 164 lifts one clear of it. Re-derive
+    // this if TREE_SCALE moves or either is re-cut.
     restHeight: 160,
+    // The row, down from the hanging sprites' top edge, where his claws curl
+    // over the branch -- the top of that band. He breathes and yawns about
+    // this line, so his paws stay hooked while his body moves below them.
+    gripRow: 18,
     bubbleHoldMs: 3000,
     yawnScaleX: 1.14,      // a big volume-conserving yawn/stretch
     yawnScaleY: 0.88,

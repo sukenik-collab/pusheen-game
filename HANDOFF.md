@@ -66,19 +66,20 @@ playtest; the art rework below is what's freshest.
   are generated in `Preloader`; only `backyard-tree.png` is art. That split is
   what lets the branch be scaled and placed to the pixel, which is how Sloth
   came to actually grip it instead of hanging near it.
-- **`sloth-hanging.png`** replaces `sloth-sleeping.png`: a draped four-limb grip,
-  cut from art generated *with* a branch drawn through it. The branch is keyed
-  back out, so the gap under his paws is a hole the tree's own branch fills.
-  `SLOTH.restHeight` is derived from that registration — see the comment on it.
-  Cut (via `tools/cut_sloth.py --simple`) from a source with the branch
-  repainted bright green and the fur re-matched to the awake poses, which
-  fixed the first cut's shade mismatch. Re-cut again to fix two follow-up
-  problems flagged against that cut: a magenta halo around the silhouette
-  (a Lanczos resize artefact, not a keying one — see `tools/README.md`), and
-  a missing ink stroke in each arm's inner crook, where the source itself
-  never inked the seam between fur and the branch it expected the game's own
-  branch to cover. `cut_sloth.py` now synthesises that stroke and resizes
-  colour-correctly; see `tools/README.md`.
+- **The hanging Sloth wraps the branch** as two layers the tree draws
+  between: `sloth-hanging-back.png` (just his far arms, under the tree) and
+  `sloth-hanging-front.png` (head, body, near arms and all four paws hooked
+  over the top, over it). Both are cut together by `tools/cut_sloth.py` from
+  art generated *with* a branch through it, which is keyed out. The back
+  layer lives outside Sloth's container (a container draws all its children
+  at one depth), so `Sloth.syncBackLayer` copies the front's transforms onto
+  it every frame — any tween moves both. The hanging pose also pivots on
+  `SLOTH.gripRow`, where his claws hook over, so breathing and the yawn keep
+  his paws on the branch instead of lifting them. This replaced a single
+  sprite with a hole the branch had to fill to the pixel, whose far arms ended
+  in flat tops that read as cut off in front of the branch.
+  `SLOTH.restHeight` is derived from the same registration — see the comment
+  on it.
 - **`backyard-tree.png`** re-cut from a second tree source, drawn alone on flat
   magenta rather than fused into a whole-scene mockup. `cut_tree.py` keys that
   by default now (`--no-magenta` keeps the original whole-scene source

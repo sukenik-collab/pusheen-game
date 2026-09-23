@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
-"""Key the hanging sloth out of its concept image, branch and all.
+"""Key the hanging sloth out of its concept image, branch and all, as two layers.
 
 The art is generated on flat magenta WITH a branch drawn through it. The branch
 is there on purpose -- an image generator asked for a grip on nothing draws mush
 -- but the scene draws its own branch from the tree art, so this has to take the
-generated one back out and leave the gap his paws wrap. Backyard.js then lines
-the real branch up with that gap (SLOTH.restHeight is derived from it).
+generated one back out. Backyard.js then puts the real branch where the
+generated one was (SLOTH.restHeight is derived from it).
+
+He wraps that branch, so he can't be one sprite in front of it: his far arms go
+behind it and everything else -- head, body, near arms, and all four paws where
+they hook over the top -- in front. So the cut writes two same-size sprites, a
+back layer holding just the far arms and a front layer holding the rest, which
+the scene draws either side of the tree (see Sloth.js). The far arms' tops were
+cut flat by the generated branch, so they're extended up through the band it
+covered, to tuck behind the scene's branch instead of stopping on its edge.
 
 The shipped source paints that branch a bright green the sloth's own palette
 never uses, so a single chromaticity key (colour normalised by brightness, via
@@ -38,6 +46,12 @@ from scipy import ndimage
 
 MIN_PIECE = 500      # px; below this a leftover component is a speck, not a limb
 RIM = 3              # px of anti-aliasing to un-mix around the silhouette
+INK = 22             # px; reach from a far arm's fill across its outline (~16px thick)
+# How far a far arm's cut top is extended up behind the branch: ~8px on the
+# sprite. Enough to stay tucked under the branch's lower edge through the
+# breathe and yawn, never enough to reach its top edge and peek out between
+# the claws -- the generated branch rises in places, so walking all of it can.
+EXTEND = 60
 
 
 def resize_rgba(arr, size):
@@ -68,9 +82,15 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--src', default='docs/concept-art/updated_hanging_sloth_manual_edit.png')
-    ap.add_argument('--out', default='public/assets/sprites/sloth-hanging.png')
+    ap.add_argument('--out', default='public/assets/sprites/sloth-hanging-front.png',
+                    help='the front layer: everything but the far arms')
+    ap.add_argument('--back-out', default='public/assets/sprites/sloth-hanging-back.png',
+                    help='the back layer: the far arms, drawn behind the tree')
     ap.add_argument('--width', type=int, default=180,
                     help='display width; the sprite is baked to size and drawn at scale 1')
+    ap.add_argument('--far', default='169,122,81',
+                    help='the shade his far arms are painted in')
+    ap.add_argument('--far-tol', type=int, default=14)
     ap.add_argument('--branch', default='74,250,21',
                     help='the branch colour to key out (fill only, unless --simple)')
     ap.add_argument('--branch-tol', type=int, default=70)
@@ -84,9 +104,9 @@ def main():
     args = ap.parse_args()
 
     BRANCH = np.array([float(v) for v in args.branch.split(',')])
+    FAR = np.array([float(v) for v in args.far.split(',')])
     BAND = tuple(int(v) for v in args.band.split(','))
     K = 16               # the tan source's branch outline is ~12px thick (--no-simple only)
-    SEAM = 16            # measured against this source's own ink weight elsewhere
 
     a = np.array(Image.open(args.src).convert('RGB')).astype(float)
     h, w, _ = a.shape
@@ -149,7 +169,8 @@ def main():
         print(f'branch fill {int(fill.sum())}px, outline {found} -> {int(outline.sum())}px '
               f'after the row sweep')
 
-    drop = magenta | fill | outline
+    branch = fill | outline
+    drop = magenta | branch
 
     inband = ((rows >= BAND[0]) & (rows <= BAND[1])) & np.ones((1, w), bool)
     for _ in range(3):
@@ -162,6 +183,7 @@ def main():
         if not sliver.any():
             break
         drop |= sliver
+        branch |= sliver
         print(f'  closed {int(sliver.sum())}px of branch-edge sliver')
 
     # Drop specks, not pieces. A paw whose limb passes behind the branch is
@@ -178,22 +200,9 @@ def main():
     keep &= ~stray
     drop |= stray
 
-    # The source only inked the part of the branch-fur seam meant to stay
-    # visible (the grip over the top) -- everywhere else fur sits flush
-    # against branch fill with nothing drawn between them, since the game's
-    # own branch was always going to cover it. Once the branch is keyed out
-    # that leaves a bare, un-outlined edge (worst at each forearm's inner
-    # crook). Detect fur touching fill with no ink between -- a real seam
-    # always has ink there already, so this only fires on the bare ones --
-    # and stroke one in, matching the sprite's own line weight and colour.
-    bare = ndimage.binary_dilation(fill, iterations=2) & keep & ~dark
-    if bare.any():
-        outline_color = np.median(a[dark & keep], axis=0)
-        seam = ndimage.binary_dilation(bare, iterations=SEAM) & fill
-        keep |= seam
-        drop &= ~seam
-        a[seam] = outline_color
-        print(f'synthesised {int(seam.sum())}px of outline along the bare branch seam')
+    back, ext = split_far_arms(a, keep, branch, dark, FAR, args.far_tol)
+    print(f'far arms: {int(back.sum())}px to the back layer, '
+          f'extended {int(ext.sum())}px up behind the branch')
 
     # Un-mix the rim against whichever background it fades into: magenta on the
     # outside, the branch's own colour inside the grip. The reference colour is
@@ -229,49 +238,130 @@ def main():
     un = np.where(low[..., None], fg, un)
     rgb[rim] = np.clip(un[rim], 0, 255)
 
-    solid = alpha > 0.01
-    idx2 = ndimage.distance_transform_edt(~solid, return_distances=False, return_indices=True)
-    rgb[~solid] = rgb[idx2[0], idx2[1]][~solid]
+    # Every pixel, rim included, goes to whichever layer owns its nearest kept
+    # pixel. The extension is back-layer only and gets its own colour, so it
+    # can never paint over the front layer's claws in the same columns.
+    idx_k = ndimage.distance_transform_edt(~keep, return_distances=False, return_indices=True)
+    owned_back = back[idx_k[0], idx_k[1]]
+    layers = {}
+    for name, own, col in (('front', ~owned_back, rgb), ('back', owned_back, rgb.copy())):
+        al = np.where(own, alpha, 0.0)
+        if name == 'back':
+            al[ext] = 1.0
+            col[ext] = extension_colour(a, back, ext)
+        layers[name] = (bleed(col, al > 0.01), al)
 
-    out = np.dstack([rgb, alpha * 255]).astype(np.uint8)
+    solid = (layers['front'][1] > 0.01) | (layers['back'][1] > 0.01)
     ys, xs = np.nonzero(solid)
-    crop = out[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
-    ch, cw = crop.shape[:2]
+    y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
+    cw, ch = x1 - x0, y1 - y0
     th = round(ch * args.width / cw)
-    Image.fromarray(resize_rgba(crop, (args.width, th))).save(args.out)
-    print(f'wrote {args.out}  {args.width}x{th}  (from {cw}x{ch})')
+    size = (args.width, th)
+    shrink = lambda m: np.array(Image.fromarray((m[y0:y1, x0:x1] * 255).astype(np.uint8))
+                                .resize(size, Image.BOX)) > 127
+    sprites = {}
+    for name, path in (('front', args.out), ('back', args.back_out)):
+        col, al = layers[name]
+        sprites[name] = resize_rgba(np.dstack([col, al * 255]).astype(np.uint8)[y0:y1, x0:x1], size)
+        Image.fromarray(sprites[name]).save(path)
+        print(f'wrote {path}  {args.width}x{th}  (from {cw}x{ch})')
 
-    # The grip gap, measured on the finished sprite. The scene's branch must be
-    # at least this thick or sky shows through it -- thicker is fine and reads
-    # naturally, since the surplus just shows between his arms.
-    al = np.array(Image.open(args.out))[..., 3] > 10
-    gap = []
+    # Where the generated branch ran, measured on the finished sprite at the
+    # columns where a paw hooks over it -- the scene branch goes exactly there,
+    # so SLOTH.restHeight lines its centre up with this band's, and the hang's
+    # pivot (SLOTH.gripRow) sits on the same line.
+    band, front_al = shrink(branch), sprites['front'][..., 3] > 127
+    tops, bots = [], []
     for x in range(args.width):
-        col = np.nonzero(al[:, x])[0]
-        if not len(col):
-            continue
-        brk = np.nonzero(np.diff(col) > 1)[0]
-        if len(brk) and col[brk[0]] < th * 0.35 and col[brk[0] + 1] < th * 0.35:
-            gap.append((col[brk[0]], col[brk[0] + 1]))
-    if not gap:
-        print('no grip gap found -- check --band and --branch against the source')
+        rows_ = np.nonzero(band[:, x])[0]
+        if len(rows_) and front_al[:rows_.min(), x].any():
+            tops.append(rows_.min())
+            bots.append(rows_.max())
+    if not tops:
+        print('no branch band found under the paws -- check --band and --branch against the source')
         return
-    top, bot = min(g[0] for g in gap), max(g[1] for g in gap)
-    print(f'grip gap: rows {top}..{bot} over {len(gap)} columns; '
-          f'the scene branch must cover {bot - top}px of this {th}px sprite, '
-          f'and he hangs {th - bot}px below it')
+    top, bot = int(np.median(tops)), int(np.median(bots))
+    print(f'branch band under the paws: rows {top}..{bot} of this {th}px sprite, '
+          f'centre row {(top + bot) / 2:g}')
+
+    # The far arms' cut tops only read right while the scene branch hides them.
+    arm, reach = shrink(back & ~ext), shrink(back | ext)
+    if arm.any():
+        arm_top = int(np.median([np.nonzero(arm[:, x])[0].min() for x in range(args.width) if arm[:, x].any()]))
+        print(f'far arms cut at row ~{arm_top}, extended up to row {np.nonzero(reach.any(axis=1))[0].min()}: '
+              f'the scene branch must cover both')
 
     if args.preview:
         pad = 60
-        prev = np.zeros((th + pad * 2, args.width + pad * 2, 3), np.uint8)
-        prev[:] = (186, 203, 244)
-        prev[pad + top - 4:pad + bot + 4] = (207, 140, 94)
-        sp = np.array(Image.open(args.out)).astype(float)
-        al3 = sp[..., 3:4] / 255
-        reg = prev[pad:pad + th, pad:pad + args.width]
-        prev[pad:pad + th, pad:pad + args.width] = (sp[..., :3] * al3 + reg * (1 - al3)).astype(np.uint8)
-        Image.fromarray(prev).save(args.preview)
+        prev = np.zeros((th + pad * 2, args.width + pad * 2, 4), np.uint8)
+        prev[:] = (186, 203, 244, 255)
+        img = Image.fromarray(prev)
+        img.alpha_composite(Image.fromarray(sprites['back']), (pad, pad))
+        bar = np.array(img)
+        bar[pad + top:pad + bot + 1] = (207, 140, 94, 255)
+        img = Image.fromarray(bar)
+        img.alpha_composite(Image.fromarray(sprites['front']), (pad, pad))
+        img.convert('RGB').save(args.preview)
         print(f'preview -> {args.preview}')
+
+
+def split_far_arms(a, keep, branch, dark, far, tol):
+    """The back layer: his far arms, which pass behind the branch.
+
+    They're the only two regions of their darker shade that touch the branch
+    -- the same shade also shades his head and belly, but never there -- plus
+    the ink along their open sides. Ink an arm shares with his near arm or head
+    belongs to that near shape, so it stays in front.
+
+    Each arm's top was cut flat by the generated branch; it's then extended up
+    through the band that branch covered, so it tucks behind the scene's branch
+    rather than ending exactly on its lower edge.
+    """
+    shade = np.abs(a - far).max(axis=2) <= tol
+    lab, _ = ndimage.label(shade)
+    ids = np.unique(lab[ndimage.binary_dilation(branch, iterations=6) & shade])
+    arms = np.isin(lab, ids[ids > 0])
+    arms = ndimage.binary_closing(arms, iterations=3) & keep   # swallow the fur dashes
+    if not arms.any():
+        print('no far arms found -- check --far against the source; the back layer will be empty')
+        return arms, arms.copy()
+
+    near = ndimage.binary_erosion(keep & ~dark & ~arms, iterations=4)   # not anti-alias slivers
+    ink = dark & keep & ndimage.binary_dilation(arms, iterations=INK)
+    shared = ink & ndimage.binary_dilation(near, iterations=INK)
+    back = ndimage.binary_fill_holes(arms | (ink & ~shared)) & keep
+
+    ext = np.zeros_like(back)
+    for x in np.nonzero(back.any(axis=0))[0]:
+        top = np.nonzero(back[:, x])[0].min()
+        y = top - 1
+        while y >= 0 and top - y <= 3 and not branch[y, x]:
+            y -= 1                                   # step over the arm's anti-alias
+        start = y
+        while y >= 0 and branch[y, x] and top - y <= EXTEND:
+            y -= 1
+        if y < start:
+            ext[y + 1:top, x] = True
+    return back, ext
+
+
+def extension_colour(a, back, ext):
+    """Each extended column continues the colour its arm had just below the cut."""
+    out = np.zeros((int(ext.sum()), 3))
+    ys, xs = np.nonzero(ext)
+    for x in np.unique(xs):
+        col = np.nonzero(back[:, x])[0]
+        sample = a[min(col.min() + 4, col.max()), x]
+        out[xs == x] = sample
+    return out
+
+
+def bleed(rgb, solid):
+    """Bleed colour outward so mipmaps never sample raw transparent pixels."""
+    idx = ndimage.distance_transform_edt(~solid, return_distances=False, return_indices=True)
+    out = rgb.copy()
+    out[~solid] = rgb[idx[0], idx[1]][~solid]
+    return out
 
 
 if __name__ == '__main__':

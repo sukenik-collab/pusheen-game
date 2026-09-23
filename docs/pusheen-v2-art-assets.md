@@ -13,10 +13,11 @@ The game is fully playable either way.
   PNGs, subject centered.
 - Loaded in `Preloader.preload()` — real art via `this.load.image('<key>',
   'assets/sprites/<file>.png')`, placeholders via `this.makeTexture('<key>', …)`.
-- The two cut assets (`backyard-tree.png`, `sloth-hanging.png`) are generated
-  from `docs/concept-art/` by **`tools/`** — see `tools/README.md`. Re-run those
-  rather than hand-editing if you change the source art; they also print the
-  geometry `SLOTH.restHeight` is derived from.
+- The cut assets (`backyard-tree.png`, `sloth-hanging-front.png`,
+  `sloth-hanging-back.png`) are generated from `docs/concept-art/` by
+  **`tools/`** — see `tools/README.md`. Re-run those rather than hand-editing
+  if you change the source art; they also print the geometry
+  `SLOTH.restHeight` and `SLOTH.gripRow` are derived from.
 - Style: *flat cartoon Pusheen style — thick clean outlines, flat solid colors,
   no gradients/shading, soft rounded corners, chunky cute proportions.*
 
@@ -35,7 +36,8 @@ Sky (`#BACBF4`) and grass (`#80A56F`) are `add.rectangle` fills, not images.
 | `bushes` | 1280×96 | ▫️ generated | The scalloped hedge along the horizon, carrying the horizon line at `BACKYARD.bushLine`. |
 | `sun` | 190×190 | ▫️ generated | Flat disc + eight chunky rays. |
 | `cloud` | 210×116 | ▫️ generated | One lump, placed twice at different scales. |
-| `slothHanging` | 180×159 | ✅ `sloth-hanging.png` | Draped over the branch, all four limbs gripping. Cut from art generated *with* a branch through it — the branch is keyed out so the gap under his paws is the tree's branch to fill. Fur matches the awake poses' tone. Re-cut (via `tools/cut_sloth.py`) to synthesise the ink stroke missing from each arm's inner crook and to clear a soft-edged magenta halo — see `tools/README.md`. |
+| `slothHangingFront` | 180×159 | ✅ `sloth-hanging-front.png` | Draped over the branch, all four paws hooked over its top: head, body, near arms and paws. Drawn *over* the tree. Cut from art generated *with* a branch through it, which is keyed out. Fur matches the awake poses' tone. |
+| `slothHangingBack` | 180×159 | ✅ `sloth-hanging-back.png` | Just his far arms, which pass behind the branch — drawn *under* the tree, same size and position as the front layer, so the branch lands between them. Both cut together by `tools/cut_sloth.py`. |
 | `slothAwake` | 124×170 | ✅ `sloth-awake.png` | Standing mid-stretch, arms up (from `concept-art/sloth3.png`). Swapped in as he drops off the branch, and worn for the plod. There's no walk-cycle art, so the steps are a waddle tween (`SLOTH.waddleDeg`/`waddleMs`) — real walk frames would replace that, not add to it. |
 | `slothSitting` | 190×110 | ✅ `sloth-sitting.png` | Settled on his belly, eyes open (from `concept-art/sloth1.png`). Where the plod ends, and how he's found on re-entry. |
 | `gardenGate` | 76×150 | ▫️ placeholder | The revealed hidden path, behind where Sloth hangs. |
@@ -74,14 +76,14 @@ panel), `pusheen` / `pusheencorn` (carry accessory is a separate child sprite).
 ## Tuning notes (placement tied to the real backdrops)
 
 - **Sloth** hang height: `SLOTH.restHeight` (feel.js) + `SLOTH_X` (Backyard.js).
-  `restHeight` is *derived*, not eyeballed — it lines the gap under his paws up
-  with the branch, from `TREE_SCALE` and the branch's offsets in the tree art.
-  Re-derive it if `TREE_SCALE` moves; the comment on it in feel.js has the
-  numbers. The sprite size is baked into `sloth-hanging.png`, so changing how big
-  he is means re-cutting it, and the grip gap scales with him.
+  `restHeight` is *derived*, not eyeballed — it puts the tree's branch where
+  his art's own branch was, from `TREE_SCALE` and the branch's offsets in the
+  tree art. Re-derive it if `TREE_SCALE` moves; the comment on it in feel.js
+  has the numbers. The sprite size is baked into the two hanging layers, so
+  changing how big he is means re-cutting them.
 - **Tree** placement: `TREE_X` / `TREE_SCALE`, and `GRASS_TOP` for the horizon
-  (all Backyard.js). The branch must stay at least as thick as his grip gap —
-  thicker is fine and reads naturally, thinner shows sky through the gap.
+  (all Backyard.js). The branch must stay thick enough to hide his far arms'
+  cut tops (`tools/cut_sloth.py` prints how high they reach).
 - **Kitchen counter** climb: the standable counter body sits ~20px below the
   painted counter surface — nudge `COUNTER_TOP_FROM_GROUND` / step heights in
   `Kitchen.js` to line up once art placement is confirmed.

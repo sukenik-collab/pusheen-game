@@ -14,10 +14,10 @@ const GROUND_HEIGHT = 40;
 // the two reads as ground running back to the hedge.
 const GRASS_TOP = 596;
 
-// The tree is its own layer, scaled and placed so its branch lands exactly in
-// the gap Sloth's paws wrap (SLOTH.restHeight is derived from the same numbers
-// -- see the note there). Its trunk base sits on groundTop, 2px of transparent
-// padding included.
+// The tree is its own layer, scaled and placed so its branch lands where Sloth
+// wraps it: between his far arms and the rest of him (SLOTH.restHeight is
+// derived from the same numbers -- see the note there). Its trunk base sits on
+// groundTop, 2px of transparent padding included.
 const TREE_X = 560;
 const TREE_SCALE = 0.8;
 
@@ -56,7 +56,7 @@ export class Backyard extends Scene
         this.add.image(940, 125, 'sun');
         this.add.rectangle(width / 2, (GRASS_TOP + height) / 2, width, height - GRASS_TOP, BACKYARD.grass);
         this.add.image(width / 2, GRASS_TOP, 'bushes').setOrigin(0.5, BACKYARD.bushLine / BACKYARD.bushHeight);
-        this.add.image(TREE_X, groundTop + 2, 'tree').setOrigin(0.5, 1).setScale(TREE_SCALE);
+        const tree = this.add.image(TREE_X, groundTop + 2, 'tree').setOrigin(0.5, 1).setScale(TREE_SCALE);
 
         this.solids = [];
 
@@ -65,8 +65,9 @@ export class Backyard extends Scene
         // revealed as he ambles clear on waking. Inert until then (bindReveal).
         this.doorToLivingRoom = new Door(this, SLOTH_X, groundTop, { texture: 'gardenGate', side: 'right', to: 'LivingRoom', enterAt: 'fromBackyard', initiallyActive: false });
 
-        // The sleepy friend, dozing on the low tree branch.
-        this.sloth = new Sloth(this, SLOTH_X, groundTop);
+        // The sleepy friend, dozing on the low tree branch -- wrapped around it:
+        // his far arms draw under the tree, the rest of him over it.
+        this.sloth = new Sloth(this, SLOTH_X, groundTop, { behind: tree });
 
         // Right-wall screen door to the Kitchen.
         this.doorToKitchen = new Door(this, 1240, groundTop, { texture: 'screenDoor', side: 'left', to: 'Kitchen', enterAt: 'fromBackyard' });
