@@ -18,8 +18,8 @@ The game is fully playable either way.
   **`tools/`** — see `tools/README.md`. Re-run those rather than hand-editing
   if you change the source art; they also print the geometry
   `SLOTH.restHeight` and `SLOTH.gripRow` are derived from. `step-boxes.png`
-  is drawn from scratch by `tools/draw_boxes.py`, which prints what the
-  kitchen places it and its ledges from.
+  is cut by `tools/cut_boxes.py`, which prints what the kitchen places it
+  and its ledges from.
 - Style: *flat cartoon Pusheen style — thick clean outlines, flat solid colors,
   no gradients/shading, soft rounded corners, chunky cute proportions.*
 
@@ -53,7 +53,7 @@ Sky (`#BACBF4`) and grass (`#80A56F`) are `add.rectangle` fills, not images.
 | `kitchenBg` | 1376×768 | ✅ `kitchen-bg.png` | Wall, window-to-backyard, countertop, **and the fridge** all painted in. |
 | *(fridge)* | — | ✅ in backdrop | No separate sprite — the fridge is part of `kitchenBg`; the Container is an invisible zone over it (`hidden: true`). |
 | `fridgeInside` | 640×300 | ▫️ placeholder | The lit fridge interior shown as the peek-panel backdrop when it opens. |
-| `stepBoxes` | 298×174 | ✅ `step-boxes.png` | The climb to the counter: a short and a tall cardboard box, one sprite, taped shut with shipping labels. Drawn by `tools/draw_boxes.py` so the middle of each top face sits exactly 80 and 160px up, where she lands on invisible ledges -- not the sprite's top edge, which is a top face's far rim. Replaced the `stepStool` / `stepBox` placeholders. |
+| `stepBoxes` | 295×176 | ✅ `step-boxes.png` | The climb to the counter: a short and a tall cardboard box, one sprite, taped shut with shipping labels (from `concept-art/kitchen_boxes.jpg`). Cut by `tools/cut_boxes.py`, scaled so the middle of each top face sits 80 and 160px up, where she lands on invisible ledges -- not the sprite's top edge, which is a top face's far rim. Replaced the `stepStool` / `stepBox` placeholders. |
 | `screenDoor` | 76×150 | ▫️ placeholder | Kitchen→Backyard screen door (same key as above). |
 
 ## Items (peek-panel icons + counter/carried sprites)
@@ -87,9 +87,9 @@ panel), `pusheen` / `pusheencorn` (carry accessory is a separate child sprite).
   cut tops (`tools/cut_sloth.py` prints how high they reach).
 - **Kitchen counter** climb: floor → short box (80) → tall box (160) →
   counter (240), each rise just inside a normal hop. The counter ledge puts
-  her at its painted front lip. The boxes are *drawn to* those heights, so
-  changing one means redrawing with a matching `stand` in
-  `tools/draw_boxes.py`, then copying what it prints into `Kitchen.js`'s
+  her at its painted front lip. The boxes are *cut to* those heights, so
+  changing one means re-cutting with a matching `stand` in
+  `tools/cut_boxes.py`, then copying what it prints into `Kitchen.js`'s
   `LAYOUT` and `LEDGES`.
 
 ## Optional — P4 cozy extras (not built)
