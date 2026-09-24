@@ -26,3 +26,6 @@ dist-ssr
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
 scratchpad/
+
+# Python bytecode (draw_boxes.py imports cut_tree.py)
+__pycache__/

@@ -1,19 +1,22 @@
-# tools — art cutting
+# tools — sprite art
 
-Two scripts that turn the concept art in `docs/concept-art/` into the
-transparent PNGs the game loads. They are how `backyard-tree.png` and the two
-hanging-sloth layers were made; re-running either with no arguments
-reproduces the shipped files byte for byte.
+Scripts that make transparent PNGs the game loads. Two cut concept art in
+`docs/concept-art/` into sprites -- they are how `backyard-tree.png` and the
+two hanging-sloth layers were made -- and one draws the kitchen's climbing
+boxes from scratch. Re-running any of them with no arguments reproduces the
+shipped files byte for byte.
 
 ```bash
 pip install pillow scipy          # not part of the npm toolchain
 
 python3 tools/cut_tree.py         # -> public/assets/sprites/backyard-tree.png
 python3 tools/cut_sloth.py        # -> public/assets/sprites/sloth-hanging-{front,back}.png
+python3 tools/draw_boxes.py       # -> public/assets/sprites/step-boxes.png
 ```
 
-Add `--preview out.png` to either to composite the result on the scene's
-palette, which is the fastest way to spot a halo or a leftover fringe.
+Add `--preview out.png` to any of them to see the result on the scene's
+palette, which is the fastest way to spot a halo or a leftover fringe
+(`draw_boxes.py`'s also marks the lines she stands on, in red).
 
 ## Why these aren't just a background delete
 
@@ -78,6 +81,16 @@ faint but real colour fringe. Both scripts resize premultiplied, through a
 shared `resize_rgba`, with a box filter rather than Lanczos since this is a
 big downsample either way and box has no lobes to ring.
 
+## Drawn, not cut: `draw_boxes.py`
+
+The two cardboard boxes she climbs to the kitchen counter are plain geometry,
+so they're drawn rather than generated and cut -- which is what lets each top
+face land exactly where the climb needs it. They're square-on and seen a
+little from above, like the counter in the backdrop, in the backdrop's
+outline colour and weight, and drawn at 4x then box-filtered down through
+`cut_tree.py`'s `resize_rgba` for clean edges. The shape, colours and
+details (tape, labels, a sticky note) are constants at the top of the file.
+
 ## The numbers they print
 
 `cut_tree.py` reports the trunk base row and the branch's thickness and height
@@ -89,6 +102,13 @@ comments on those constants show the working. The rules: the scene's branch
 must cover the far arms' cut tops and their extension (or they show), and its
 top edge sits a few px above his art's branch so his paws hook over it rather
 than rest on it.
+
+`draw_boxes.py` reports the sprite's size and, for each box, the height she
+stands at (the middle of its top face), its width, and its offset from the
+sprite's centre. `LAYOUT` and `LEDGES` in `Kitchen.js` are copied from these.
+The heights are the script's `stand` values and must match `LOW_BOX_TOP` /
+`TALL_BOX_TOP` there: every rise to the counter's 240 is just inside a hop,
+so change them together or not at all.
 
 ## Sources
 
