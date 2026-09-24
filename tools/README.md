@@ -1,22 +1,21 @@
-# tools — sprite art
+# tools — art cutting
 
-Scripts that make transparent PNGs the game loads. Two cut concept art in
-`docs/concept-art/` into sprites -- they are how `backyard-tree.png` and the
-two hanging-sloth layers were made -- and one draws the kitchen's climbing
-boxes from scratch. Re-running any of them with no arguments reproduces the
-shipped files byte for byte.
+Three scripts that turn the concept art in `docs/concept-art/` into the
+transparent PNGs the game loads. They are how `backyard-tree.png`, the two
+hanging-sloth layers and the kitchen's climbing boxes were made; re-running
+any of them with no arguments reproduces the shipped files byte for byte.
 
 ```bash
 pip install pillow scipy          # not part of the npm toolchain
 
 python3 tools/cut_tree.py         # -> public/assets/sprites/backyard-tree.png
 python3 tools/cut_sloth.py        # -> public/assets/sprites/sloth-hanging-{front,back}.png
-python3 tools/draw_boxes.py       # -> public/assets/sprites/step-boxes.png
+python3 tools/cut_boxes.py        # -> public/assets/sprites/step-boxes.png
 ```
 
 Add `--preview out.png` to any of them to see the result on the scene's
 palette, which is the fastest way to spot a halo or a leftover fringe
-(`draw_boxes.py`'s also marks the lines she stands on, in red).
+(`cut_boxes.py`'s also marks the lines she stands on, in red).
 
 ## Why these aren't just a background delete
 
@@ -81,15 +80,18 @@ faint but real colour fringe. Both scripts resize premultiplied, through a
 shared `resize_rgba`, with a box filter rather than Lanczos since this is a
 big downsample either way and box has no lobes to ring.
 
-## Drawn, not cut: `draw_boxes.py`
+## `cut_boxes.py`
 
-The two cardboard boxes she climbs to the kitchen counter are plain geometry,
-so they're drawn rather than generated and cut -- which is what lets each top
-face land exactly where the climb needs it. They're square-on and seen a
-little from above, like the counter in the backdrop, in the backdrop's
-outline colour and weight, and drawn at 4x then box-filtered down through
-`cut_tree.py`'s `resize_rgba` for clean edges. The shape, colours and
-details (tape, labels, a sticky note) are constants at the top of the file.
+The two cardboard boxes she climbs to the kitchen counter, drawn together on
+flat magenta and cut as one sprite. The key, rim un-mixing and resize are
+imported from `cut_tree.py`, so the fixes above apply as-is. What's its own
+is the sizing, which comes from gameplay rather than a pixel size: the boxes
+show their tops a little from above, so she stands halfway back across a
+top face, not on the sprite's top edge (that face's far rim). The script
+measures each top face between the outlines along its back and front edges,
+and fits one scale that puts both middles at their step heights, 80 and
+160px above the floor. That only works if the source's two faces sit close
+to 1:2, so it refuses a source where either would land more than 1.5px off.
 
 ## The numbers they print
 
@@ -103,12 +105,13 @@ must cover the far arms' cut tops and their extension (or they show), and its
 top edge sits a few px above his art's branch so his paws hook over it rather
 than rest on it.
 
-`draw_boxes.py` reports the sprite's size and, for each box, the height she
-stands at (the middle of its top face), its width, and its offset from the
-sprite's centre. `LAYOUT` and `LEDGES` in `Kitchen.js` are copied from these.
-The heights are the script's `stand` values and must match `LOW_BOX_TOP` /
-`TALL_BOX_TOP` there: every rise to the counter's 240 is just inside a hop,
-so change them together or not at all.
+`cut_boxes.py` reports the sprite's size and, for each box, the height she
+stands at (the middle of its top face) and the rows that face spans, its
+width, and its offset from the sprite's centre. `LAYOUT` and `LEDGES` in
+`Kitchen.js` are copied from these. The heights are the script's `stand`
+values and must match `LOW_BOX_TOP` / `TALL_BOX_TOP` there: every rise to
+the counter's 240 is just inside a hop, so change them together or not at
+all.
 
 ## Sources
 
@@ -118,6 +121,7 @@ so change them together or not at all.
 | `backyard-tree-source.png` | `cut_tree.py --no-magenta` | The original source: a whole scene on flat sky + grass, tree fused to the hedge. Superseded, but its cut is still reproducible. |
 | `updated_hanging_sloth_manual_edit.png` | `cut_sloth.py` (default) | Magenta background, **green** branch, fur re-matched to the awake poses. Cuts both layers in the game today. |
 | `hanging-sloth-source.png` | `cut_sloth.py --no-simple` | The original source: magenta background, **tan** branch close enough to the sloth's own outline colour to defeat a plain colour key. Superseded, but it still cuts (its far arms need `--far`). |
+| `kitchen_boxes.jpg` | `cut_boxes.py` | Both boxes together on flat magenta, JPEG. The tall box's top face sits at 2.01x the short one's height, which is what lets one scale land both on their steps. |
 
 `SLOTH.restHeight` and `SLOTH.gripRow` in `feel.js` are derived from whichever
 sprites are currently cut in — re-derive them (the comments on those
