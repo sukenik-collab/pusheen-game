@@ -1,23 +1,22 @@
-# tools — art cutting
+# tools — sprite art
 
-Three scripts that turn the concept art in `docs/concept-art/` into the
-transparent PNGs the game loads. They are how `backyard-tree.png`, the two
-hanging-sloth layers and the kitchen's two climbing steps were made;
-re-running any of them with no arguments reproduces the shipped files byte
-for byte.
+Scripts that make transparent PNGs the game loads. Two cut concept art in
+`docs/concept-art/` into sprites -- they are how `backyard-tree.png` and the
+two hanging-sloth layers were made -- and one draws the kitchen's climbing
+boxes from scratch. Re-running any of them with no arguments reproduces the
+shipped files byte for byte.
 
 ```bash
 pip install pillow scipy          # not part of the npm toolchain
 
 python3 tools/cut_tree.py         # -> public/assets/sprites/backyard-tree.png
 python3 tools/cut_sloth.py        # -> public/assets/sprites/sloth-hanging-{front,back}.png
-python3 tools/cut_prop.py         # -> public/assets/sprites/step-{stool,cart}.png
+python3 tools/draw_boxes.py       # -> public/assets/sprites/step-boxes.png
 ```
 
-Add `--preview out.png` to the first two to composite the result on the
-scene's palette, which is the fastest way to spot a halo or a leftover
-fringe. `cut_prop.py --preview DIR` writes each prop at 4x on the kitchen's
-cabinet colour, with the line she stands on drawn in red.
+Add `--preview out.png` to any of them to see the result on the scene's
+palette, which is the fastest way to spot a halo or a leftover fringe
+(`draw_boxes.py`'s also marks the lines she stands on, in red).
 
 ## Why these aren't just a background delete
 
@@ -66,23 +65,8 @@ up behind where that branch ran, to tuck under the scene's branch rather than
 stop on its lower edge. The legacy tan source paints its far arms a different
 shade -- pass `--far` to split them.
 
-**`cut_prop.py`** — single props drawn alone on flat magenta: `stool` and
-`cart` presets, both by default. The key and rim un-mixing are imported from
-`cut_tree.py`, so its fixes below apply as-is. What differs: the key is
-global rather than a flood in from the border, since the cart shows
-background through gaps it fully encloses (between its tiers, inside the
-wheel frame, between its twin front poles). And each prop is **sized by
-gameplay**: both are drawn in 3/4 view, so the sprite's top edge is the far
-rim of its top face, and she stands halfway back across that face instead.
-A preset's `stand` is that height above the floor (the step's height in
-`Kitchen.js`), and the prop is scaled to put it exactly there. The cart gets
-two more fixes: its outlines are drawn at ~4px against the stool's ~10, which
-would land well under a pixel in game, so `ink` thickens them before the
-downsize; and `tint` moves its fills from a pinkish cream that vanished
-against the cream cabinets onto a mint from the fridge's family.
-
-**`cut_tree.py` and `cut_sloth.py`**, and this is what a hand-authored
-vector source never exposed: (1) a background pixel can still read as fully opaque with the
+**Both scripts**, and this is what a hand-authored vector source never
+exposed: (1) a background pixel can still read as fully opaque with the
 background's own colour, when it doesn't fit the plain blend line between the
 sampled foreground and background closely enough -- both scripts' fallback
 for that case used to just assume "solid foreground", which is right at a
@@ -97,6 +81,16 @@ faint but real colour fringe. Both scripts resize premultiplied, through a
 shared `resize_rgba`, with a box filter rather than Lanczos since this is a
 big downsample either way and box has no lobes to ring.
 
+## Drawn, not cut: `draw_boxes.py`
+
+The two cardboard boxes she climbs to the kitchen counter are plain geometry,
+so they're drawn rather than generated and cut -- which is what lets each top
+face land exactly where the climb needs it. They're square-on and seen a
+little from above, like the counter in the backdrop, in the backdrop's
+outline colour and weight, and drawn at 4x then box-filtered down through
+`cut_tree.py`'s `resize_rgba` for clean edges. The shape, colours and
+details (tape, labels, a sticky note) are constants at the top of the file.
+
 ## The numbers they print
 
 `cut_tree.py` reports the trunk base row and the branch's thickness and height
@@ -109,12 +103,12 @@ must cover the far arms' cut tops and their extension (or they show), and its
 top edge sits a few px above his art's branch so his paws hook over it rather
 than rest on it.
 
-`cut_prop.py` reports each sprite's size, the row she stands on (and its
-height above the feet, which should match `stand`), and the top face's width
-and offset from the sprite's centre. The `LAYOUT` sprite sizes and `LEDGES`
-widths in `Kitchen.js` are copied from these. To change a step's height,
-change its `stand` here and `STOOL_TOP`/`CART_TOP` there together, then
-re-cut.
+`draw_boxes.py` reports the sprite's size and, for each box, the height she
+stands at (the middle of its top face), its width, and its offset from the
+sprite's centre. `LAYOUT` and `LEDGES` in `Kitchen.js` are copied from these.
+The heights are the script's `stand` values and must match `LOW_BOX_TOP` /
+`TALL_BOX_TOP` there: every rise to the counter's 240 is just inside a hop,
+so change them together or not at all.
 
 ## Sources
 
@@ -124,8 +118,6 @@ re-cut.
 | `backyard-tree-source.png` | `cut_tree.py --no-magenta` | The original source: a whole scene on flat sky + grass, tree fused to the hedge. Superseded, but its cut is still reproducible. |
 | `updated_hanging_sloth_manual_edit.png` | `cut_sloth.py` (default) | Magenta background, **green** branch, fur re-matched to the awake poses. Cuts both layers in the game today. |
 | `hanging-sloth-source.png` | `cut_sloth.py --no-simple` | The original source: magenta background, **tan** branch close enough to the sloth's own outline colour to defeat a plain colour key. Superseded, but it still cuts (its far arms need `--far`). |
-| `stool1.jpg` | `cut_prop.py stool` | The step stool, alone on magenta, JPEG. (`stool2.jpg`, a round stool with a white sticker border, was the alternative not taken.) |
-| `kitchen_drawers2.jpg` | `cut_prop.py cart` | The rolling cart, alone on magenta, JPEG; outlines thickened and recoloured in the cut. (`kitchen_drawers1.jpg`, a cubby shelf, is superseded by it.) |
 
 `SLOTH.restHeight` and `SLOTH.gripRow` in `feel.js` are derived from whichever
 sprites are currently cut in — re-derive them (the comments on those

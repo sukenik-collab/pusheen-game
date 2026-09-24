@@ -14,11 +14,12 @@ The game is fully playable either way.
 - Loaded in `Preloader.preload()` — real art via `this.load.image('<key>',
   'assets/sprites/<file>.png')`, placeholders via `this.makeTexture('<key>', …)`.
 - The cut assets (`backyard-tree.png`, `sloth-hanging-front.png`,
-  `sloth-hanging-back.png`, `step-stool.png`, `step-cart.png`) are generated
-  from `docs/concept-art/` by **`tools/`** — see `tools/README.md`. Re-run
-  those rather than hand-editing if you change the source art; they also
-  print the geometry `SLOTH.restHeight`, `SLOTH.gripRow` and the kitchen's
-  step ledges are derived from.
+  `sloth-hanging-back.png`) are generated from `docs/concept-art/` by
+  **`tools/`** — see `tools/README.md`. Re-run those rather than hand-editing
+  if you change the source art; they also print the geometry
+  `SLOTH.restHeight` and `SLOTH.gripRow` are derived from. `step-boxes.png`
+  is drawn from scratch by `tools/draw_boxes.py`, which prints what the
+  kitchen places it and its ledges from.
 - Style: *flat cartoon Pusheen style — thick clean outlines, flat solid colors,
   no gradients/shading, soft rounded corners, chunky cute proportions.*
 
@@ -52,8 +53,7 @@ Sky (`#BACBF4`) and grass (`#80A56F`) are `add.rectangle` fills, not images.
 | `kitchenBg` | 1376×768 | ✅ `kitchen-bg.png` | Wall, window-to-backyard, countertop, **and the fridge** all painted in. |
 | *(fridge)* | — | ✅ in backdrop | No separate sprite — the fridge is part of `kitchenBg`; the Container is an invisible zone over it (`hidden: true`). |
 | `fridgeInside` | 640×300 | ▫️ placeholder | The lit fridge interior shown as the peek-panel backdrop when it opens. |
-| `stepStool` | 125×97 | ✅ `step-stool.png` | First climbing step up to the counter (from `concept-art/stool1.jpg`). Drawn in 3/4 view, so she stands on an invisible ledge halfway back across its top face, 80px up, not on the sprite's top edge. Sized by `tools/cut_prop.py` to put that face at the step's height. |
-| `stepCart` | 118×169 | ✅ `step-cart.png` | Second step: a rolling cart (from `concept-art/kitchen_drawers2.jpg`), ledge in its top basket 160px up. Recoloured in the cut from pinkish cream to a mint from the fridge's family so it stands off the cream cabinets, and its outlines thickened to match the stool's. Replaced the `stepBox` placeholder. |
+| `stepBoxes` | 298×174 | ✅ `step-boxes.png` | The climb to the counter: a short and a tall cardboard box, one sprite, taped shut with shipping labels. Drawn by `tools/draw_boxes.py` so the middle of each top face sits exactly 80 and 160px up, where she lands on invisible ledges -- not the sprite's top edge, which is a top face's far rim. Replaced the `stepStool` / `stepBox` placeholders. |
 | `screenDoor` | 76×150 | ▫️ placeholder | Kitchen→Backyard screen door (same key as above). |
 
 ## Items (peek-panel icons + counter/carried sprites)
@@ -85,11 +85,12 @@ panel), `pusheen` / `pusheencorn` (carry accessory is a separate child sprite).
 - **Tree** placement: `TREE_X` / `TREE_SCALE`, and `GRASS_TOP` for the horizon
   (all Backyard.js). The branch must stay thick enough to hide his far arms'
   cut tops (`tools/cut_sloth.py` prints how high they reach).
-- **Kitchen counter** climb: floor → stool (80) → cart (160) → counter (240),
-  each rise just inside a normal hop. The counter ledge puts her at its
-  painted front lip. The step art is *sized to* those heights, so changing
-  one means re-cutting that step with a matching `stand` (`tools/README.md`),
-  then copying the printed sizes into `Kitchen.js`'s `LAYOUT` and `LEDGES`.
+- **Kitchen counter** climb: floor → short box (80) → tall box (160) →
+  counter (240), each rise just inside a normal hop. The counter ledge puts
+  her at its painted front lip. The boxes are *drawn to* those heights, so
+  changing one means redrawing with a matching `stand` in
+  `tools/draw_boxes.py`, then copying what it prints into `Kitchen.js`'s
+  `LAYOUT` and `LEDGES`.
 
 ## Optional — P4 cozy extras (not built)
 

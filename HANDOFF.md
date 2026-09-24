@@ -86,13 +86,13 @@ playtest; the art rework below is what's freshest.
   working); same halo fix as the sloth's. Branch geometry moved by a couple
   of px (`SLOTH.restHeight` 159 → 160) — re-derived, not eyeballed; see the
   comment on it.
-- **The kitchen's two climbing steps are real art:** a step stool and a
-  mint rolling cart (`step-stool.png`, `step-cart.png`), cut by
-  `tools/cut_prop.py`. Both are drawn in 3/4 view, so she doesn't stand on a
-  sprite's top edge (that's the far rim); the sprites are drawn only and she
-  lands on invisible one-way ledges halfway back across each top face, the
-  same way the counter already worked. The script sizes each step so that
-  face sits at the step's height, which stayed 80/160/240.
+- **The kitchen climb is two cardboard boxes** (`step-boxes.png`, one
+  sprite), drawn from scratch by `tools/draw_boxes.py` -- a stool and a
+  rolling cart were tried first and read as pasted in from another picture.
+  The boxes show their tops a little from above, like the counter, so she
+  lands on invisible one-way ledges halfway back across each top face (80
+  and 160px up), the same way the counter already worked, rather than on the
+  sprite's top edge.
 - `kitchen-bg.png` and the two awake poses (`sloth-awake.png` standing
   mid-stretch, `sloth-sitting.png` settled on his belly, cut from
   `docs/concept-art/sloth3.png` and `sloth1.png`) are unchanged. All three Sloth
@@ -105,9 +105,9 @@ playtest; the art rework below is what's freshest.
      `TREE_X`/`TREE_SCALE`/`GRASS_TOP` for the scenery around him. `restHeight`
      is derived from `TREE_SCALE`, so re-derive it if the tree is rescaled.
    - **Kitchen counter climb:** the hop margins are tight by design (each
-     rise is 80px of a ~82px hop). Heights are `STOOL_TOP`/`CART_TOP`/
-     `COUNTER_TOP_FROM_GROUND` in Kitchen.js; the step art is sized to them,
-     so moving one means re-cutting that step (see `tools/README.md`).
+     rise is 80px of a ~82px hop). Heights are `LOW_BOX_TOP`/`TALL_BOX_TOP`/
+     `COUNTER_TOP_FROM_GROUND` in Kitchen.js; the boxes are drawn to them, so
+     moving one means redrawing (see `tools/README.md`).
 2. **Missing art:** the remaining placeholders (screenDoor, gardenGate,
    fridgeInside, glass, orangeJuice, juicePitcher, item decoys) are
    generated shapes; see the punch-list.

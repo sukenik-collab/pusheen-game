@@ -17,42 +17,39 @@ const SPAWN_POINTS = {
     fromBackyard: { x: 150 }
 };
 
-// Two little steps up to the high counter: floor -> stool -> cart -> counter
-// top. Each rise is within a normal hop (~82px apex) -- only just, by design.
-// The counter's height is tuned to the kitchen backdrop, where she stands at
-// its front lip; the steps are sized to these heights, not the other way round.
-const STOOL_TOP = 80;
-const CART_TOP = 160;
+// Two little steps up to the high counter: floor -> short box -> tall box ->
+// counter top. Each rise is within a normal hop (~82px apex) -- only just, by
+// design. The counter's height is tuned to the kitchen backdrop, where she
+// stands at its front lip; the boxes are drawn to these heights, not the
+// other way round.
+const LOW_BOX_TOP = 80;
+const TALL_BOX_TOP = 160;
 const COUNTER_TOP_FROM_GROUND = 240;
 const COUNTER_X = 875;
 const COUNTER_W = 350;              // spans ~700..1050
 
-// The steps' art (tools/cut_prop.py) is drawn in 3/4 view, so the sprite's
-// top edge is the far rim of its top face -- standing there reads as
-// hovering. She stands halfway back across that face instead, and the script
-// scales each step so that line lands at its STOOL_TOP/CART_TOP. So the
-// sprites are drawn only, sitting on the floor, and she lands on invisible
-// ledges (LEDGES) at those heights, sized to each top face's width.
+// Both boxes are one sprite (tools/draw_boxes.py), sitting on the floor. They
+// show their top faces a little from above, like the counter, so she stands
+// halfway back across a top face rather than on the sprite's top edge (the
+// far rim): the sprite is drawn only, and she lands on invisible ledges
+// (LEDGES) at LOW_BOX_TOP / TALL_BOX_TOP, which is where the script draws
+// those lines. Sizes and offsets are what it prints; re-take them on a redraw.
 //
-// Placed so each hop is mostly vertical: the stool's face (479..591) and the
-// cart's (608..698) are closer together than she is wide, and the cart's
-// meets the counter's left end (700). She can stand across a gap and hop.
-// Sprite and face sizes are what cut_prop.py prints; re-take them on a re-cut.
-const STOOL_X = 535;
-const CART_X = 655;
+// Placed so each hop is mostly vertical: the short box (442..606) and the
+// tall one (568..736) overlap, and the tall one overlaps the counter's left
+// end (700). She can stand across each join and hop straight up.
+const BOXES_X = 589;
 const LAYOUT = [
-    { name: 'stepStool', role: 'background', sprite: 'stepStool', x: STOOL_X, w: 125, h: 97 },
-    { name: 'stepCart', role: 'background', sprite: 'stepCart', x: CART_X, w: 118, h: 169 }
+    { name: 'stepBoxes', role: 'background', sprite: 'stepBoxes', x: BOXES_X, w: 298, h: 174 }
 ];
 
-// Invisible one-way ledges (top face only), so she walks freely past the steps
+// Invisible one-way ledges (top face only), so she walks freely past the boxes
 // and jumps up through them, landing only on top. `top` is height above the
-// floor. The backdrop draws the counter, so it's one too. The cart's top
-// face sits 1.6px left of its sprite's centre (cut_prop.py prints both).
+// floor. The backdrop draws the counter, so it's one too.
 const LEDGE_THICKNESS = 24;
 const LEDGES = [
-    { x: STOOL_X, w: 112, top: STOOL_TOP },
-    { x: CART_X - 1.6, w: 90, top: CART_TOP },
+    { x: BOXES_X - 65, w: 164, top: LOW_BOX_TOP },
+    { x: BOXES_X + 63, w: 168, top: TALL_BOX_TOP },
     { x: COUNTER_X, w: COUNTER_W, top: COUNTER_TOP_FROM_GROUND }
 ];
 
@@ -102,8 +99,8 @@ export class Kitchen extends Scene
 
         buildLayout(this, LAYOUT, groundTop);
 
-        // Stool, cart and counter top. She walks off either end of any of them
-        // to drop back down (no climbing back down the steps needed).
+        // Both boxes and the counter top. She walks off either end of any of
+        // them to drop back down (no climbing back down the steps needed).
         this.solids = LEDGES.map((ledge) => addLedge(this, ledge, groundTop));
         const counterTop = groundTop - COUNTER_TOP_FROM_GROUND;
 
