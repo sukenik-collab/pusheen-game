@@ -63,6 +63,11 @@ export class Preloader extends Scene
         // scaled to the 1280x720 canvas. All three Sloth poses are transparent
         // sprites pre-cropped to their display size.
         this.load.image('kitchenBg', 'assets/sprites/kitchen-bg.png');
+        // The two climbing steps up to the counter, cut by tools/cut_prop.py.
+        // Drawn in 3/4 view, so where she stands is inside the art, not its top
+        // edge -- Kitchen.js gives each an invisible ledge there.
+        this.load.image('stepStool', 'assets/sprites/step-stool.png');
+        this.load.image('stepCart', 'assets/sprites/step-cart.png');
         // The Backyard is layered rather than a single backdrop: sky, grass and
         // the bushes/sun/clouds are generated below, and only the tree is art.
         // That is what lets the branch be scaled and placed to the pixel where
@@ -155,23 +160,6 @@ export class Preloader extends Scene
             }
             gfx.fillStyle(BACKYARD.grass, 1);        // keep the line's underside clean
             gfx.fillRect(0, line + 5, 1280, BACKYARD.bushHeight - line - 5);
-        });
-
-        // The two climbing steps up to the counter (stool -> box -> counter
-        // top). Wide + adjacent, so the horizontal hop between them is small.
-        this.makeTexture('stepStool', 140, 80, (gfx) => {
-            gfx.fillStyle(0xc98f5a, 1);
-            gfx.fillRoundedRect(0, 0, 140, 22, 6);         // seat
-            gfx.fillRect(16, 22, 14, 58);                  // legs
-            gfx.fillRect(110, 22, 14, 58);
-        });
-        this.makeTexture('stepBox', 120, 160, (gfx) => {
-            gfx.fillStyle(0xd0a56a, 1);
-            gfx.fillRoundedRect(0, 0, 120, 160, 8);
-            gfx.lineStyle(4, 0xb2854b, 1);
-            gfx.strokeRect(6, 6, 108, 148);
-            gfx.lineBetween(0, 54, 120, 54);               // slats
-            gfx.lineBetween(0, 106, 120, 106);
         });
 
         // The closed fridge in the room. Sized like the LivingRoom cabinet (160

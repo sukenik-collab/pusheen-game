@@ -86,6 +86,13 @@ playtest; the art rework below is what's freshest.
   working); same halo fix as the sloth's. Branch geometry moved by a couple
   of px (`SLOTH.restHeight` 159 → 160) — re-derived, not eyeballed; see the
   comment on it.
+- **The kitchen's two climbing steps are real art:** a step stool and a
+  mint rolling cart (`step-stool.png`, `step-cart.png`), cut by
+  `tools/cut_prop.py`. Both are drawn in 3/4 view, so she doesn't stand on a
+  sprite's top edge (that's the far rim); the sprites are drawn only and she
+  lands on invisible one-way ledges halfway back across each top face, the
+  same way the counter already worked. The script sizes each step so that
+  face sits at the step's height, which stayed 80/160/240.
 - `kitchen-bg.png` and the two awake poses (`sloth-awake.png` standing
   mid-stretch, `sloth-sitting.png` settled on his belly, cut from
   `docs/concept-art/sloth3.png` and `sloth1.png`) are unchanged. All three Sloth
@@ -97,12 +104,13 @@ playtest; the art rework below is what's freshest.
    - **Sloth** hang: `SLOTH.restHeight` (feel.js), `SLOTH_X` (Backyard.js), and
      `TREE_X`/`TREE_SCALE`/`GRASS_TOP` for the scenery around him. `restHeight`
      is derived from `TREE_SCALE`, so re-derive it if the tree is rescaled.
-   - **Kitchen counter climb:** the standable counter body sits ~20px below the
-     painted counter surface, and the hop margins are tight by design — nudge
-     `COUNTER_TOP_FROM_GROUND` + `STOOL_H`/`BOX_H` in Kitchen.js.
+   - **Kitchen counter climb:** the hop margins are tight by design (each
+     rise is 80px of a ~82px hop). Heights are `STOOL_TOP`/`CART_TOP`/
+     `COUNTER_TOP_FROM_GROUND` in Kitchen.js; the step art is sized to them,
+     so moving one means re-cutting that step (see `tools/README.md`).
 2. **Missing art:** the remaining placeholders (screenDoor, gardenGate,
-   stepStool, stepBox, fridgeInside, glass, orangeJuice, juicePitcher, item
-   decoys) are generated shapes; see the punch-list.
+   fridgeInside, glass, orangeJuice, juicePitcher, item decoys) are
+   generated shapes; see the punch-list.
    → **`docs/pusheen-v2-art-assets.md`** (status + sizes + tuning knobs).
    The awake Sloth poses are done — the wake beat now stretches, plods clear
    on the standing pose (a waddle tween carries the steps; there's no
