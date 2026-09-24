@@ -17,26 +17,55 @@ const SPAWN_POINTS = {
     fromBackyard: { x: 150 }
 };
 
-// Two little steps up to the high counter: floor -> stool -> box -> counter top.
-// Each rise is within a normal hop (~82px apex). Heights are tuned to the
-// counter in the kitchen backdrop -- expect a small pass once art is final
-// (the counter body currently sits ~20px below the painted counter surface).
-const STOOL_H = 80;                 // top at groundTop - 80
-const BOX_H = 160;                  // top at groundTop - 160
-const COUNTER_TOP_FROM_GROUND = 240; // top at groundTop - 240
+// Two little steps up to the high counter: floor -> stool -> cart -> counter
+// top. Each rise is within a normal hop (~82px apex) -- only just, by design.
+// The counter's height is tuned to the kitchen backdrop, where she stands at
+// its front lip; the steps are sized to these heights, not the other way round.
+const STOOL_TOP = 80;
+const CART_TOP = 160;
+const COUNTER_TOP_FROM_GROUND = 240;
 const COUNTER_X = 875;
 const COUNTER_W = 350;              // spans ~700..1050
 
-// One-way climbing steps (top-face only) so she walks freely past them and only
-// lands on their tops. The counter itself is an invisible one-way body built in
-// create() (the backdrop draws the counter); the fridge is in the backdrop too.
-// Wide + adjacent so each hop is mostly vertical: the stool (450..590) meets the
-// box (590..710), which meets the counter's left end (~700). Body widths come
-// from the textures (140, 120); h here just sets yFromGround.
+// The steps' art (tools/cut_prop.py) is drawn in 3/4 view, so the sprite's
+// top edge is the far rim of its top face -- standing there reads as
+// hovering. She stands halfway back across that face instead, and the script
+// scales each step so that line lands at its STOOL_TOP/CART_TOP. So the
+// sprites are drawn only, sitting on the floor, and she lands on invisible
+// ledges (LEDGES) at those heights, sized to each top face's width.
+//
+// Placed so each hop is mostly vertical: the stool's face (479..591) and the
+// cart's (608..698) are closer together than she is wide, and the cart's
+// meets the counter's left end (700). She can stand across a gap and hop.
+// Sprite and face sizes are what cut_prop.py prints; re-take them on a re-cut.
+const STOOL_X = 535;
+const CART_X = 655;
 const LAYOUT = [
-    { name: 'stepStool', role: 'standable', oneWay: true, sprite: 'stepStool', x: 520, h: STOOL_H, yFromGround: STOOL_H / 2 },
-    { name: 'stepBox', role: 'standable', oneWay: true, sprite: 'stepBox', x: 650, h: BOX_H, yFromGround: BOX_H / 2 }
+    { name: 'stepStool', role: 'background', sprite: 'stepStool', x: STOOL_X, w: 125, h: 97 },
+    { name: 'stepCart', role: 'background', sprite: 'stepCart', x: CART_X, w: 118, h: 169 }
 ];
+
+// Invisible one-way ledges (top face only), so she walks freely past the steps
+// and jumps up through them, landing only on top. `top` is height above the
+// floor. The backdrop draws the counter, so it's one too. The cart's top
+// face sits 1.6px left of its sprite's centre (cut_prop.py prints both).
+const LEDGE_THICKNESS = 24;
+const LEDGES = [
+    { x: STOOL_X, w: 112, top: STOOL_TOP },
+    { x: CART_X - 1.6, w: 90, top: CART_TOP },
+    { x: COUNTER_X, w: COUNTER_W, top: COUNTER_TOP_FROM_GROUND }
+];
+
+function addLedge (scene, { x, w, top }, groundTop)
+{
+    const surface = groundTop - top;
+    const ledge = scene.add.rectangle(x, surface + LEDGE_THICKNESS / 2, w, LEDGE_THICKNESS).setVisible(false);
+    scene.physics.add.existing(ledge, true);
+    ledge.body.checkCollision.down = false;
+    ledge.body.checkCollision.left = false;
+    ledge.body.checkCollision.right = false;
+    return ledge;
+}
 
 // The fridge opens to its lit interior (panel: 'fridgeInside'). The OJ pitcher
 // fills the glass she's carrying (fillHeld), gated on holding the glass --
@@ -71,18 +100,12 @@ export class Kitchen extends Scene
 
         this.add.image(width / 2, height / 2, 'kitchenBg').setDisplaySize(width, height);
 
-        this.solids = buildLayout(this, LAYOUT, groundTop);
+        buildLayout(this, LAYOUT, groundTop);
 
-        // The counter top she climbs onto: an invisible one-way platform over
-        // the backdrop's painted countertop. She walks off either end to drop
-        // back down (no climbing back down the steps needed).
+        // Stool, cart and counter top. She walks off either end of any of them
+        // to drop back down (no climbing back down the steps needed).
+        this.solids = LEDGES.map((ledge) => addLedge(this, ledge, groundTop));
         const counterTop = groundTop - COUNTER_TOP_FROM_GROUND;
-        const counter = this.add.rectangle(COUNTER_X, counterTop + 12, COUNTER_W, 24).setVisible(false);
-        this.physics.add.existing(counter, true);
-        counter.body.checkCollision.down = false;
-        counter.body.checkCollision.left = false;
-        counter.body.checkCollision.right = false;
-        this.solids.push(counter);
 
         // The glass sits out on the counter -- only reachable once she's climbed
         // up beside it. Gone once taken (glass:taken) so it doesn't respawn.
