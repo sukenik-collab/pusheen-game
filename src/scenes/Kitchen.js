@@ -37,19 +37,31 @@ const COUNTER_W = 350;              // spans ~700..1050
 //
 // Placed so each hop is mostly vertical: the short box (442..606) and the
 // tall one (568..736) overlap, and the tall one overlaps the counter's left
-// end (700). She can stand across each join and hop straight up.
+// end (700). She can stand at the short box's right end with her body over
+// the tall one, and on the tall one's right end with it over the counter,
+// and hop straight up.
 const BOXES_X = 589;
 const LAYOUT = [
     { name: 'stepBoxes', role: 'background', sprite: 'stepBoxes', x: BOXES_X, w: 298, h: 174 }
 ];
+
+// Arcade keeps her standing while any part of her body overlaps a ledge, and
+// her body is 110 wide (Pusheen.js). A ledge as wide as its box let her stand
+// with her centre ~55px past the box's drawn edge, on thin air. So each box's
+// ledge is inset by her half-width, less a little grace: she stands while her
+// centre is over the drawn top (to within EDGE_GRACE), and tips off where the
+// box visibly ends. The counter isn't inset -- the painted counter runs on
+// past both ends of its ledge, so there's no drawn edge to match.
+const EDGE_GRACE = 10;
+const BOX_EDGE_INSET = 55 - EDGE_GRACE;
 
 // Invisible one-way ledges (top face only), so she walks freely past the boxes
 // and jumps up through them, landing only on top. `top` is height above the
 // floor. The backdrop draws the counter, so it's one too.
 const LEDGE_THICKNESS = 24;
 const LEDGES = [
-    { x: BOXES_X - 65, w: 164, top: LOW_BOX_TOP },
-    { x: BOXES_X + 63, w: 168, top: TALL_BOX_TOP },
+    { x: BOXES_X - 65, w: 164 - 2 * BOX_EDGE_INSET, top: LOW_BOX_TOP },
+    { x: BOXES_X + 63, w: 168 - 2 * BOX_EDGE_INSET, top: TALL_BOX_TOP },
     { x: COUNTER_X, w: COUNTER_W, top: COUNTER_TOP_FROM_GROUND }
 ];
 
