@@ -17,26 +17,64 @@ const SPAWN_POINTS = {
     fromBackyard: { x: 150 }
 };
 
-// Two little steps up to the high counter: floor -> stool -> box -> counter top.
-// Each rise is within a normal hop (~82px apex). Heights are tuned to the
-// counter in the kitchen backdrop -- expect a small pass once art is final
-// (the counter body currently sits ~20px below the painted counter surface).
-const STOOL_H = 80;                 // top at groundTop - 80
-const BOX_H = 160;                  // top at groundTop - 160
-const COUNTER_TOP_FROM_GROUND = 240; // top at groundTop - 240
+// Two little steps up to the high counter: floor -> short box -> tall box ->
+// counter top. Each rise is within a normal hop (~82px apex) -- only just, by
+// design. The counter's height is tuned to the kitchen backdrop, where she
+// stands at its front lip; the boxes are drawn to these heights, not the
+// other way round.
+const LOW_BOX_TOP = 80;
+const TALL_BOX_TOP = 160;
+const COUNTER_TOP_FROM_GROUND = 240;
 const COUNTER_X = 875;
 const COUNTER_W = 350;              // spans ~700..1050
 
-// One-way climbing steps (top-face only) so she walks freely past them and only
-// lands on their tops. The counter itself is an invisible one-way body built in
-// create() (the backdrop draws the counter); the fridge is in the backdrop too.
-// Wide + adjacent so each hop is mostly vertical: the stool (450..590) meets the
-// box (590..710), which meets the counter's left end (~700). Body widths come
-// from the textures (140, 120); h here just sets yFromGround.
+// Both boxes are one sprite (tools/draw_boxes.py), sitting on the floor. They
+// show their top faces a little from above, like the counter, so she stands
+// halfway back across a top face rather than on the sprite's top edge (the
+// far rim): the sprite is drawn only, and she lands on invisible ledges
+// (LEDGES) at LOW_BOX_TOP / TALL_BOX_TOP, which is where the script draws
+// those lines. Sizes and offsets are what it prints; re-take them on a redraw.
+//
+// Placed so each hop is mostly vertical: the short box (442..606) and the
+// tall one (568..736) overlap, and the tall one overlaps the counter's left
+// end (700). She can stand at the short box's right end with her body over
+// the tall one, and on the tall one's right end with it over the counter,
+// and hop straight up.
+const BOXES_X = 589;
 const LAYOUT = [
-    { name: 'stepStool', role: 'standable', oneWay: true, sprite: 'stepStool', x: 520, h: STOOL_H, yFromGround: STOOL_H / 2 },
-    { name: 'stepBox', role: 'standable', oneWay: true, sprite: 'stepBox', x: 650, h: BOX_H, yFromGround: BOX_H / 2 }
+    { name: 'stepBoxes', role: 'background', sprite: 'stepBoxes', x: BOXES_X, w: 298, h: 174 }
 ];
+
+// Arcade keeps her standing while any part of her body overlaps a ledge, and
+// her body is 110 wide (Pusheen.js). A ledge as wide as its box let her stand
+// with her centre ~55px past the box's drawn edge, on thin air. So each box's
+// ledge is inset by her half-width, less a little grace: she stands while her
+// centre is over the drawn top (to within EDGE_GRACE), and tips off where the
+// box visibly ends. The counter isn't inset -- the painted counter runs on
+// past both ends of its ledge, so there's no drawn edge to match.
+const EDGE_GRACE = 10;
+const BOX_EDGE_INSET = 55 - EDGE_GRACE;
+
+// Invisible one-way ledges (top face only), so she walks freely past the boxes
+// and jumps up through them, landing only on top. `top` is height above the
+// floor. The backdrop draws the counter, so it's one too.
+const LEDGE_THICKNESS = 24;
+const LEDGES = [
+    { x: BOXES_X - 65, w: 164 - 2 * BOX_EDGE_INSET, top: LOW_BOX_TOP },
+    { x: BOXES_X + 63, w: 168 - 2 * BOX_EDGE_INSET, top: TALL_BOX_TOP },
+    { x: COUNTER_X, w: COUNTER_W, top: COUNTER_TOP_FROM_GROUND }
+];
+
+function addLedge (scene, { x, w, top }, groundTop)
+{
+    const surface = groundTop - top;
+    const ledge = scene.add.rectangle(x, surface + LEDGE_THICKNESS / 2, w, LEDGE_THICKNESS).setVisible(false);
+    scene.physics.add.existing(ledge, true);
+    ledge.body.checkCollision.down = false;
+    ledge.body.checkCollision.left = false;
+    ledge.body.checkCollision.right = false;
+    return ledge;
+}
 
 // The fridge opens to its lit interior (panel: 'fridgeInside'). The OJ pitcher
 // fills the glass she's carrying (fillHeld), gated on holding the glass --
@@ -71,18 +109,12 @@ export class Kitchen extends Scene
 
         this.add.image(width / 2, height / 2, 'kitchenBg').setDisplaySize(width, height);
 
-        this.solids = buildLayout(this, LAYOUT, groundTop);
+        buildLayout(this, LAYOUT, groundTop);
 
-        // The counter top she climbs onto: an invisible one-way platform over
-        // the backdrop's painted countertop. She walks off either end to drop
-        // back down (no climbing back down the steps needed).
+        // Both boxes and the counter top. She walks off either end of any of
+        // them to drop back down (no climbing back down the steps needed).
+        this.solids = LEDGES.map((ledge) => addLedge(this, ledge, groundTop));
         const counterTop = groundTop - COUNTER_TOP_FROM_GROUND;
-        const counter = this.add.rectangle(COUNTER_X, counterTop + 12, COUNTER_W, 24).setVisible(false);
-        this.physics.add.existing(counter, true);
-        counter.body.checkCollision.down = false;
-        counter.body.checkCollision.left = false;
-        counter.body.checkCollision.right = false;
-        this.solids.push(counter);
 
         // The glass sits out on the counter -- only reachable once she's climbed
         // up beside it. Gone once taken (glass:taken) so it doesn't respawn.

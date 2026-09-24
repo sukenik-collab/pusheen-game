@@ -17,7 +17,9 @@ The game is fully playable either way.
   `sloth-hanging-back.png`) are generated from `docs/concept-art/` by
   **`tools/`** — see `tools/README.md`. Re-run those rather than hand-editing
   if you change the source art; they also print the geometry
-  `SLOTH.restHeight` and `SLOTH.gripRow` are derived from.
+  `SLOTH.restHeight` and `SLOTH.gripRow` are derived from. `step-boxes.png`
+  is drawn from scratch by `tools/draw_boxes.py`, which prints what the
+  kitchen places it and its ledges from.
 - Style: *flat cartoon Pusheen style — thick clean outlines, flat solid colors,
   no gradients/shading, soft rounded corners, chunky cute proportions.*
 
@@ -51,8 +53,7 @@ Sky (`#BACBF4`) and grass (`#80A56F`) are `add.rectangle` fills, not images.
 | `kitchenBg` | 1376×768 | ✅ `kitchen-bg.png` | Wall, window-to-backyard, countertop, **and the fridge** all painted in. |
 | *(fridge)* | — | ✅ in backdrop | No separate sprite — the fridge is part of `kitchenBg`; the Container is an invisible zone over it (`hidden: true`). |
 | `fridgeInside` | 640×300 | ▫️ placeholder | The lit fridge interior shown as the peek-panel backdrop when it opens. |
-| `stepStool` | 140×80 | ▫️ placeholder | First climbing step up to the counter. |
-| `stepBox` | 120×160 | ▫️ placeholder | Second climbing step. |
+| `stepBoxes` | 298×174 | ✅ `step-boxes.png` | The climb to the counter: a short and a tall cardboard box, one sprite, taped shut with shipping labels. Drawn by `tools/draw_boxes.py` so the middle of each top face sits exactly 80 and 160px up, where she lands on invisible ledges -- not the sprite's top edge, which is a top face's far rim. Replaced the `stepStool` / `stepBox` placeholders. |
 | `screenDoor` | 76×150 | ▫️ placeholder | Kitchen→Backyard screen door (same key as above). |
 
 ## Items (peek-panel icons + counter/carried sprites)
@@ -84,9 +85,12 @@ panel), `pusheen` / `pusheencorn` (carry accessory is a separate child sprite).
 - **Tree** placement: `TREE_X` / `TREE_SCALE`, and `GRASS_TOP` for the horizon
   (all Backyard.js). The branch must stay thick enough to hide his far arms'
   cut tops (`tools/cut_sloth.py` prints how high they reach).
-- **Kitchen counter** climb: the standable counter body sits ~20px below the
-  painted counter surface — nudge `COUNTER_TOP_FROM_GROUND` / step heights in
-  `Kitchen.js` to line up once art placement is confirmed.
+- **Kitchen counter** climb: floor → short box (80) → tall box (160) →
+  counter (240), each rise just inside a normal hop. The counter ledge puts
+  her at its painted front lip. The boxes are *drawn to* those heights, so
+  changing one means redrawing with a matching `stand` in
+  `tools/draw_boxes.py`, then copying what it prints into `Kitchen.js`'s
+  `LAYOUT` and `LEDGES`.
 
 ## Optional — P4 cozy extras (not built)
 
