@@ -1,4 +1,7 @@
 # Pusheen Cozy Game — MVP Product Brief
+
+> **Update (2026-09):** the MVP slice shipped and the game has grown past it (`HANDOFF.md`). This brief still holds the why and the success and kill criteria; its out-of-scope and deferred lists feed `ROADMAP.md`.
+
 *"The Living Room Snack Hunt" vertical slice*
 
 Status: draft v0.1 · Owner: [you] · Collaborator: [your kid] · Target build: web (Phaser)
