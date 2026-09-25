@@ -87,8 +87,9 @@ playtest; the art rework below is what's freshest.
   of px (`SLOTH.restHeight` 159 → 160) — re-derived, not eyeballed; see the
   comment on it.
 - **The kitchen climb is two cardboard boxes** (`step-boxes.png`, one
-  sprite), drawn from scratch by `tools/draw_boxes.py` -- a stool and a
-  rolling cart were tried first and read as pasted in from another picture.
+  sprite), cut by `tools/cut_boxes.py` from `docs/concept-art/kitchen_boxes.jpg`
+  -- a stool and a rolling cart were tried first and read as pasted in from
+  another picture.
   The boxes show their tops a little from above, like the counter, so she
   lands on invisible one-way ledges halfway back across each top face (80
   and 160px up), the same way the counter already worked, rather than on the
