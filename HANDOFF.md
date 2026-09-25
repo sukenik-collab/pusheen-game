@@ -1,140 +1,113 @@
-# HANDOFF — v2 "Wake Me for Juice" (Room Pair #2)
+# HANDOFF
 
-Working state for picking this up later. Last updated 2026-07-13.
+Where the game stands and how it hangs together. Last updated 2026-09-25.
+**What to do next is in [`ROADMAP.md`](ROADMAP.md)**; this file is the state
+of play.
+
+## Start here next time
+
+1. Open `ROADMAP.md` at **Now**. Item 1 (the invisible fridge labels) is a
+   quick win; item 2 (the art batch) needs you to generate images first,
+   using `docs/art-prompts.md`.
+2. `npm run dev` serves the game at http://localhost:8080 (it boots in the
+   Backyard). `npm run build` must pass before any PR.
+3. Work on a branch; `main` is what's live.
 
 ## Where things stand
 
-- **Branch:** `feat/v2-room-pair-2` (pushed to origin). Based on the v1.5
-  refactor, which is **already merged to `main`** — so a PR from this branch to
-  `main` shows only the v2 diff and merges cleanly. **Not yet merged (your call).**
-- **Build:** `npm run build` passes. **Play:** `npm run dev`.
-- **Boot room is the Backyard** (`Preloader` → `Backyard`). The LivingRoom +
-  Bedroom are unreachable until you wake Sloth (the connecting gate is
-  reveal-gated).
+- **`main` is the playable build.** Netlify deploys it to
+  https://pusheen-game.netlify.app/ on every merge, and every PR gets its
+  own deploy preview (the Netlify bot comments the link).
+- **Nothing is in flight.** v2 ("Wake Me for Juice", Room Pair #2) and the
+  art work since are all merged.
+- **Signed off at the last playtest:** Sloth's hang from the branch and the
+  kitchen climb.
 
-## What this slice is
+## The game today
 
-A garden→kitchen quest that opens up the existing house:
+One small connected house. It boots in the Backyard:
 
-> Meet **Sloth** (asleep, hanging from the backyard tree) → he asks for juice →
-> in the **Kitchen**, climb onto the counter for a **glass** → fill it at the
-> **fridge** (OJ pitcher) → carry it back → **give it to Sloth** → he wakes,
-> drops down, ambles off, and a **garden gate** is revealed → through it to the
-> **LivingRoom** (the original snack + nap slice, now reached later).
-> "Play again" resets and drops you back in the Backyard.
+> Meet **Sloth**, asleep on the backyard tree. He'd like juice. In the
+> **Kitchen**, climb two cardboard boxes onto the counter for a **glass**,
+> fill it at the **fridge**, and carry it back. He wakes, drops down, ambles
+> off, and a **garden gate** appears. Through it is the **LivingRoom**, the
+> original slice: the snack in the cabinet, Stormy's lost yarn and the
+> sunbeam nap, then "Play again".
 
-Full spec: `docs/pusheen-v2-room-pair-2-spec.md`. It plays well as of last
-playtest; the art rework below is what's freshest.
+The **Bedroom** is off the LivingRoom. Its costume box turns Pusheen into
+Pusheencorn, whose floatier jump reaches the high shelf. There are no fail
+states, timers or enemies anywhere.
 
-## Built & working (P0–P3 + art rework)
+## Art: what's real and what isn't
 
-- **Rooms:** `Backyard` + `Kitchen` (v1.5 data-driven scenes), screen door
-  between them; garden gate → LivingRoom (reveal-gated); LivingRoom gained a
-  `fromBackyard` spawn + return door; Play-again transitions to Backyard.
-- **Carry system:** `held:item` ∈ none/glass/juice → a Pusheen accessory sprite
-  + jump multiplier, re-derived in the Pusheen **constructor** every room and
-  kept live via a registry subscription. `setFacing()` flips the accessory.
-- **Glass on the counter:** `HeldPickup` entity (direct `take`). Pusheen must
-  **climb onto the counter** to reach it — step stool → box → counter, all
-  one-way platforms (walk off the edge to drop down).
-- **Fridge:** painted into the kitchen backdrop; an invisible `Container` zone
-  (`hidden:true`) opens to the lit interior (`fridgeInside` panel) showing the
-  **OJ pitcher** (fills the held glass, gated on holding it) among decoys
-  (milk/cheese/leftovers) that give the gentle nope.
-- **Sloth:** hangs from the branch; flag-branched dialogue; one-time **wake
-  beat** (yawn → drop off branch with a bounce → amble left → sparkles) that
-  freezes input while it plays. On drop he **nudges Pusheen aside** so the
-  revealed gate isn't under her feet — she has to walk to it. Reveal wired via
-  `bindReveal('juice:delivered', …)`.
-- **Doors:** `Door` takes a `texture` option; screen doors + garden gate use it.
-  A door also **arms only once Pusheen is clear of its zone**, so it can't fire
-  on someone already standing in it. That is load-bearing, not defensive: the
-  garden gate is revealed at exactly the spot she stands to hand over the juice,
-  and without it the delivery yanked her to the LivingRoom in the same frame —
-  before the wake beat played or the gate had even faded in.
-- **Sloth's post-wake line is a costume Easter egg**, not an unreachable branch.
-  He settles past the gate, so hearing it takes the Pusheencorn high jump to
-  clear the gate (normal jump is 36px short; costumed clears by 75px). Spec §4
-  has the numbers and, importantly, the two things not to "fix" — a grounded-only
-  door trigger or a shorter `SLOTH.amblePx` would each quietly remove it.
+- **Real, cut from `docs/concept-art/` by the scripts in `tools/`:** the
+  backyard tree, the hanging Sloth (two layers), and the kitchen boxes. See
+  `tools/README.md`.
+- **Real, from earlier work:** the kitchen backdrop, Sloth's awake and
+  sitting poses, and the original rooms' sprites (Pusheen, Pusheencorn,
+  Stormy, furniture). Some of those were cut from concept art; others are
+  SVGs in `scripts/new-room-art.html`, rasterized by
+  `scripts/gen-new-room-art.mjs`.
+- **Still placeholder shapes** (drawn in `Preloader.makeTexture`): the
+  garden gate, the screen door, the fridge interior, the glass and juice
+  glass, the OJ pitcher, milk, cheese and leftovers. Prompts to generate
+  them are in `docs/art-prompts.md`; sizes and status in
+  `docs/pusheen-v2-art-assets.md`.
+- **Audio** is synthesized CC0 placeholders;
+  `public/assets/audio/CREDITS.md` suggests real replacements.
 
-## Real art wired
+## Load-bearing details (don't "fix" these)
 
-- **The Backyard is layered**, not one painted backdrop. `Backyard.create()`
-  stacks sky → clouds → sun → grass → hedge → tree back to front (creation order
-  is depth order). Sky and grass are `add.rectangle` fills; hedge, sun and cloud
-  are generated in `Preloader`; only `backyard-tree.png` is art. That split is
-  what lets the branch be scaled and placed to the pixel, which is how Sloth
-  came to actually grip it instead of hanging near it.
-- **The hanging Sloth wraps the branch** as two layers the tree draws
-  between: `sloth-hanging-back.png` (just his far arms, under the tree) and
-  `sloth-hanging-front.png` (head, body, near arms and all four paws hooked
-  over the top, over it). Both are cut together by `tools/cut_sloth.py` from
-  art generated *with* a branch through it, which is keyed out. The back
-  layer lives outside Sloth's container (a container draws all its children
-  at one depth), so `Sloth.syncBackLayer` copies the front's transforms onto
-  it every frame — any tween moves both. The hanging pose also pivots on
-  `SLOTH.gripRow`, where his claws hook over, so breathing and the yawn keep
-  his paws on the branch instead of lifting them. This replaced a single
-  sprite with a hole the branch had to fill to the pixel, whose far arms ended
-  in flat tops that read as cut off in front of the branch.
-  `SLOTH.restHeight` is derived from the same registration — see the comment
-  on it.
-- **`backyard-tree.png`** re-cut from a second tree source, drawn alone on flat
-  magenta rather than fused into a whole-scene mockup. `cut_tree.py` keys that
-  by default now (`--no-magenta` keeps the original whole-scene source
-  working); same halo fix as the sloth's. Branch geometry moved by a couple
-  of px (`SLOTH.restHeight` 159 → 160) — re-derived, not eyeballed; see the
-  comment on it.
-- **The kitchen climb is two cardboard boxes** (`step-boxes.png`, one
-  sprite), cut by `tools/cut_boxes.py` from `docs/concept-art/kitchen_boxes.jpg`
-  -- a stool and a rolling cart were tried first and read as pasted in from
-  another picture.
-  The boxes show their tops a little from above, like the counter, so she
-  lands on invisible one-way ledges halfway back across each top face (80
-  and 160px up), the same way the counter already worked, rather than on the
-  sprite's top edge.
-- `kitchen-bg.png` and the two awake poses (`sloth-awake.png` standing
-  mid-stretch, `sloth-sitting.png` settled on his belly, cut from
-  `docs/concept-art/sloth3.png` and `sloth1.png`) are unchanged. All three Sloth
-  poses are now pre-cropped to display size and swap in at scale 1.
+- **Doors arm only once Pusheen is clear of their zone.** The garden gate
+  appears exactly where she stands to hand over the juice. Without this,
+  the delivery warped her to the LivingRoom mid wake-up.
+- **Sloth's post-wake line is a costume Easter egg.** He settles past the
+  gate, so hearing it takes Pusheencorn's jump (a normal jump is 36px
+  short). A grounded-only door trigger or a shorter `SLOTH.amblePx` would
+  quietly remove it; the v2 spec §4 has the numbers.
+- **The kitchen hops are tight on purpose.** Each rise is 80px of a ~82px
+  hop. `LOW_BOX_TOP`, `TALL_BOX_TOP` and `COUNTER_TOP_FROM_GROUND` in
+  `Kitchen.js` and the box art are cut to each other, so change them
+  together (`tools/README.md`).
+- **The box ledges are narrower than the boxes on purpose:** inset by her
+  half-width less 10px, so she can't stand on thin air past an edge. The
+  counter's ledge isn't inset, because its painted top runs on past both
+  ends.
+- **The hanging Sloth is two layers with the tree drawn between them.** The
+  back layer lives outside his container, and `Sloth.syncBackLayer` copies
+  his transforms onto it every frame. The hang pivots on `SLOTH.gripRow`,
+  so breathing keeps his paws on the branch. `SLOTH.restHeight` is derived
+  from the tree and sprite geometry: re-derive it, don't eyeball it (the
+  comment on it in `feel.js` shows how).
+- **In the Backyard, creation order is depth order** (sky, clouds, sun,
+  grass, hedge, tree). There's no `setDepth`.
 
-## TODO when you pick this up
+## How the pieces fit
 
-1. **Playtest-tune placements** (I couldn't pixel-verify without rendering):
-   - **Sloth** hang: `SLOTH.restHeight` (feel.js), `SLOTH_X` (Backyard.js), and
-     `TREE_X`/`TREE_SCALE`/`GRASS_TOP` for the scenery around him. `restHeight`
-     is derived from `TREE_SCALE`, so re-derive it if the tree is rescaled.
-   - **Kitchen counter climb:** the hop margins are tight by design (each
-     rise is 80px of a ~82px hop). Heights are `LOW_BOX_TOP`/`TALL_BOX_TOP`/
-     `COUNTER_TOP_FROM_GROUND` in Kitchen.js; the boxes are drawn to them, so
-     moving one means redrawing (see `tools/README.md`).
-2. **Missing art:** the remaining placeholders (screenDoor, gardenGate,
-   fridgeInside, glass, orangeJuice, juicePitcher, item decoys) are
-   generated shapes; see the punch-list.
-   → **`docs/pusheen-v2-art-assets.md`** (status + sizes + tuning knobs).
-   The awake Sloth poses are done — the wake beat now stretches, plods clear
-   on the standing pose (a waddle tween carries the steps; there's no
-   walk-cycle art) and flops onto the sitting pose where he stops.
-3. **Optional P4 cozy extras** (spec §5): butterflies, flowers, hammock/lemon —
-   only if desired.
-4. **Merge:** open a PR `feat/v2-room-pair-2` → `main` and merge when happy.
+- **Rooms** are data-driven (the v1.5 refactor): each scene has a `LAYOUT`
+  of passive furniture (`src/systems/roomBuilder.js`), interactables
+  register with `InteractionController`, and doors name the room and spawn
+  point they lead to (`src/scenes/roomTransition.js`).
+- **Run state** lives in the Phaser registry (`src/config/gameState.js`:
+  `held:item`, `sloth:met`, `glass:taken`, `juice:delivered`, …). "Play
+  again" resets it.
+- **Carrying:** `held:item` (none, glass or juice) sets Pusheen's accessory
+  sprite and a gentler jump (`CARRY` in `feel.js`).
+- **Reveals:** `bindReveal(flag, …)` (`src/systems/Reveal.js`) fades the
+  garden gate in when `juice:delivered` flips.
+- **The UI scene** (`src/scenes/UI.js`) runs alongside the rooms: the HUD,
+  the touch buttons, and the peek panel for the cabinet and fridge.
+- **Tunables** are all in `src/config/feel.js`.
 
-## Key files
+## Docs map
 
-- Scenes: `src/scenes/Backyard.js`, `Kitchen.js`, `LivingRoom.js` (house wiring),
-  `Preloader.js` (art + placeholders).
-- Entities: `src/entities/Sloth.js`, `HeldPickup.js`, `Container.js` (panel +
-  hidden), `Door.js` (texture), `Pusheen.js` (carry).
-- Config: `src/config/feel.js` (CARRY, SLOTH, SLOTH_RADAR, …),
-  `src/config/gameState.js` (run-state keys: held:item, sloth:met,
-  glass:taken, juice:delivered).
-
-## Recent commits (newest first)
-
-- `41bb0be` docs: art punch-list update
-- `177565a` real kitchen art + climb onto the counter
-- `204c68d` real backyard art, door sprites, delivery/reveal flow fix
-- `282bfbe` art rework: backdrops, hanging Sloth, counter glass, fridge interior
-- `1097789` v2 slice: Backyard + Kitchen, juice quest, connected house
-- `56fe8af` v2 infra: held-item carry + content-item gates
+| File | What it's for |
+|---|---|
+| `ROADMAP.md` | What's next, in order, and a log of decisions |
+| `HANDOFF.md` | This file: the state of play |
+| `CLAUDE.md` | Working rules for Claude sessions |
+| `docs/art-prompts.md` | Gemini prompts for the art still missing |
+| `docs/pusheen-v2-art-assets.md` | Every v2 sprite: size, status, tuning notes |
+| `tools/README.md` | How concept art becomes sprites |
+| `docs/pusheen-mvp-product-brief.md` | The why, plus the success and kill criteria |
+| `docs/pusheen-mvp-design-doc.md`, `pusheen-mvp-tech-spec.md`, `pusheen-v1.5-refactor-spec.md`, `pusheen-v2-room-pair-2-spec.md` | The specs as built: feel targets and architecture history |

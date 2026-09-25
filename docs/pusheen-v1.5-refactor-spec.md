@@ -1,5 +1,7 @@
 # Pusheen — v1.5 Refactor Spec (pre-Room-Pair-#2)
 
+> **Update (2026-09):** shipped. Its non-goals (§1) are the engine work parked in `ROADMAP.md`, Later.
+
 **Status:** authoritative (supersedes the stale `pusheen-mvp-tech-spec.md`).
 **Scope:** internal refactor only. **Zero player-visible change.** The existing
 playtest — snack peek, nap payoff, the 3-yarn quest across both rooms, the
