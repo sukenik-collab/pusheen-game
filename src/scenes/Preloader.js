@@ -63,8 +63,8 @@ export class Preloader extends Scene
         // scaled to the 1280x720 canvas. All three Sloth poses are transparent
         // sprites pre-cropped to their display size.
         this.load.image('kitchenBg', 'assets/sprites/kitchen-bg.png');
-        // The two cardboard boxes she climbs to the counter, one sprite drawn by
-        // tools/draw_boxes.py. Where she stands is inside the art, not its top
+        // The two cardboard boxes she climbs to the counter, one sprite cut by
+        // tools/cut_boxes.py. Where she stands is inside the art, not its top
         // edge -- Kitchen.js gives each box an invisible ledge there.
         this.load.image('stepBoxes', 'assets/sprites/step-boxes.png');
         // The Backyard is layered rather than a single backdrop: sky, grass and

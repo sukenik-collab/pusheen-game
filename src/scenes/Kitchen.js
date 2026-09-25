@@ -28,21 +28,22 @@ const COUNTER_TOP_FROM_GROUND = 240;
 const COUNTER_X = 875;
 const COUNTER_W = 350;              // spans ~700..1050
 
-// Both boxes are one sprite (tools/draw_boxes.py), sitting on the floor. They
+// Both boxes are one sprite (tools/cut_boxes.py), sitting on the floor. They
 // show their top faces a little from above, like the counter, so she stands
 // halfway back across a top face rather than on the sprite's top edge (the
 // far rim): the sprite is drawn only, and she lands on invisible ledges
-// (LEDGES) at LOW_BOX_TOP / TALL_BOX_TOP, which is where the script draws
-// those lines. Sizes and offsets are what it prints; re-take them on a redraw.
+// (LEDGES) at LOW_BOX_TOP / TALL_BOX_TOP, which is where the script scales
+// those lines to. Sizes and offsets are what it prints; re-take them on a
+// re-cut.
 //
-// Placed so each hop is mostly vertical: the short box (442..606) and the
-// tall one (568..736) overlap, and the tall one overlaps the counter's left
+// Placed so each hop is mostly vertical: the short box (443..606) and the
+// tall one (568..735) overlap, and the tall one overlaps the counter's left
 // end (700). She can stand at the short box's right end with her body over
 // the tall one, and on the tall one's right end with it over the counter,
 // and hop straight up.
 const BOXES_X = 589;
 const LAYOUT = [
-    { name: 'stepBoxes', role: 'background', sprite: 'stepBoxes', x: BOXES_X, w: 298, h: 174 }
+    { name: 'stepBoxes', role: 'background', sprite: 'stepBoxes', x: BOXES_X, w: 295, h: 176 }
 ];
 
 // Arcade keeps her standing while any part of her body overlaps a ledge, and
@@ -60,8 +61,8 @@ const BOX_EDGE_INSET = 55 - EDGE_GRACE;
 // floor. The backdrop draws the counter, so it's one too.
 const LEDGE_THICKNESS = 24;
 const LEDGES = [
-    { x: BOXES_X - 65, w: 164 - 2 * BOX_EDGE_INSET, top: LOW_BOX_TOP },
-    { x: BOXES_X + 63, w: 168 - 2 * BOX_EDGE_INSET, top: TALL_BOX_TOP },
+    { x: BOXES_X - 64.7, w: 163 - 2 * BOX_EDGE_INSET, top: LOW_BOX_TOP },
+    { x: BOXES_X + 62.2, w: 167 - 2 * BOX_EDGE_INSET, top: TALL_BOX_TOP },
     { x: COUNTER_X, w: COUNTER_W, top: COUNTER_TOP_FROM_GROUND }
 ];
 
