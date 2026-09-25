@@ -1,11 +1,14 @@
 # Pusheen Cozy Game
 
-A tiny, single-screen "vibe-slice": a plump cat wanders a cozy living-room
-corner, peeks in a cabinet, finds a snack, and naps in a sunbeam. No enemies,
-no timer, no fail state. This MVP exists to test one thing — is guided,
-low-stakes pottering around a room actually delightful, or just pleasant-but-
-boring? See `docs/pusheen-mvp-product-brief.md` for the full hypothesis and
-success criteria.
+A small, cozy fan game: a plump cat potters around a little connected house.
+She fetches juice to wake Sloth in the backyard, finds a snack, helps Stormy
+find her yarn, and naps in a sunbeam. No enemies, no timer, no fail state. It
+exists to test one thing — is guided, low-stakes pottering around a house
+actually delightful, or just pleasant-but-boring? See
+`docs/pusheen-mvp-product-brief.md` for the full hypothesis and success
+criteria.
+
+An unofficial, non-commercial fan project; not affiliated with Pusheen Corp.
 
 ![screenshot](screenshot.png)
 
@@ -21,8 +24,8 @@ https://pusheen-game.netlify.app/
 |---|---|---|
 | Move | Arrow keys / A, D | On-screen `<` / `>` buttons |
 | Jump | Space / W / Up | On-screen `^` button |
-| Interact (open/close cabinet, take item) | E | On-screen `E` button |
-| Select item in the cabinet | 1 / 2 / 3 | Tap the item |
+| Interact (talk, open/close the cabinet or fridge, take an item) | E | On-screen `E` button |
+| Select an item in the cabinet or fridge | 1 – 4 | Tap the item |
 | Play again (after the nap) | Space | Tap the button |
 | Music / SFX menu | — | ♪ button, top-right |
 
@@ -45,13 +48,14 @@ npm run build    # production build to dist/
 | Path | Contents |
 |---|---|
 | `src/main.js` | Phaser game config + scene list |
-| `src/config/feel.js` | All tunable movement/animation constants |
-| `src/config/audioManifest.js` | Music tracks + SFX sets available in-game |
-| `src/scenes/` | `Preloader`, `LivingRoom` (gameplay), `UI` (HUD/controls, parallel scene) |
-| `src/entities/` | One class per game object — `Pusheen`, `Cabinet`, `Cushion`, `Sunbeam` |
+| `src/config/` | `feel.js` (all tunable movement/animation constants), `gameState.js` (run state), `audioManifest.js` (music + SFX sets) |
+| `src/scenes/` | `Preloader`, the four rooms (`Backyard`, `Kitchen`, `LivingRoom`, `Bedroom`), `UI` (HUD, controls, peek panel; runs alongside) |
+| `src/entities/` | One class per game object — `Pusheen`, `Sloth`, `Stormy`, `Container`, `Door`, … |
+| `src/systems/` | Shared wiring: data layouts, interactions, reveals |
 | `src/audio/AudioController.js` | Music/SFX playback, ducking, mute |
+| `tools/` | Python scripts that cut concept art into sprites |
 | `public/assets/` | Sprites and audio, served as static files |
-| `docs/` | Product brief, design doc, tech spec — the why, the feel targets, the architecture |
+| `docs/` | Specs, the art asset list and art prompts, and the concept art |
 
 ## Audio
 
@@ -64,8 +68,8 @@ logic changes needed.
 
 ## Status
 
-All five build phases (movement, room, cabinet, nap payoff, audio) are done
-and merged to `main`. There's no automated test suite by design — the MVP is
+Where things stand is in `HANDOFF.md`; what's next, in order, is in
+`ROADMAP.md`. There's no automated test suite by design — the game is
 validated through playtesting against the feel-based success criteria in
 `docs/pusheen-mvp-product-brief.md`, not a checklist of features. See
 `CLAUDE.md` for the project's working rules and `docs/` for the full spec set.

@@ -1,5 +1,7 @@
 # Pusheen — v2 Spec: Room Pair #2, "Wake Me for Juice"
 
+> **Update (2026-09):** shipped (P0–P3). Of the §5 cozy extras, the butterfly is planned (`ROADMAP.md`, Now) and the rest are parked under Later.
+
 **Status:** authoritative. **Depends on v1.5** (`pusheen-v1.5-refactor-spec.md`) —
 every room here is expressed in v1.5's vocabulary (data layout + typed
 interactable factory + interaction controller + container/gate/reveal + named
