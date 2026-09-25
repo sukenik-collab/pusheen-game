@@ -2,7 +2,8 @@
 
 Status of each asset: **✅ real art** (wired from `docs/concept-art`), or
 **▫️ placeholder** (generated shape in `Preloader.makeTexture`, awaiting art).
-The game is fully playable either way.
+The game is fully playable either way. Gemini prompts for the placeholders
+are in `docs/art-prompts.md`.
 
 ## Conventions
 
@@ -94,4 +95,5 @@ panel), `pusheen` / `pusheencorn` (carry accessory is a separate child sprite).
 
 ## Optional — P4 cozy extras (not built)
 
-`butterfly`, `flower`, `lemon`.
+`butterfly` is planned (`ROADMAP.md`, Now; prompt 7 in `docs/art-prompts.md`).
+`flower` and `lemon` are parked under Later.

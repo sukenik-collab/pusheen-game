@@ -1,4 +1,7 @@
 # Pusheen Cozy Game — MVP Tech Spec
+
+> **Update (2026-09):** shipped (all build phases). Kept as the design record; the current structure is in `CLAUDE.md`, and what's next in `ROADMAP.md`.
+
 *"The Living Room Snack Hunt" vertical slice*
 
 > ⚠️ **STALE — historical reference only.** This describes the original

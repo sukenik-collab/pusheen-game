@@ -1,4 +1,7 @@
 # Pusheen Cozy Game — MVP Design Doc
+
+> **Update (2026-09):** shipped. Kept as the record of the feel targets; the live numbers are in `src/config/feel.js`.
+
 *"The Living Room Snack Hunt" vertical slice*
 
 Status: draft v0.1 · Companion to: MVP Product Brief · Implementation detail lives in: Tech Spec
