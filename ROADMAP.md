@@ -9,13 +9,13 @@ choice is made.
 
 ## Now: polish what's there
 
-1. [ ] **Fix the invisible fridge labels** (S). Item names in the peek panel
+1. [x] **Fix the invisible fridge labels** (S). Item names in the peek panel
    are white text (`src/scenes/UI.js`, `populatePeekPanel`) on the fridge's
    near-white interior, so they vanish; they only read on the cabinet's dark
    drawer. A dark outline stroke works on both panels.
    *Done when:* every item name reads on both panels.
 
-2. [ ] **Real art for the remaining placeholders** (M; you go first).
+2. [x] **Real art for the remaining placeholders** (M; you go first).
    - You: generate with `docs/art-prompts.md` (garden gate, screen door,
      glass and juice glass, OJ pitcher, milk, cheese, leftovers, fridge
      interior) and save them to `docs/concept-art/`.
@@ -24,7 +24,10 @@ choice is made.
      `docs/pusheen-v2-art-assets.md`, wire them in, and check them in the
      game.
    - *Done when:* no generated placeholder shapes remain apart from the
-     backyard scenery that's generated on purpose (sun, clouds, hedge).
+     backyard scenery that's generated on purpose (sun, clouds, hedge). Still
+     generated on purpose: `sun`, `cloud`, `bushes` (Backyard), and the
+     unused `fridge` closed-door texture (the fridge is painted into
+     `kitchenBg`; nothing draws this key).
 
 3. [ ] **Sloth's wake beat: poses, walk art, animation, pacing** (M to L).
    Today he yawns on the branch, drops onto the arms-up stretch pose, plods
@@ -125,6 +128,17 @@ choice is made.
 
 ## Decided
 
+- 2026-09-28: The fridge items stand on the fridge art's shelf, spread
+  inside its back wall, rather than in the fixed-spacing row the cabinet
+  uses (that row ran past the fridge's frame and left short items floating
+  above the shelf). They're cut at one shared scale, keeping their drawn
+  proportions, instead of each being forced into its own box.
+- 2026-09-28: The garden gate's generated art came out wider than the
+  prompt's "twice as tall as wide" (posts flanking a picket panel, closer to
+  square overall). Rather than regenerate, its walk-into zone is sized to
+  just the picket panel (the part that would actually swing); the posts are
+  decorative and can extend past it. `Door.js` gained a per-instance
+  `zoneWidth` for this — the screen door still uses the shared default.
 - 2026-09-25: Polish, then metrics, then share, before any engine refactor.
 - 2026-09-25: Share publicly as an unofficial, non-commercial fan project,
   with a disclaimer on the splash screen.

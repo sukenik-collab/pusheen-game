@@ -28,6 +28,12 @@ const COUNTER_TOP_FROM_GROUND = 240;
 const COUNTER_X = 875;
 const COUNTER_W = 350;              // spans ~700..1050
 
+// The glass stands on the painted counter top, its base this far back from
+// the front lip she stands on: in front of the mugs (their bases sit ~23-33px
+// back) and clear of the counter's front edge line (~12px back). On the lip
+// itself it read as hanging in front of the counter.
+const GLASS_SET_BACK = 20;
+
 // Both boxes are one sprite (tools/cut_boxes.py), sitting on the floor. They
 // show their top faces a little from above, like the counter, so she stands
 // halfway back across a top face rather than on the sprite's top edge (the
@@ -119,7 +125,7 @@ export class Kitchen extends Scene
 
         // The glass sits out on the counter -- only reachable once she's climbed
         // up beside it. Gone once taken (glass:taken) so it doesn't respawn.
-        this.glass = new HeldPickup(this, COUNTER_X - 25, counterTop - 42, { sprite: 'glass', gives: 'glass', flag: 'glass:taken' });
+        this.glass = new HeldPickup(this, COUNTER_X - 25, counterTop - GLASS_SET_BACK - 42, { sprite: 'glass', gives: 'glass', flag: 'glass:taken' });
 
         // The refrigerator is drawn into the backdrop (right side); this is its
         // invisible interaction zone, opening to the lit interior.

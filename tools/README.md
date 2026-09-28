@@ -1,9 +1,12 @@
 # tools — art cutting
 
-Three scripts that turn the concept art in `docs/concept-art/` into the
-transparent PNGs the game loads. They are how `backyard-tree.png`, the two
-hanging-sloth layers and the kitchen's climbing boxes were made; re-running
-any of them with no arguments reproduces the shipped files byte for byte.
+Scripts that turn the concept art in `docs/concept-art/` into the transparent
+PNGs the game loads. They are how `backyard-tree.png`, the two hanging-sloth
+layers, the kitchen's climbing boxes, the two doorways, the fridge interior,
+the glasses and the fridge items were made; re-running any of them with no
+arguments reproduces the shipped files byte for byte (`cut_prop.py` and
+`cut_items.py` need their `--src`/`--out`/size flags every time -- they cut
+whichever prop or item image you point them at, not one fixed source).
 
 ```bash
 pip install pillow scipy          # not part of the npm toolchain
@@ -11,11 +14,29 @@ pip install pillow scipy          # not part of the npm toolchain
 python3 tools/cut_tree.py         # -> public/assets/sprites/backyard-tree.png
 python3 tools/cut_sloth.py        # -> public/assets/sprites/sloth-hanging-{front,back}.png
 python3 tools/cut_boxes.py        # -> public/assets/sprites/step-boxes.png
+
+# A single free-standing prop (a door, the fridge interior): fit to one
+# target dimension, the other follows the source's own aspect ratio.
+python3 tools/cut_prop.py --src docs/concept-art/screen_door.jpg \
+    --out public/assets/sprites/screen-door.png --height 150
+
+# One image, several items: split by connected component, left to right.
+# Each to its own box (the glasses, which must match to the pixel)...
+python3 tools/cut_items.py --src docs/concept-art/glasses.jpg \
+    --item "glass=66x84:public/assets/sprites/glass.png" \
+    --item "orangeJuice=66x84:public/assets/sprites/orange-juice.png"
+# ...or all at one scale, keeping their drawn proportions (the fridge items).
+python3 tools/cut_items.py --src docs/concept-art/fridge_items.jpg --same-scale 100 \
+    --item "itemMilk:public/assets/sprites/item-milk.png" \
+    --item "itemCheese:public/assets/sprites/item-cheese.png" \
+    --item "itemLeftovers:public/assets/sprites/item-leftovers.png" \
+    --item "juicePitcher:public/assets/sprites/juice-pitcher.png"
 ```
 
 Add `--preview out.png` to any of them to see the result on the scene's
 palette, which is the fastest way to spot a halo or a leftover fringe
-(`cut_boxes.py`'s also marks the lines she stands on, in red).
+(`cut_boxes.py`'s also marks the lines she stands on, in red; `cut_prop.py`'s
+marks a `--posts` split; `cut_items.py` writes one preview per item).
 
 ## Why these aren't just a background delete
 
@@ -93,6 +114,33 @@ and fits one scale that puts both middles at their step heights, 80 and
 160px above the floor. That only works if the source's two faces sit close
 to 1:2, so it refuses a source where either would land more than 1.5px off.
 
+## `cut_prop.py` and `cut_items.py`
+
+Both key the background directly (every bg-scored pixel is background),
+rather than flood-filling out from the border like `cut_tree.py`'s magenta
+path. A flood only reaches background that's connected to the edge, and two
+of these sources have background pockets that aren't: the garden gate's
+picket tops touch at their rounded peak, sealing off the magenta gap between
+each picket from the sky above it, and the OJ pitcher's handle encloses a
+pocket of background. A flood would leave both baked in as opaque magenta. Nothing else in these sources paints a colour close enough
+to magenta for the direct key to over-trigger.
+
+`cut_prop.py`'s `--posts` split (the garden gate's picket panel vs. its two
+posts) classifies one row rather than voting over each column's full height,
+because two things share the posts' own dark wood colour without being post:
+the diagonal brace, which can dominate whichever picket it lands near the top
+of, and the post's own ivy overlay, which eats into *its* colour the same
+way. A single clean row (`--posts-row`, picked clear of both) sidesteps the
+ambiguity entirely; `--preview` marks where it landed in red, so a bad
+`--posts-row` is obvious at a glance.
+
+`cut_items.py` sizes items one of two ways. `--item name=WxH:out.png`
+resizes each straight to its own box -- for the glasses, which swap in for
+each other and must match to the pixel. `--same-scale PX` gives every item
+one scale, the tallest coming out PX tall -- for the fridge items, which
+stand side by side on a shelf: forcing each into its own box stretched some
+(the cheese by 17%) and made their sizes relative to each other arbitrary.
+
 ## The numbers they print
 
 `cut_tree.py` reports the trunk base row and the branch's thickness and height
@@ -122,6 +170,11 @@ all.
 | `updated_hanging_sloth_manual_edit.png` | `cut_sloth.py` (default) | Magenta background, **green** branch, fur re-matched to the awake poses. Cuts both layers in the game today. |
 | `hanging-sloth-source.png` | `cut_sloth.py --no-simple` | The original source: magenta background, **tan** branch close enough to the sloth's own outline colour to defeat a plain colour key. Superseded, but it still cuts (its far arms need `--far`). |
 | `kitchen_boxes.jpg` | `cut_boxes.py` | Both boxes together on flat magenta, JPEG. The tall box's top face sits at 2.01x the short one's height, which is what lets one scale land both on their steps. |
+| `garden_gate.jpg` | `cut_prop.py --posts` | The gate alone on flat magenta. Posts `202,124,76`, panel (picket faces) `227,159,110`; `--posts-row 0.247` lands clear of the rails, brace and ivy. |
+| `screen_door.jpg` | `cut_prop.py` | The door alone on flat magenta. |
+| `fridge_inside.jpg` | `cut_prop.py` | The empty interior alone on flat magenta. |
+| `glasses.jpg` | `cut_items.py` | Empty and full glass, side by side. |
+| `fridge_items.jpg` | `cut_items.py --same-scale 100` | Milk, cheese, leftovers tub and the OJ pitcher, left to right in the source (not the prompt's pitcher-first order -- match `--item` specs by shape, not by re-reading the prompt). |
 
 `SLOTH.restHeight` and `SLOTH.gripRow` in `feel.js` are derived from whichever
 sprites are currently cut in — re-derive them (the comments on those
