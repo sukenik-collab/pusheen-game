@@ -8,8 +8,28 @@ const MARGIN = 24;
 const PANEL_OPEN_MS = 220;
 const PANEL_CLOSE_MS = 180;
 
-const ITEM_SIZE = 90;
+// A panel without a shelf (the cabinet's drawer): items centred in a row.
 const ITEM_SPACING = 160;
+const ROW_ITEM_Y = -10;
+const ROW_LABEL_Y = 55;
+
+// Panels whose art has a shelf, in panel-centre coordinates measured from the
+// art. fridge-inside.png (640x350): the shelf's back edge is at +28 and its
+// front edge at +43, the back wall spans -214..+213 and the lower compartment
+// +58..+107. Items stand with their bases on shelfY, spread with even gaps
+// from left to right, inside the back wall so none overlaps the frame.
+const PANEL_SHELVES = {
+    fridgeInside: { shelfY: 38, left: -200, right: 200, labelY: 83 }
+};
+
+// A dark outline so item names read on any panel: the fridge's pale interior
+// as well as the drawer's dark wood.
+const LABEL_STYLE = { fontSize: '18px', color: '#ffffff', stroke: '#3e2c23', strokeThickness: 4 };
+
+// The key-number badges: a dark chip, so it reads on either panel too.
+const NUMBER_STYLE = { fontSize: '16px', color: '#ffffff', backgroundColor: '#3e2c23cc', padding: { x: 6, y: 2 } };
+const NUMBER_GAP = 6;       // px between the number row and the tallest item's top
+
 const NOPE_SHAKE_PX = 8;
 const NOPE_SHAKE_MS = 55;
 
@@ -84,8 +104,9 @@ export class UI extends Scene
             this.updateInteractButtonVisibility();
 
             if (value) {
-                this.panelBg.setTexture(this.registry.get('peek:panel') ?? 'drawer');
-                this.populatePeekPanel(this.registry.get('peek:contents') ?? []);
+                const panel = this.registry.get('peek:panel') ?? 'drawer';
+                this.panelBg.setTexture(panel);
+                this.populatePeekPanel(this.registry.get('peek:contents') ?? [], panel);
                 this.openPeekPanel();
             } else {
                 this.closePeekPanel();
@@ -193,28 +214,37 @@ export class UI extends Scene
         this.itemBoxes = [];
     }
 
-    populatePeekPanel (contents)
+    populatePeekPanel (contents, panel)
     {
         this.itemObjects.forEach((obj) => obj.destroy());
         this.itemObjects = [];
         this.itemBoxes = [];
 
-        // Center any item count, not just 3: the middle item (or gap) lands on
-        // the panel's x=0. (Was hardcoded to -ITEM_SPACING, dead-center for 3
-        // only -- the cupboard/fridge carry a different count.)
-        const startX = -((contents.length - 1) / 2) * ITEM_SPACING;
+        const shelf = PANEL_SHELVES[panel];
+        const boxes = contents.map((item) => this.add.image(0, 0, item.sprite).setInteractive());
+        const xs = shelf ? shelfXs(boxes, shelf) : rowXs(boxes.length);
+
+        // Standing on the shelf: each base on the shelf line, so short and
+        // tall items all rest on it. Otherwise centred on the row.
+        boxes.forEach((box, i) => {
+            if (shelf) {
+                box.setOrigin(0.5, 1).setPosition(xs[i], shelf.shelfY);
+            } else {
+                box.setPosition(xs[i], ROW_ITEM_Y);
+            }
+        });
+
+        // The key numbers share one row just above the tallest item, each
+        // centred over its own, so they read as a line to scan without the
+        // labels -- in any panel, whatever mix of heights it holds.
+        const numberY = Math.min(...boxes.map((box) => box.getTopLeft().y)) - NUMBER_GAP;
 
         contents.forEach((item, i) => {
-            const itemX = startX + i * ITEM_SPACING;
-            const box = this.add.image(itemX, -10, item.sprite)
-                .setInteractive();
-            const label = this.add.text(itemX, 55, item.label, { fontSize: '18px', color: '#ffffff' })
+            const box = boxes[i];
+            const label = this.add.text(xs[i], shelf ? shelf.labelY : ROW_LABEL_Y, item.label, LABEL_STYLE)
                 .setOrigin(0.5);
-            const numberHint = this.add.text(itemX - ITEM_SIZE / 2 + 4, -10 - ITEM_SIZE / 2 + 4, String(i + 1), {
-                fontSize: '14px',
-                color: '#ffffff',
-                backgroundColor: '#00000066'
-            }).setOrigin(0, 0);
+            const numberHint = this.add.text(xs[i], numberY, String(i + 1), NUMBER_STYLE)
+                .setOrigin(0.5, 1);
 
             this.peekPanel.add(box);
             this.peekPanel.add(label);
@@ -457,4 +487,26 @@ export class UI extends Scene
         this.audioMenuOpen = visible;
         this.audioPanelParts.forEach((part) => part.setVisible(visible));
     }
+}
+
+// Centres of a row of `count` items at ITEM_SPACING, the middle item (or gap)
+// on the panel's x=0, for any count.
+function rowXs (count)
+{
+    const startX = -((count - 1) / 2) * ITEM_SPACING;
+    return Array.from({ length: count }, (_, i) => startX + i * ITEM_SPACING);
+}
+
+// Centres of items spread along a shelf: the first starts at `left`, the last
+// ends at `right`, with even gaps between them however wide each one is.
+function shelfXs (boxes, { left, right })
+{
+    const total = boxes.reduce((sum, box) => sum + box.width, 0);
+    const gap = (right - left - total) / (boxes.length - 1);
+    let x = left;
+    return boxes.map((box) => {
+        const centre = x + box.width / 2;
+        x += box.width + gap;
+        return centre;
+    });
 }

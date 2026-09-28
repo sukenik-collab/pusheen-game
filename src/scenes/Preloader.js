@@ -3,11 +3,6 @@ import { TRACKS, SFX_SETS } from '../config/audioManifest.js';
 import { resetRunState } from '../config/gameState.js';
 import { AudioController } from '../audio/AudioController.js';
 
-// The dark brown the real art outlines everything with. The generated item
-// placeholders were flat fills with no outline at all, which is most of why
-// they read as not-in-style next to the drawn sprites.
-const ITEM_OUTLINE = 0x5a3a24;
-
 // The Backyard's scenery palette, sampled from the tree art so the generated
 // layers sit in the same world as it. Sky and grass are flat fills the scene
 // draws itself (Backyard.js) rather than images; bushLine is where the horizon
@@ -80,6 +75,22 @@ export class Preloader extends Scene
         this.load.image('slothAwake', 'assets/sprites/sloth-awake.png');
         this.load.image('slothSitting', 'assets/sprites/sloth-sitting.png');
 
+        // The two doorways, the fridge's insides, and its contents -- all cut
+        // by tools/cut_prop.py or tools/cut_items.py from docs/concept-art.
+        // The garden gate is wider than its door frame: two decorative posts
+        // (ivy on the left, the latch on the right) flank the picket panel
+        // that actually swings, which is what Door.js's zoneWidth is sized to
+        // (see Backyard.js) rather than the sprite's own full width.
+        this.load.image('screenDoor', 'assets/sprites/screen-door.png');
+        this.load.image('gardenGate', 'assets/sprites/garden-gate.png');
+        this.load.image('fridgeInside', 'assets/sprites/fridge-inside.png');
+        this.load.image('glass', 'assets/sprites/glass.png');
+        this.load.image('orangeJuice', 'assets/sprites/orange-juice.png');
+        this.load.image('juicePitcher', 'assets/sprites/juice-pitcher.png');
+        this.load.image('itemMilk', 'assets/sprites/item-milk.png');
+        this.load.image('itemCheese', 'assets/sprites/item-cheese.png');
+        this.load.image('itemLeftovers', 'assets/sprites/item-leftovers.png');
+
         // A tiny soft dot, reused as the sunbeam's dust-mote particle texture.
         const g = this.add.graphics();
         g.fillStyle(0xffffff, 1);
@@ -92,23 +103,6 @@ export class Preloader extends Scene
         // into real art later. Each is sized to its intended footprint. The
         // room backdrops are full 1280x720 images that the real art replaces.
 
-        // Dedicated door art (placeholders): a screen door for the room-to-room
-        // screen doorways, and a garden gate for the backyard's revealed path.
-        this.makeTexture('screenDoor', 76, 150, (gfx) => {
-            gfx.fillStyle(0x8a6d4f, 1);
-            gfx.fillRoundedRect(0, 0, 76, 150, 8);          // frame
-            gfx.fillStyle(0xcfe3d8, 1);
-            gfx.fillRect(8, 8, 60, 134);                    // mesh panel
-            gfx.lineStyle(1, 0x9fb8ad, 1);
-            for (let mx = 14; mx < 68; mx += 8) gfx.lineBetween(mx, 8, mx, 142);
-            for (let my = 14; my < 142; my += 8) gfx.lineBetween(8, my, 68, my);
-        });
-        this.makeTexture('gardenGate', 76, 150, (gfx) => {
-            gfx.fillStyle(0xb98c5a, 1);
-            for (let px = 6; px < 70; px += 20) gfx.fillRoundedRect(px, 20, 12, 128, 4);  // pickets
-            gfx.fillRoundedRect(2, 46, 72, 12, 4);          // rails
-            gfx.fillRoundedRect(2, 104, 72, 12, 4);
-        });
         // The Backyard's scenery, in the same flat style as the tree art it sits
         // with: thick dark outline, flat fill, no shading. Sky and grass are
         // rectangles in the scene, so only these three need textures.
@@ -170,97 +164,6 @@ export class Preloader extends Scene
             gfx.fillRect(0, 68, 150, 6);           // door split
             gfx.fillRoundedRect(122, 22, 12, 44, 6);   // handle
         });
-        // The fridge interior -- the peek panel backdrop when the fridge opens
-        // (wide enough for its four items). Shelves + a cool interior.
-        this.makeTexture('fridgeInside', 640, 300, (gfx) => {
-            gfx.fillStyle(0xdfeef2, 1);
-            gfx.fillRoundedRect(0, 0, 640, 300, 14);
-            gfx.fillStyle(0xffffff, 1);
-            gfx.fillRoundedRect(16, 16, 608, 268, 10);   // lit interior
-            gfx.fillStyle(0xcfe0e4, 1);
-            gfx.fillRect(28, 150, 584, 8);               // a shelf
-        });
-        // An empty glass (sits on the counter), and the same glass filled with
-        // juice (what she carries after filling it).
-        this.makeTexture('glass', 66, 84, (gfx) => {
-            gfx.fillStyle(0xbfe0ef, 0.9);
-            gfx.fillRoundedRect(12, 6, 42, 74, 8);
-        });
-        this.makeTexture('orangeJuice', 66, 84, (gfx) => {
-            gfx.fillStyle(0xff9d2e, 1);
-            gfx.fillRoundedRect(15, 28, 36, 50, 6);   // juice
-            gfx.fillStyle(0xbfe0ef, 0.55);
-            gfx.fillRoundedRect(12, 6, 42, 74, 8);    // glass over it
-        });
-        // The OJ pitcher inside the fridge (fill the glass from it). Handle on
-        // the LEFT, spout on the RIGHT -- they were both on the right, stacked
-        // on top of each other, which is not a shape a jug can be.
-        this.makeTexture('juicePitcher', 112, 112, (gfx) => {
-            // Handle first so the body covers its inner half and it reads as
-            // attached rather than as a ring parked beside the jug.
-            gfx.lineStyle(11, 0xffb861, 1);
-            gfx.strokeCircle(32, 66, 20);
-            gfx.lineStyle(4, ITEM_OUTLINE, 1);
-            gfx.strokeCircle(32, 66, 26);
-            gfx.strokeCircle(32, 66, 15);
-
-            gfx.fillStyle(0xff9d2e, 1);
-            gfx.fillRoundedRect(34, 24, 58, 80, 13);   // body of juice
-            gfx.fillStyle(0xffb861, 1);
-            gfx.fillRoundedRect(34, 24, 58, 20, 11);   // lighter juice line
-            gfx.lineStyle(4, ITEM_OUTLINE, 1);
-            gfx.strokeRoundedRect(34, 24, 58, 80, 13);
-
-            // Spout last, so it sits over the body outline it grows out of.
-            gfx.fillStyle(0xffb861, 1);
-            gfx.fillTriangle(86, 34, 108, 44, 86, 58);
-            gfx.lineStyle(4, ITEM_OUTLINE, 1);
-            gfx.beginPath();
-            gfx.moveTo(86, 34);
-            gfx.lineTo(108, 44);
-            gfx.lineTo(86, 58);
-            gfx.strokePath();                          // outer edges only
-        });
-        // Cozy fridge decoys -- selecting any of these gives the gentle nope.
-        // Warm off-white, NOT #ffffff: the fridge interior behind it is pure
-        // white, so the old carton was invisible apart from its label band.
-        this.makeTexture('itemMilk', 72, 100, (gfx) => {
-            gfx.fillStyle(0xf6efe2, 1);
-            gfx.fillRoundedRect(10, 32, 52, 60, 7);
-            gfx.fillStyle(0x7db7e8, 1);
-            gfx.fillTriangle(10, 34, 62, 34, 36, 8);   // gable roof
-            gfx.fillRoundedRect(16, 58, 40, 18, 4);    // label band
-            gfx.lineStyle(4, ITEM_OUTLINE, 1);
-            gfx.strokeRoundedRect(10, 32, 52, 60, 7);
-            gfx.strokeTriangle(10, 34, 62, 34, 36, 8);
-        });
-        // A blunt-nosed wedge rather than a bare right triangle, with the
-        // outline and real outlined holes -- the flat sharp triangle with two
-        // darker dots read as a smudge, not as cheese.
-        this.makeTexture('itemCheese', 96, 76, (gfx) => {
-            const wedge = [
-                { x: 22, y: 60 }, { x: 68, y: 60 }, { x: 82, y: 48 },
-                { x: 82, y: 28 }, { x: 70, y: 22 }, { x: 20, y: 52 }
-            ];
-            gfx.fillStyle(0xf6c945, 1);
-            gfx.fillPoints(wedge, true);
-            gfx.lineStyle(4, ITEM_OUTLINE, 1);
-            gfx.strokePoints(wedge, true);
-
-            gfx.fillStyle(0xe0a91f, 1);
-            gfx.lineStyle(3, ITEM_OUTLINE, 1);
-            [[54, 44, 7], [70, 38, 5], [42, 50, 4]].forEach(([hx, hy, r]) => {
-                gfx.fillCircle(hx, hy, r);
-                gfx.strokeCircle(hx, hy, r);
-            });
-        });
-        this.makeTexture('itemLeftovers', 86, 68, (gfx) => {
-            gfx.fillStyle(0xbcdce6, 0.85);
-            gfx.fillRoundedRect(6, 14, 74, 48, 10);    // tub
-            gfx.fillStyle(0x9fc9d6, 1);
-            gfx.fillRoundedRect(2, 8, 82, 14, 7);      // lid
-        });
-
         // Audio: every selectable track + every SFX set's clips. The file path
         // doubles as the load key, so the manifest is the only place paths live.
         TRACKS.forEach((track) => this.load.audio(track.file, track.file));

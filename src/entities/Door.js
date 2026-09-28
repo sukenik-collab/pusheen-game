@@ -17,6 +17,11 @@ const HEIGHT = 150;
 //   initiallyActive : default true; false = a reveal-gated hidden door, inert
 //                     and undrawn until activate() runs (see the Reveal
 //                     primitive). Unused in v1.5 -- both doors ship active.
+//   zoneWidth       : default WIDTH; the garden gate's art is wider than a
+//                     doorway (two decorative posts flank the picket panel
+//                     that actually swings), so its walk-into zone is sized
+//                     to just that panel instead of the shared default --
+//                     see tools/cut_prop.py's --posts and Backyard.js.
 export class Door extends GameObjects.Container
 {
     constructor (scene, x, groundTop, opts = {})
@@ -31,7 +36,8 @@ export class Door extends GameObjects.Container
         this.to = opts.to ?? null;
         this.enterAt = opts.enterAt ?? null;
 
-        this.zone = new Geom.Rectangle(x - WIDTH / 2, groundTop - HEIGHT, WIDTH, HEIGHT);
+        const zoneWidth = opts.zoneWidth ?? WIDTH;
+        this.zone = new Geom.Rectangle(x - zoneWidth / 2, groundTop - HEIGHT, zoneWidth, HEIGHT);
         this.triggered = false;
 
         // Walking *into* a doorway is what opens it -- so it won't fire on
