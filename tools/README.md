@@ -3,10 +3,12 @@
 Scripts that turn the concept art in `docs/concept-art/` into the transparent
 PNGs the game loads. They are how `backyard-tree.png`, the two hanging-sloth
 layers, the kitchen's climbing boxes, the two doorways, the fridge interior,
-the glasses and the fridge items were made; re-running any of them with no
-arguments reproduces the shipped files byte for byte (`cut_prop.py` and
-`cut_items.py` need their `--src`/`--out`/size flags every time -- they cut
-whichever prop or item image you point them at, not one fixed source).
+the glasses, the fridge items and the butterfly rig were made; re-running any
+of them with no arguments reproduces the shipped files byte for byte
+(`cut_prop.py` and `cut_items.py` need their `--src`/`--out`/size flags every
+time -- they cut whichever prop or item image you point them at, not one
+fixed source; `cut_butterfly.py` defaults to the one butterfly source there
+is today).
 
 ```bash
 pip install pillow scipy          # not part of the npm toolchain
@@ -31,6 +33,12 @@ python3 tools/cut_items.py --src docs/concept-art/fridge_items.jpg --same-scale 
     --item "itemCheese:public/assets/sprites/item-cheese.png" \
     --item "itemLeftovers:public/assets/sprites/item-leftovers.png" \
     --item "juicePitcher:public/assets/sprites/juice-pitcher.png"
+
+# A five-piece animated rig from one image: body+antennae plus four wing
+# quadrants, split at the body's own centre so Butterfly.js can flap each
+# wing independently. Copy the printed origins into WING_ORIGIN/BODY_ORIGIN
+# there on any re-cut.
+python3 tools/cut_butterfly.py --width 56
 ```
 
 Add `--preview out.png` to any of them to see the result on the scene's
@@ -122,8 +130,9 @@ path. A flood only reaches background that's connected to the edge, and two
 of these sources have background pockets that aren't: the garden gate's
 picket tops touch at their rounded peak, sealing off the magenta gap between
 each picket from the sky above it, and the OJ pitcher's handle encloses a
-pocket of background. A flood would leave both baked in as opaque magenta. Nothing else in these sources paints a colour close enough
-to magenta for the direct key to over-trigger.
+pocket of background. A flood would leave both baked in as opaque magenta.
+Nothing else in these sources paints a colour close enough to magenta for the
+direct key to over-trigger.
 
 `cut_prop.py`'s `--posts` split (the garden gate's picket panel vs. its two
 posts) classifies one row rather than voting over each column's full height,
@@ -140,6 +149,44 @@ each other and must match to the pixel. `--same-scale PX` gives every item
 one scale, the tallest coming out PX tall -- for the fridge items, which
 stand side by side on a shelf: forcing each into its own box stretched some
 (the cheese by 17%) and made their sizes relative to each other arbitrary.
+
+## `cut_butterfly.py`
+
+One image, five sprites: body+antennae and four wing quadrants, so
+`Butterfly.js` can flap each wing independently instead of animating one flat
+sprite. Keys the background directly, like `cut_prop.py`/`cut_items.py` above
+-- the cheese wedge isn't the only source with an enclosed background pocket
+a border flood would miss; here it's the small gap between the antennae and
+the head that a flood would leave opaque.
+
+The four wings are plain rectangular quadrants of the whole cutout, split at
+the body blob's own centre (measured by its fill colour, `--body-color`),
+which is also where all four visually attach. Splitting there rather than at
+a fixed fraction means a redrawn butterfly with a bigger or smaller body
+still splits in the right place. Each wing's crop reaches a little past the
+split lines into its two neighbours (`--wing-overlap`, in final sprite px,
+not source px, so it means the same thing at any `--width`): cut exactly on
+the line, independent rounding when each piece is resized to its own target
+size left a 1-2px gap at some flap angles once the wing was actually
+scaling -- fine as a still image, not once animated. The overlap is pure
+redundancy (both pieces sample the same source pixels there), so which one
+draws on top there doesn't matter.
+
+The body piece is its own colour-and-region mask, not a rectangular crop:
+the thorax blob unioned with the antennae, which are found as the only solid
+content inside a box above the thorax (`--antenna-box`) -- nothing of the
+wings reaches that high in the shipped source. A plain rectangular crop
+there would duplicate a strip of real, static wing pixels right next to the
+antennae, sitting on top of the wing piece that's supposed to flap under it
+and freezing part of the flap in that strip. `--preview` marks the split
+point and the antenna box, so a differently-proportioned source can be
+checked before trusting either.
+
+Each piece's origin -- where the split point landed inside its own crop, as
+a fraction -- is printed on every run and goes straight into `BODY_ORIGIN`/
+`WING_ORIGIN` in `Butterfly.js`. The wings' come out close to one corner but
+essentially never exactly on it, once `--wing-overlap` has pushed that
+corner's edge past the split line.
 
 ## The numbers they print
 
@@ -175,6 +222,7 @@ all.
 | `fridge_inside.jpg` | `cut_prop.py` | The empty interior alone on flat magenta. |
 | `glasses.jpg` | `cut_items.py` | Empty and full glass, side by side. |
 | `fridge_items.jpg` | `cut_items.py --same-scale 100` | Milk, cheese, leftovers tub and the OJ pitcher, left to right in the source (not the prompt's pitcher-first order -- match `--item` specs by shape, not by re-reading the prompt). |
+| `butterfly.jpg` | `cut_butterfly.py` | The butterfly alone on flat magenta, symmetric about its own body. |
 
 `SLOTH.restHeight` and `SLOTH.gripRow` in `feel.js` are derived from whichever
 sprites are currently cut in — re-derive them (the comments on those
