@@ -6,8 +6,9 @@ of play.
 
 ## Start here next time
 
-1. Open `ROADMAP.md` at **Now**. Items 1 (fridge labels) and 2 (the art
-   batch) are done; item 3 (Sloth's wake beat) is next.
+1. Open `ROADMAP.md` at **Now**. Items 1 (fridge labels), 2 (the art batch)
+   and 4 (the butterfly) are done; item 3 (Sloth's wake beat) is next. The
+   butterfly hasn't had a playtest yet — see "Where things stand".
 2. `npm run dev` serves the game at http://localhost:8080 (it boots in the
    Backyard). `npm run build` must pass before any PR.
 3. Work on a branch; `main` is what's live.
@@ -21,6 +22,9 @@ of play.
   art work since are all merged.
 - **Signed off at the last playtest:** Sloth's hang from the branch and the
   kitchen climb.
+- **Not yet playtested:** the backyard butterfly (`ROADMAP.md` item 4, just
+  landed) — does the wander actually read as alive, and does it ever look
+  like it's heading somewhere specific rather than meandering?
 
 ## The game today
 
@@ -37,13 +41,18 @@ The **Bedroom** is off the LivingRoom. Its costume box turns Pusheen into
 Pusheencorn, whose floatier jump reaches the high shelf. There are no fail
 states, timers or enemies anywhere.
 
+A shy **butterfly** wanders the Backyard's sky on its own; it drifts away if
+Pusheen gets close and resumes wandering once she's gone. Nothing to catch,
+nothing to chase — purely ambient.
+
 ## Art: what's real and what isn't
 
 - **Real, cut from `docs/concept-art/` by the scripts in `tools/`:** the
   backyard tree, the hanging Sloth (two layers), the kitchen boxes, the
   garden gate, the screen door, the fridge interior, the glass and juice
-  glass, and the four fridge items (OJ pitcher, milk, cheese, leftovers).
-  See `tools/README.md`.
+  glass, the four fridge items (OJ pitcher, milk, cheese, leftovers), and the
+  butterfly's five-piece rig (body+antennae, four wings). See
+  `tools/README.md`.
 - **Real, from earlier work:** the kitchen backdrop, Sloth's awake and
   sitting poses, and the original rooms' sprites (Pusheen, Pusheencorn,
   Stormy, furniture). Some of those were cut from concept art; others are
@@ -80,6 +89,13 @@ states, timers or enemies anywhere.
   alone, narrower than the sprite. Widening the zone to match the full
   sprite would let her trigger the transition from a stride still visibly
   short of the gate's opening.
+- **The butterfly's wander heading drifts by `noise * sqrt(dt)`, not
+  `noise * dt`.** It's a random walk, and a walk's accumulated turning over
+  real time only comes out the same regardless of frame rate if each step's
+  noise scales with the *square root* of its own timestep. Scaling by `dt`
+  itself (the obvious-looking version) quietly makes her turn more
+  sluggishly on a slower machine — she read as barely curving at all before
+  this was caught. `Butterfly.js`'s `steer()` has the comment.
 - **The hanging Sloth is two layers with the tree drawn between them.** The
   back layer lives outside his container, and `Sloth.syncBackLayer` copies
   his transforms onto it every frame. The hang pivots on `SLOTH.gripRow`,

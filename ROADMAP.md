@@ -59,18 +59,29 @@ choice is made.
    - *Done when:* the beat reads as one continuous, sleepy motion on the
      tablet.
 
-4. [ ] **A butterfly in the backyard** (M).
-   - Flight: a meandering wander (smooth random steering) with a fluttery
-     bob and a wing-flap tween that squashes its width. No physics, and it
-     stays over the backyard.
-   - Shy, not scared: two sensor zones (golden rule 3). Inside the outer one
-     it drifts gently away from Pusheen; once she's gone it wanders back.
-     Nothing to catch, nothing to chase (golden rule 4).
-   - Optional delight: if she stays still near it for ~3 seconds, it lands
-     on her head, and flutters off when she moves.
-   - Art: prompt 7 in `docs/art-prompts.md`, or a generated shape to start.
+4. [x] **A butterfly in the backyard** (M).
+   - Flight is steering, not waypoints: a wander (a slowly-drifting heading,
+     never per-frame jitter) blended with a gentle pull away from Pusheen and
+     a soft pull back from the yard's edges into one desired velocity, eased
+     toward every frame -- she never target-chases or target-flees, so
+     there's no scripted "return to start" once Pusheen leaves, just the
+     wander that was always running underneath. All tuning in `BUTTERFLY`,
+     `src/config/feel.js`.
+   - Shy, not scared: the two sensor zones (golden rule 3) ramp avoidance
+     strength continuously rather than switching a behaviour on, and never
+     override the wander, just add to it, so she curves off her existing
+     heading instead of snapping to face away. Nothing to catch, nothing to
+     chase (golden rule 4) -- not registered with `InteractionController`.
+   - Art: a five-piece rig, not one flat sprite -- body+antennae and four
+     wing quadrants (`tools/cut_butterfly.py`, prompt 7 in
+     `docs/art-prompts.md`), each wing flapped independently (scaleX around
+     its own attachment corner) in bursts with gliding pauses between, never
+     a constant metronome.
+   - Not done: the optional delight (landing on her head after ~3s still) --
+     parked under Later until there's a playtest asking for it.
    - *Done when:* it looks alive while idle and reads as shy when she comes
-     close.
+     close. Playtest still owed: does it actually feel alive on the tablet,
+     and does the wander ever look like it's heading somewhere specific?
 
 5. [ ] **First-impression pass** (M): for strangers, before sharing.
    - A splash overlay on load: the title, "a fan project", a disclaimer, and
@@ -122,12 +133,25 @@ choice is made.
   rooms with several states (time × weather × quest) once a sleep system
   exists; fast travel (hedgehog-guided, or shipping-box warp points).
 - **More cozy extras** (v2 spec §5): sniff flowers, open cupboards, a
-  hammock with a bounce, a lemon to bat around.
+  hammock with a bounce, a lemon to bat around, the butterfly landing on
+  Pusheen's head after ~3s still and fluttering off when she moves.
 - **Real audio.** The music and SFX are synthesized placeholders;
   `public/assets/audio/CREDITS.md` suggests replacements.
 
 ## Decided
 
+- 2026-09-28: The butterfly is a five-piece rig (body+antennae, four wing
+  quadrants), not one flat sprite, so each wing can flap independently
+  (scaleX around its own attachment corner). Cut by `tools/cut_butterfly.py`,
+  which splits the concept art at the body's own centre point; each wing's
+  crop reaches a couple of final px past that split into its neighbours
+  (`--wing-overlap`), since cutting exactly on the line left a 1-2px gap at
+  some flap angles once each piece's independent rounding was in play.
+- 2026-09-28: Her movement is steering (wander + avoidance + soft boundaries
+  blended into one desired velocity, eased toward) rather than a waypoint
+  list or a flee-on-sight state machine -- she has her own life and Pusheen
+  only ever leans on it. Full rationale and the tuning knobs are in
+  `BUTTERFLY`, `src/config/feel.js`.
 - 2026-09-28: The fridge items stand on the fridge art's shelf, spread
   inside its back wall, rather than in the fixed-spacing row the cabinet
   uses (that row ran past the fridge's frame and left short items floating
