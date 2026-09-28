@@ -23,8 +23,10 @@ of play.
 - **Signed off at the last playtest:** Sloth's hang from the branch and the
   kitchen climb.
 - **Not yet playtested:** the backyard butterfly (`ROADMAP.md` item 4, just
-  landed) — does the wander actually read as alive, and does it ever look
-  like it's heading somewhere specific rather than meandering?
+  landed) — does the wander actually read as alive, does it ever look like
+  it's heading somewhere specific rather than meandering, and is the
+  landing on Pusheen's head rare enough to surprise but common enough that
+  a player standing still for a while gets to see it?
 
 ## The game today
 
@@ -42,8 +44,10 @@ Pusheencorn, whose floatier jump reaches the high shelf. There are no fail
 states, timers or enemies anywhere.
 
 A shy **butterfly** wanders the Backyard's sky on its own; it drifts away if
-Pusheen gets close and resumes wandering once she's gone. Nothing to catch,
-nothing to chase — purely ambient.
+Pusheen gets close and resumes wandering once she's gone. Now and then, if
+Pusheen stands still, it lands on her head (on the horn tip, as
+Pusheencorn) and flutters off when she moves. Nothing to catch, nothing to
+chase — purely ambient.
 
 ## Art: what's real and what isn't
 
@@ -102,6 +106,12 @@ nothing to chase — purely ambient.
   so breathing keeps his paws on the branch. `SLOTH.restHeight` is derived
   from the tree and sprite geometry: re-derive it, don't eyeball it (the
   comment on it in `feel.js` shows how).
+- **The butterfly is created after Pusheen** in `Backyard.js`, so it draws
+  over her head when it perches there. Move it earlier and a landed
+  butterfly sits behind her.
+- **The butterfly judges "Pusheen is still" by her position, not her
+  velocity**, so a scripted slide (Sloth's shove, with her physics body off)
+  still counts as moving and sends a perched butterfly off.
 - **In the Backyard, creation order is depth order** (sky, clouds, sun,
   grass, hedge, tree). There's no `setDepth`.
 

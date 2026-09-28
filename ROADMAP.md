@@ -77,8 +77,12 @@ choice is made.
      `docs/art-prompts.md`), each wing flapped independently (scaleX around
      its own attachment corner) in bursts with gliding pauses between, never
      a constant metronome.
-   - Not done: the optional delight (landing on her head after ~3s still) --
-     parked under Later until there's a playtest asking for it.
+   - Now and then she lands on Pusheen's head (on the horn tip, as
+     Pusheencorn): only once Pusheen has been still ~2s, only on a random
+     roll every few seconds, then not again for 20-40s, so it's a surprise
+     rather than a rule. She curves in, drops onto the head along a short
+     Bezier curve, sits 1.5-5s, and flutters off when Pusheen moves or the
+     time runs out.
    - *Done when:* it looks alive while idle and reads as shy when she comes
      close. Playtest still owed: does it actually feel alive on the tablet,
      and does the wander ever look like it's heading somewhere specific?
@@ -133,13 +137,22 @@ choice is made.
   rooms with several states (time × weather × quest) once a sleep system
   exists; fast travel (hedgehog-guided, or shipping-box warp points).
 - **More cozy extras** (v2 spec §5): sniff flowers, open cupboards, a
-  hammock with a bounce, a lemon to bat around, the butterfly landing on
-  Pusheen's head after ~3s still and fluttering off when she moves.
+  hammock with a bounce, a lemon to bat around.
 - **Real audio.** The music and SFX are synthesized placeholders;
   `public/assets/audio/CREDITS.md` suggests replacements.
 
 ## Decided
 
+- 2026-09-28: The butterfly lands on Pusheen's head now and then, as a rare
+  roll while she's still -- never a rule the player can learn. Its states
+  are wander, approach, land and perched; there are no separate "shy"
+  states, since the avoidance already ramps with distance. The last stretch
+  of the landing is a short Bezier curve, tweened along directly (Phaser's
+  `PathFollower` only drives a single sprite, and the butterfly is a
+  container). Its bob and sway moved from per-frame maths to tweens
+  (golden rule 1). A sprite-sheet flap was considered and not taken: it
+  needs matching frames from Gemini, and squeezing each wing's width
+  already reads as the flap.
 - 2026-09-28: The butterfly is a five-piece rig (body+antennae, four wing
   quadrants), not one flat sprite, so each wing can flap independently
   (scaleX around its own attachment corner). Cut by `tools/cut_butterfly.py`,
