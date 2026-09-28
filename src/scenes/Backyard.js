@@ -84,10 +84,6 @@ export class Backyard extends Scene
         // Right-wall screen door to the Kitchen.
         this.doorToKitchen = new Door(this, 1240, groundTop, { texture: 'screenDoor', side: 'left', to: 'Kitchen', enterAt: 'fromBackyard' });
 
-        // A shy critter, not an NPC: she wanders on her own and only ever
-        // leans away from Pusheen, never chases or is chased (golden rule 4).
-        this.butterfly = new Butterfly(this, BUTTERFLY_SPAWN.x, BUTTERFLY_SPAWN.y, BUTTERFLY_BOUNDS);
-
         // One dispatcher for E-press interactions here (just Sloth today). The
         // doors are walk-into triggers and stay out (see the controller's note).
         this.interactions = new InteractionController(this);
@@ -102,6 +98,11 @@ export class Backyard extends Scene
         this.pusheen = new Pusheen(this, spawn.x, groundTop - SPAWN.heightAboveGround);
         this.physics.add.collider(this.pusheen, this.ground);
         this.solids.forEach((solid) => this.physics.add.collider(this.pusheen, solid));
+
+        // A shy critter, not an NPC: she wanders on her own, leans away from
+        // Pusheen, and now and then lands on her head (golden rule 4 -- never
+        // chases or is chased). Built after Pusheen so it draws over her head.
+        this.butterfly = new Butterfly(this, BUTTERFLY_SPAWN.x, BUTTERFLY_SPAWN.y, BUTTERFLY_BOUNDS);
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keys = this.input.keyboard.addKeys('W,A,S,D,SPACE,E');
