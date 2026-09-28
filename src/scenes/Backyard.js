@@ -3,6 +3,7 @@ import { SLOTH, SPAWN } from '../config/feel.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Sloth } from '../entities/Sloth.js';
 import { Door } from '../entities/Door.js';
+import { Butterfly } from '../entities/Butterfly.js';
 import { InteractionController } from '../systems/InteractionController.js';
 import { bindReveal } from '../systems/Reveal.js';
 import { fadeToRoom, fadeInRoom, resolveSpawn } from './roomTransition.js';
@@ -35,6 +36,14 @@ const SPAWN_POINTS = {
 // Sloth hangs from the tree's low branch, out along its level stretch and clear
 // of the leaf sprigs at the tip; the gate is revealed directly behind that spot.
 const SLOTH_X = 700;
+
+// Where the butterfly wanders: the open sky above the grass, inset from the
+// screen edges (its own boundaryMargin softens the approach to these well
+// before she'd visibly reach them). No collision with the tree or Sloth --
+// golden rule 4, nothing to catch or be caught by, so a clipped wing is just
+// a rare, low-stakes overlap, not a bug.
+const BUTTERFLY_BOUNDS = { left: 40, right: 1240, top: 80, bottom: GRASS_TOP - 20 };
+const BUTTERFLY_SPAWN = { x: 300, y: 240 };
 
 export class Backyard extends Scene
 {
@@ -74,6 +83,10 @@ export class Backyard extends Scene
 
         // Right-wall screen door to the Kitchen.
         this.doorToKitchen = new Door(this, 1240, groundTop, { texture: 'screenDoor', side: 'left', to: 'Kitchen', enterAt: 'fromBackyard' });
+
+        // A shy critter, not an NPC: she wanders on her own and only ever
+        // leans away from Pusheen, never chases or is chased (golden rule 4).
+        this.butterfly = new Butterfly(this, BUTTERFLY_SPAWN.x, BUTTERFLY_SPAWN.y, BUTTERFLY_BOUNDS);
 
         // One dispatcher for E-press interactions here (just Sloth today). The
         // doors are walk-into triggers and stay out (see the controller's note).
@@ -152,8 +165,12 @@ export class Backyard extends Scene
         });
     }
 
-    update ()
+    update (time, delta)
     {
+        // Her own life, independent of Pusheen's state -- keeps wandering
+        // through the wake beat and a room transition alike.
+        this.butterfly.update(time, delta, this.pusheen);
+
         if (this.transitioning) {
             this.pusheen.stopMoving();
             this.pusheen.update();
