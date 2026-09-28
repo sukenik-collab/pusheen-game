@@ -197,6 +197,76 @@ export const SLOTH = {
     juiceCueStaggerMs: 70
 };
 
+// The backyard butterfly: no fail state, nothing to catch (golden rule 4) --
+// its whole personality is in how it moves. It has its own life (a wander
+// that never stops), and Pusheen only leans on it, gently, when she's close.
+// Never target-chases a waypoint and never target-flees Pusheen: everything
+// below is a steering force blended into one desired velocity, smoothed
+// toward frame-rate-independently (Butterfly.js's `approach`), so nothing
+// snaps. Tune by playtest -- start by watching it for ~30s with Pusheen far
+// away and see if it looks alive on its own before tuning the avoidance.
+export const BUTTERFLY = {
+    // Wander: a slowly drifting heading, not per-frame jitter -- see
+    // wanderTurnRate. Speed breathes around wanderSpeed rather than holding
+    // it exactly, so it sometimes almost hovers while turning.
+    wanderSpeed: 35,
+    wanderSpeedRipple: 5,
+    wanderRippleHz: 0.7,
+    maxSpeed: 55,
+    // Max radians/sec the *wander heading* itself drifts by -- low-frequency,
+    // so it carves broad lazy curves rather than a random walk.
+    wanderTurnRate: 0.6,
+    // How hard actual velocity turns to follow the desired direction (used
+    // as `approach`'s rate: higher snaps quicker, lower drifts languidly).
+    steeringResponse: 2.0,
+
+    // Sensor zones, same "outer leads" contract as every other radar in this
+    // file, but continuous rather than a single enable/disable line: outer
+    // ramps in a little avoidance, inner ramps in more. Backyard-scale, not
+    // the cabinet/Stormy defaults -- a butterfly's "personal space" reads
+    // bigger than a conversation radius.
+    outerRadius: 190,
+    innerRadius: 90,
+    outerAvoidance: 0.25,
+    innerAvoidance: 0.65,
+    // The wander's own pull in the blend (see steer() in Butterfly.js):
+    // avoidance never fully overrides it, so she nudges rather than commands.
+    wanderWeight: 1.0,
+
+    // Soft walls a little in from the actual backyard edges, so it curves
+    // away instead of visibly bouncing off an invisible box.
+    boundaryMargin: 90,
+    boundaryForce: 0.8,
+
+    // Bob/sway: a visual offset on top of the logical x/y, never fed back
+    // into steering -- the flight path itself stays a smooth curve.
+    bobAmplitude: 7,
+    bobFrequency: 1.5,
+    swayAmplitude: 3,
+    swayFrequency: 0.9,
+
+    // Wing flap: scaleX around each wing's attachment corner (its own
+    // origin -- see Butterfly.js), not rotation. Upper/lower wings get
+    // different amplitudes so the flap doesn't read as mechanically
+    // mirrored, and flapSpeed rises a little with ground speed.
+    flapSpeed: 7,
+    flapSpeedFromSpeed: 3.0,
+    upperFlapBase: 0.55,
+    upperFlapRange: 0.45,
+    lowerFlapBase: 0.65,
+    lowerFlapRange: 0.35,
+    // Bursty, not a constant metronome: flap for a bit, glide (wings near
+    // open) for a bit. Both durations vary randomly within their range so no
+    // two pauses match.
+    flapBurstMs: [500, 900],
+    flapGlideMs: [350, 700],
+
+    // A few degrees of lean toward the direction of travel -- physicality
+    // without breaking the straight-on art style.
+    tiltPerSpeed: 0.0016,
+    maxTiltRad: 0.14
+};
+
 // Room palettes -- lazy-summer-afternoon warmth.
 export const BACKYARD = {
     sky: 0xbfe0e8,
