@@ -201,10 +201,10 @@ export const SLOTH = {
 // its whole personality is in how it moves. It has its own life (a wander
 // that never stops), and Pusheen only leans on it, gently, when she's close.
 // Never target-chases a waypoint and never target-flees Pusheen: everything
-// below is a steering force blended into one desired velocity, smoothed
-// toward frame-rate-independently (Butterfly.js's `approach`), so nothing
-// snaps. Tune by playtest -- start by watching it for ~30s with Pusheen far
-// away and see if it looks alive on its own before tuning the avoidance.
+// below is a steering force blended into one desired velocity, eased toward
+// frame-rate-independently (Butterfly.js's steer()), so nothing snaps. Tune
+// by playtest -- start by watching it for ~30s with Pusheen far away and see
+// if it looks alive on its own before tuning the avoidance.
 export const BUTTERFLY = {
     // Wander: a slowly drifting heading, not per-frame jitter -- see
     // wanderTurnRate. Speed breathes around wanderSpeed rather than holding
@@ -216,8 +216,8 @@ export const BUTTERFLY = {
     // Max radians/sec the *wander heading* itself drifts by -- low-frequency,
     // so it carves broad lazy curves rather than a random walk.
     wanderTurnRate: 0.6,
-    // How hard actual velocity turns to follow the desired direction (used
-    // as `approach`'s rate: higher snaps quicker, lower drifts languidly).
+    // How hard actual velocity turns to follow the desired direction: higher
+    // snaps quicker, lower drifts languidly.
     steeringResponse: 2.0,
 
     // Sensor zones, same "outer leads" contract as every other radar in this
@@ -238,12 +238,15 @@ export const BUTTERFLY = {
     boundaryMargin: 90,
     boundaryForce: 0.8,
 
-    // Bob/sway: a visual offset on top of the logical x/y, never fed back
-    // into steering -- the flight path itself stays a smooth curve.
+    // Bob/sway: tweens on the art inside the butterfly (golden rule 1), never
+    // her flight position, so the path itself stays a smooth curve. Each
+    // half-swing re-rolls its own size and length within floatJitter, and the
+    // bob and sway run on unrelated timings, so the float never repeats.
     bobAmplitude: 7,
-    bobFrequency: 1.5,
+    bobHalfMs: 330,
     swayAmplitude: 3,
-    swayFrequency: 0.9,
+    swayHalfMs: 560,
+    floatJitter: 0.25,
 
     // Wing flap: scaleX around each wing's attachment corner (its own
     // origin -- see Butterfly.js), not rotation. Upper/lower wings get
@@ -267,7 +270,40 @@ export const BUTTERFLY = {
     // downward; a bank reads as a butterfly in a side-view yard. (The first
     // cut leaned ~3deg, too little to see.)
     tiltPerSpeed: 0.006,
-    maxTiltRad: 0.3
+    maxTiltRad: 0.3,
+
+    // Landing on Pusheen's head: rare and opportunistic, never a rule she can
+    // learn ("stand near it and it lands"). Considered once per landCheckMs,
+    // only once Pusheen has been still for stillMs with her head in
+    // landRange, then only on a landChance roll. After a landing -- or an
+    // approach she spooks by moving -- it won't consider another for
+    // landCooldownMs (and not for landFirstCooldownMs after the room opens).
+    landCheckMs: [2000, 4000],
+    landChance: 0.35,
+    stillMs: 2000,
+    landRange: 420,
+    landCooldownMs: [20000, 40000],
+    landFirstCooldownMs: [8000, 15000],
+    // Approach: her usual flight with the shyness switched off and a gentle
+    // pull toward a point above and to one side of the head (the side she's
+    // already on), so she arrives curving rather than beelining like a
+    // projectile. Wander keeps some say, so the curve stays lazy.
+    approachSpeed: 42,
+    approachWanderWeight: 0.35,
+    approachOffset: { x: 70, y: -80 },
+    approachArrivePx: 24,
+    approachGiveUpMs: 12000,
+    // The last stretch is a short scripted curve down onto the head.
+    landMs: 1100,
+    // How far above her head-top point the butterfly's centre sits, so the
+    // lower wings rest on it rather than hovering or sinking in.
+    perchLift: 16,
+    perchMs: [1500, 5000],
+    perchFlapScale: 0.3,
+    // Pusheen moving (or the perch running out) sends her off -- after a
+    // beat, so it reads as reacting to her rather than glued to her.
+    takeoffReactMs: [120, 250],
+    takeoffSpeed: 50
 };
 
 // Room palettes -- lazy-summer-afternoon warmth.

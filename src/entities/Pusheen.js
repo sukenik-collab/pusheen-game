@@ -14,6 +14,17 @@ const HELD_SPRITE = { glass: 'glass', juice: 'orangeJuice' };
 const WIDTH = 110;
 const HEIGHT = 78;
 
+// Where a butterfly perches: the top of her head, in px from the sprite's
+// centre as drawn facing left (un-flipped). Between the ears on pusheen.png.
+// As Pusheencorn, on the horn -- anywhere lower on her head, the butterfly
+// hides the horn completely: 6px below its tip (y -52), so the butterfly's
+// body rests on the point with her lower wings either side, rather than
+// hovering over it. Measured from the art.
+const HEAD_TOP = {
+    pusheen: { x: -23, y: -29 },
+    pusheencorn: { x: -20, y: -46 }
+};
+
 export class Pusheen extends GameObjects.Container
 {
     constructor (scene, x, y)
@@ -171,6 +182,18 @@ export class Pusheen extends GameObjects.Container
     isGrounded ()
     {
         return this.body.blocked.down || this.body.touching.down;
+    }
+
+    // The top of her head in world space, following her facing, costume and
+    // the idle breathe, so a perched butterfly rides her breathing.
+    getHeadTop ()
+    {
+        const head = HEAD_TOP[this.costumed ? 'pusheencorn' : 'pusheen'];
+        const flip = this.facing === 'right' ? -1 : 1;
+        return {
+            x: this.x + head.x * flip * this.visual.scaleX,
+            y: this.y + this.visual.y + head.y * this.visual.scaleY
+        };
     }
 
     update ()
