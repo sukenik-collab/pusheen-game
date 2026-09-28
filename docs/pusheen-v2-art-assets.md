@@ -43,9 +43,9 @@ Sky (`#BACBF4`) and grass (`#80A56F`) are `add.rectangle` fills, not images.
 | `slothHangingBack` | 180×159 | ✅ `sloth-hanging-back.png` | Just his far arms, which pass behind the branch — drawn *under* the tree, same size and position as the front layer, so the branch lands between them. Both cut together by `tools/cut_sloth.py`. |
 | `slothAwake` | 124×170 | ✅ `sloth-awake.png` | Standing mid-stretch, arms up (from `concept-art/sloth3.png`). Swapped in as he drops off the branch, and worn for the plod. There's no walk-cycle art, so the steps are a waddle tween (`SLOTH.waddleDeg`/`waddleMs`) — real walk frames would replace that, not add to it. |
 | `slothSitting` | 190×110 | ✅ `sloth-sitting.png` | Settled on his belly, eyes open (from `concept-art/sloth1.png`). Where the plod ends, and how he's found on re-entry. |
-| `gardenGate` | 76×150 | ▫️ placeholder | The revealed hidden path, behind where Sloth hangs. |
+| `gardenGate` | 128×150 | ✅ `garden-gate.png` | The revealed hidden path, behind where Sloth hangs (from `concept-art/garden_gate.jpg`). Wider than a doorway on purpose: two decorative posts (ivy on the left, the latch on the right) flank the 5-picket panel that actually swings, so the walk-into zone is sized to just that panel — 87px, `zoneWidth` in Backyard.js's `Door` call — not the sprite's own 128px. Cut by `tools/cut_prop.py --posts`, which reports the panel bounds; re-run it and copy the new width in if the art changes. |
 | `backyardBg` | — | ⛔ retired | Replaced by the layer stack above. |
-| `screenDoor` | 76×150 | ▫️ placeholder | The Backyard→Kitchen screen door (shared with the Kitchen side). |
+| `screenDoor` | 87×150 | ✅ `screen-door.png` | The Backyard→Kitchen screen door (shared with the Kitchen side), from `concept-art/screen_door.jpg`. Cut by `tools/cut_prop.py`. |
 
 ## Kitchen
 
@@ -53,20 +53,20 @@ Sky (`#BACBF4`) and grass (`#80A56F`) are `add.rectangle` fills, not images.
 |---|---|---|---|
 | `kitchenBg` | 1376×768 | ✅ `kitchen-bg.png` | Wall, window-to-backyard, countertop, **and the fridge** all painted in. |
 | *(fridge)* | — | ✅ in backdrop | No separate sprite — the fridge is part of `kitchenBg`; the Container is an invisible zone over it (`hidden: true`). |
-| `fridgeInside` | 640×300 | ▫️ placeholder | The lit fridge interior shown as the peek-panel backdrop when it opens. |
+| `fridgeInside` | 640×350 | ✅ `fridge-inside.png` | The lit fridge interior shown as the peek-panel backdrop when it opens, from `concept-art/fridge_inside.jpg`. Cut by `tools/cut_prop.py --width 640`. The items stand on its shelf: `PANEL_SHELVES` in `UI.js` holds the shelf line and back-wall span measured from this art, so re-measure them if it's re-cut (see Tuning notes). |
 | `stepBoxes` | 295×176 | ✅ `step-boxes.png` | The climb to the counter: a short and a tall cardboard box, one sprite, taped shut with shipping labels (from `concept-art/kitchen_boxes.jpg`). Cut by `tools/cut_boxes.py`, scaled so the middle of each top face sits 80 and 160px up, where she lands on invisible ledges -- not the sprite's top edge, which is a top face's far rim. Replaced the `stepStool` / `stepBox` placeholders. |
-| `screenDoor` | 76×150 | ▫️ placeholder | Kitchen→Backyard screen door (same key as above). |
+| `screenDoor` | 87×150 | ✅ `screen-door.png` | Kitchen→Backyard screen door (same key and file as above). |
 
 ## Items (peek-panel icons + counter/carried sprites)
 
 | Key | Size | Status | Notes |
 |---|---|---|---|
-| `glass` | 66×84 | ▫️ placeholder | Empty glass — sits on the counter (climb up to take it) + carried accessory. |
-| `orangeJuice` | 66×84 | ▫️ placeholder | Filled glass — carried accessory after filling. |
-| `juicePitcher` | 112×112 | ▫️ placeholder | The OJ pitcher inside the fridge. |
-| `itemMilk` | 72×100 | ▫️ placeholder | Fridge decoy (gentle "nope"). |
-| `itemCheese` | 96×76 | ▫️ placeholder | Fridge decoy. |
-| `itemLeftovers` | 86×68 | ▫️ placeholder | Fridge decoy. |
+| `glass` | 66×84 | ✅ `glass.png` | Empty glass — stands on the counter top (climb up to take it) + carried accessory. From `concept-art/glasses.jpg` (both glasses in one image), cut by `tools/cut_items.py`. Its base is `GLASS_SET_BACK` (Kitchen.js) behind the counter's front lip, in front of the mugs. |
+| `orangeJuice` | 66×84 | ✅ `orange-juice.png` | Filled glass — carried accessory after filling. Same source and cut as `glass`, so the two match exactly. |
+| `juicePitcher` | 94×100 | ✅ `juice-pitcher.png` | The OJ pitcher inside the fridge, from `concept-art/fridge_items.jpg` (all four items in one image), cut by `tools/cut_items.py --same-scale 100`: one scale for all four, so they keep the sizes they were drawn at relative to each other. Its handle/spout ended up mirrored from the original prompt (handle right, spout left) — left as-is, purely cosmetic. |
+| `itemMilk` | 63×99 | ✅ `item-milk.png` | Fridge decoy (gentle "nope"). Same source and cut as the pitcher. |
+| `itemCheese` | 69×64 | ✅ `item-cheese.png` | Fridge decoy. Same source and cut as the pitcher. |
+| `itemLeftovers` | 75×66 | ✅ `item-leftovers.png` | Fridge decoy. Same source and cut as the pitcher. |
 
 ---
 
@@ -92,6 +92,17 @@ panel), `pusheen` / `pusheencorn` (carry accessory is a separate child sprite).
   changing one means re-cutting with a matching `stand` in
   `tools/cut_boxes.py`, then copying what it prints into `Kitchen.js`'s
   `LAYOUT` and `LEDGES`.
+- **Fridge shelf**: `PANEL_SHELVES.fridgeInside` in `UI.js` is measured from
+  `fridge-inside.png`, in panel-centre coordinates: item bases on `shelfY`
+  (between the shelf's back edge, +28, and front edge, +43), the row spread
+  from `left` to `right` inside the back wall (-214..+213), labels in the
+  lower compartment. The four items' widths plus the gaps have to fit that
+  span, so a bigger `--same-scale` re-cut may need a wider span or smaller
+  items.
+- **Garden gate** walk-into zone: `Door`'s `zoneWidth` opt (Backyard.js),
+  sized to the picket panel alone, not the sprite's decorative posts. Re-cut
+  with `tools/cut_prop.py --posts` and copy in the new panel width if the art
+  changes; see `Door.js`'s comment on `zoneWidth` for why it's per-instance.
 
 ## Optional — P4 cozy extras (not built)
 

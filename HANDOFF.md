@@ -1,14 +1,13 @@
 # HANDOFF
 
-Where the game stands and how it hangs together. Last updated 2026-09-25.
+Where the game stands and how it hangs together. Last updated 2026-09-28.
 **What to do next is in [`ROADMAP.md`](ROADMAP.md)**; this file is the state
 of play.
 
 ## Start here next time
 
-1. Open `ROADMAP.md` at **Now**. Item 1 (the invisible fridge labels) is a
-   quick win; item 2 (the art batch) needs you to generate images first,
-   using `docs/art-prompts.md`.
+1. Open `ROADMAP.md` at **Now**. Items 1 (fridge labels) and 2 (the art
+   batch) are done; item 3 (Sloth's wake beat) is next.
 2. `npm run dev` serves the game at http://localhost:8080 (it boots in the
    Backyard). `npm run build` must pass before any PR.
 3. Work on a branch; `main` is what's live.
@@ -41,17 +40,19 @@ states, timers or enemies anywhere.
 ## Art: what's real and what isn't
 
 - **Real, cut from `docs/concept-art/` by the scripts in `tools/`:** the
-  backyard tree, the hanging Sloth (two layers), and the kitchen boxes. See
-  `tools/README.md`.
+  backyard tree, the hanging Sloth (two layers), the kitchen boxes, the
+  garden gate, the screen door, the fridge interior, the glass and juice
+  glass, and the four fridge items (OJ pitcher, milk, cheese, leftovers).
+  See `tools/README.md`.
 - **Real, from earlier work:** the kitchen backdrop, Sloth's awake and
   sitting poses, and the original rooms' sprites (Pusheen, Pusheencorn,
   Stormy, furniture). Some of those were cut from concept art; others are
   SVGs in `scripts/new-room-art.html`, rasterized by
   `scripts/gen-new-room-art.mjs`.
-- **Still placeholder shapes** (drawn in `Preloader.makeTexture`): the
-  garden gate, the screen door, the fridge interior, the glass and juice
-  glass, the OJ pitcher, milk, cheese and leftovers. Prompts to generate
-  them are in `docs/art-prompts.md`; sizes and status in
+- **Still placeholder shapes** (drawn in `Preloader.makeTexture`): only the
+  backyard's generated-on-purpose scenery (sun, clouds, hedge) and the
+  unused `fridge` closed-door texture (the fridge is painted into
+  `kitchenBg`). Sizes and status of every sprite are in
   `docs/pusheen-v2-art-assets.md`.
 - **Audio** is synthesized CC0 placeholders;
   `public/assets/audio/CREDITS.md` suggests real replacements.
@@ -73,6 +74,12 @@ states, timers or enemies anywhere.
   half-width less 10px, so she can't stand on thin air past an edge. The
   counter's ledge isn't inset, because its painted top runs on past both
   ends.
+- **The garden gate's sprite is wider than its walk-into zone on purpose.**
+  Its art includes two decorative posts flanking the picket panel that
+  actually swings; `Door`'s `zoneWidth` (Backyard.js) is sized to the panel
+  alone, narrower than the sprite. Widening the zone to match the full
+  sprite would let her trigger the transition from a stride still visibly
+  short of the gate's opening.
 - **The hanging Sloth is two layers with the tree drawn between them.** The
   back layer lives outside his container, and `Sloth.syncBackLayer` copies
   his transforms onto it every frame. The hang pivots on `SLOTH.gripRow`,
