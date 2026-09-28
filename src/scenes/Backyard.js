@@ -63,7 +63,10 @@ export class Backyard extends Scene
         // Hidden garden gate to the LivingRoom -- built BEFORE Sloth so he draws
         // over it, hanging in front of it. Placed behind where he hangs, and
         // revealed as he ambles clear on waking. Inert until then (bindReveal).
-        this.doorToLivingRoom = new Door(this, SLOTH_X, groundTop, { texture: 'gardenGate', side: 'right', to: 'LivingRoom', enterAt: 'fromBackyard', initiallyActive: false });
+        // Its art (128px) is wider than a doorway: two decorative posts flank
+        // the picket panel that actually swings, so the walk-into zone is sized
+        // to just that panel (87px, from tools/cut_prop.py's --posts split).
+        this.doorToLivingRoom = new Door(this, SLOTH_X, groundTop, { texture: 'gardenGate', side: 'right', to: 'LivingRoom', enterAt: 'fromBackyard', initiallyActive: false, zoneWidth: 87 });
 
         // The sleepy friend, dozing on the low tree branch -- wrapped around it:
         // his far arms draw under the tree, the rest of him over it.
