@@ -261,10 +261,13 @@ export const BUTTERFLY = {
     flapBurstMs: [500, 900],
     flapGlideMs: [350, 700],
 
-    // A few degrees of lean toward the direction of travel -- physicality
-    // without breaking the straight-on art style.
-    tiltPerSpeed: 0.0016,
-    maxTiltRad: 0.14
+    // She banks into her horizontal travel -- ~12deg at wander speed, capped
+    // at ~17deg -- but stays head-up. The art is seen from above, so turning
+    // her to face her heading would flip her upside down whenever she flew
+    // downward; a bank reads as a butterfly in a side-view yard. (The first
+    // cut leaned ~3deg, too little to see.)
+    tiltPerSpeed: 0.006,
+    maxTiltRad: 0.3
 };
 
 // Room palettes -- lazy-summer-afternoon warmth.

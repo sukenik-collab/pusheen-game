@@ -203,8 +203,8 @@ export class Butterfly extends GameObjects.Container
         this.wingLR.scaleX = B.lowerFlapBase + B.lowerFlapRange * this.wingOpen;
     }
 
-    // A few degrees of lean toward the direction of travel -- physicality
-    // without rotating a straight-on sprite dramatically.
+    // A bank toward horizontal travel, eased so she tips into turns rather
+    // than snapping -- see BUTTERFLY.tiltPerSpeed for why not a full turn.
     updateTilt (dt)
     {
         const target = PMath.Clamp(this.velocity.x * B.tiltPerSpeed, -B.maxTiltRad, B.maxTiltRad);
