@@ -110,8 +110,13 @@ panel), `pusheen` / `pusheencorn` (carry accessory is a separate child sprite).
   re-cut — copy them in whole, don't hand-tune, they're where the pieces
   physically meet. `BUTTERFLY_BOUNDS` (Backyard.js) is the sky above the
   grass line, inset from the screen edges.
+- **Butterfly perch**: `HEAD_TOP` in `Pusheen.js` is where it lands, in px
+  from her sprite's centre facing left — between the ears on
+  `pusheen.png`, and just below the horn tip on `pusheencorn.png` (lower on
+  her head, it hides the horn). Re-measure both if either sprite is
+  redrawn. `BUTTERFLY.perchLift` (feel.js) is how far above that point the
+  butterfly's centre sits, so its lower wings rest on the head.
 
 ## Optional — P4 cozy extras (not built)
 
-`flower` and `lemon` are parked under Later (`ROADMAP.md`); so is the
-butterfly landing on Pusheen's head after a few seconds still.
+`flower` and `lemon` are parked under Later (`ROADMAP.md`).
