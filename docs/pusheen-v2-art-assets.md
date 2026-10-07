@@ -46,8 +46,8 @@ Sky (`#BACBF4`) and grass (`#80A56F`) are `add.rectangle` fills, not images.
 | `gardenGate` | 128×150 | ✅ `garden-gate.png` | The revealed hidden path, behind where Sloth hangs (from `concept-art/garden_gate.jpg`). Wider than a doorway on purpose: two decorative posts (ivy on the left, the latch on the right) flank the 5-picket panel that actually swings, so the walk-into zone is sized to just that panel — 87px, `zoneWidth` in Backyard.js's `Door` call — not the sprite's own 128px. Cut by `tools/cut_prop.py --posts`, which reports the panel bounds; re-run it and copy the new width in if the art changes. |
 | `backyardBg` | — | ⛔ retired | Replaced by the layer stack above. |
 | `screenDoor` | 87×150 | ✅ `screen-door.png` | The Backyard→Kitchen screen door (shared with the Kitchen side), from `concept-art/screen_door.jpg`. Cut by `tools/cut_prop.py`. |
-| `butterflyBody` | 12×34 | ✅ `butterfly-body.png` | Body + antennae, from `concept-art/butterfly.jpg`. One of five pieces in `Butterfly.js`'s rig — see below. |
-| `butterflyWingUL`/`UR`/`LL`/`LR` | ~28×22 / ~28×22 / ~24×19 / ~24×19 | ✅ `butterfly-wing-{ul,ur,ll,lr}.png` | The four wing quadrants, flapped independently (scaleX around each one's own attachment corner). All five cut together by `tools/cut_butterfly.py`, which splits the art at the body's own centre point; see `tools/README.md` for why each wing's crop reaches a little past that split. |
+| `butterflyBody` | 11×32 | ✅ `butterfly-body.png` | Body + antennae, from `concept-art/butterfly.jpg`. One of five pieces in `Butterfly.js`'s rig — see below. |
+| `butterflyWingUL`/`UR`/`LL`/`LR` | 29×23 / 29×23 / 27×20 / 26×20 | ✅ `butterfly-wing-{ul,ur,ll,lr}.png` | The four wing quadrants, flapped independently (scaleX around each one's own attachment corner). All five cut together by `tools/cut_butterfly.py`, which splits the art at the body's own centre point; see `tools/README.md` for why each wing's crop reaches a little past that split. |
 
 ## Kitchen
 
@@ -108,8 +108,11 @@ panel), `pusheen` / `pusheencorn` (carry accessory is a separate child sprite).
 - **Butterfly rig**: the five origins in `Butterfly.js` (`BODY_ORIGIN`,
   `WING_ORIGIN`) are exactly what `tools/cut_butterfly.py` prints on every
   re-cut — copy them in whole, don't hand-tune, they're where the pieces
-  physically meet. `BUTTERFLY_BOUNDS` (Backyard.js) is the sky above the
-  grass line, inset from the screen edges.
+  physically meet. Her size is the cut's `--width` (53px wingspan, the
+  script's default): re-cut to resize her rather than scaling her in code.
+  `BUTTERFLY_BOUNDS` (Backyard.js) is the sky above the grass line; its
+  top and bottom keep her on screen, its sides reach 90px past the screen
+  edges so she can slip briefly off either side.
 - **Butterfly perch**: `HEAD_TOP` in `Pusheen.js` is where it lands, in px
   from her sprite's centre facing left — between the ears on
   `pusheen.png`, and just below the horn tip on `pusheencorn.png` (lower on

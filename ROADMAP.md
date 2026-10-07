@@ -66,7 +66,9 @@ choice is made.
      toward every frame -- she never target-chases or target-flees, so
      there's no scripted "return to start" once Pusheen leaves, just the
      wander that was always running underneath. All tuning in `BUTTERFLY`,
-     `src/config/feel.js`.
+     `src/config/feel.js`. She isn't on screen when the yard opens: she
+     flutters in from just past one side after ~10s, roams the whole sky
+     from then on, and now and then slips briefly off the left or right.
    - Shy, not scared: the two sensor zones (golden rule 3) ramp avoidance
      strength continuously rather than switching a behaviour on, and never
      override the wander, just add to it, so she curves off her existing
@@ -81,8 +83,8 @@ choice is made.
      Pusheencorn): only once Pusheen has been still ~2s, only on a random
      roll every few seconds, then not again for 20-40s, so it's a surprise
      rather than a rule. She curves in, drops onto the head along a short
-     Bezier curve, sits 1.5-5s, and flutters off when Pusheen moves or the
-     time runs out.
+     Bezier curve, sits 1.5-5s with one slow open-and-close flap, and
+     flutters off when Pusheen moves or the time runs out.
    - *Done when:* it looks alive while idle and reads as shy when she comes
      close. Playtest still owed: does it actually feel alive on the tablet,
      and does the wander ever look like it's heading somewhere specific?
@@ -143,6 +145,15 @@ choice is made.
 
 ## Decided
 
+- 2026-10-07: After the first look at the butterfly (PR #20's preview), four
+  changes. She enters from just past a side edge ~10s after the yard opens,
+  instead of being on screen at the start. She's cut 5% smaller (53px
+  wingspan). Her roaming is wider, because her wander heading now follows
+  where the walls and Pusheen turn her: she had been pinning herself
+  against walls and in corners (the top-left one most, near her old spawn
+  point). Her wing flap is slow and steady while perched. Her bounds now
+  reach past the screen's sides, so she can slip briefly off-screen and
+  come back.
 - 2026-09-28: The butterfly lands on Pusheen's head now and then, as a rare
   roll while she's still -- never a rule the player can learn. Its states
   are wander, approach, land and perched; there are no separate "shy"
