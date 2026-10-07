@@ -1,9 +1,14 @@
 # Art prompts (Gemini)
 
-Prompts for the art the game still needs, written for Gemini. Each asset is
+Prompts for the game's generated art, written for Gemini. Each asset is
 one image: paste the **shared style block** first, then that asset's block,
 and attach the reference images it lists. Prompt 8 is different: a
-storyboard for exploring the Sloth's wake-up, not a sprite. Sizes and status
+storyboard for exploring the Sloth's wake-up, not a sprite.
+
+**Done:** 1-5 and 7 are generated, cut and in the game. Their prompts stay
+here for regenerating, and each one's "In game" line says how it was
+actually cut. **Still to generate:** 6 (Sloth walking) and 8 (the wake-up
+storyboard), both for `ROADMAP.md`'s Sloth wake beat item. Sizes and status
 of every sprite are in `docs/pusheen-v2-art-assets.md`; what order to do
 things in is in `ROADMAP.md`.
 
@@ -62,7 +67,10 @@ off-whites are all fine.
 **Save as** `docs/concept-art/garden_gate.jpg`. **In game:** `gardenGate`,
 about 76×150, standing on the grass in the Backyard. It appears when Sloth
 wakes and is the way through to the house. **Attach:** a Backyard
-screenshot, `backyard-tree.png`.
+screenshot, `backyard-tree.png`. *As cut:* 128×150. The art came out
+wider than asked, with posts either side of the picket panel, so the
+walk-into zone is sized to the 87px panel alone (`tools/cut_prop.py
+--posts`).
 
 ```
 ASSET: a small wooden garden gate on its own, seen straight-on from the
@@ -85,7 +93,7 @@ about 80% of the height.
 **Save as** `docs/concept-art/screen_door.jpg`. **In game:** `screenDoor`,
 about 76×150, the door between the Backyard and the Kitchen; the same
 sprite is used on both sides. **Attach:** a Kitchen screenshot,
-`kitchen-bg.png`.
+`kitchen-bg.png`. *As cut:* 87×150, keeping the art's own proportions.
 
 ```
 ASSET: a wooden screen door on its own, seen straight-on, closed. About
@@ -133,7 +141,10 @@ on the fridge shelf when it opens; tap one to take it. Target sizes:
 `juicePitcher` 112×112, `itemMilk` 72×100, `itemCheese` 96×76,
 `itemLeftovers` 86×68. The pitcher fills her glass; the rest are cozy
 decoys. **Attach:** a Kitchen screenshot, `step-boxes.png`, and the glasses
-image once you have it, so the juice matches.
+image once you have it, so the juice matches. *As cut:* all four at one
+scale, keeping their drawn sizes relative to each other (pitcher 94×100,
+milk 63×99, cheese 69×64, leftovers 75×66), standing on the interior's
+shelf.
 
 ```
 ASSET: four separate kitchen items in a row, left to right, drawn at the
@@ -163,7 +174,9 @@ spread evenly along one baseline.
 `fridgeInside`, 640×300, the backdrop of the panel that opens when she uses
 the fridge. The four items above are drawn on top of it in a row just above
 the middle, with their names underneath. **Attach:** a Kitchen screenshot
-(the fridge is the mint one on the right).
+(the fridge is the mint one on the right). *As cut:* 640×350. The items
+stand on its painted shelf, with a row of number badges above them and
+their names in the lower compartment.
 
 ```
 ASSET: the inside of an open refrigerator, seen straight-on, as one wide
@@ -217,6 +230,9 @@ the image height, both standing on the same baseline.
 **Save as** `docs/concept-art/butterfly.jpg`. **In game:** `butterfly`,
 about 44×36, flying around the Backyard. One sprite is enough: the wing flap
 is done in code by squashing its width. **Attach:** a Backyard screenshot.
+*As cut:* a 53px wingspan, split into five pieces (body and antennae, four
+wings) so each wing flaps on its own (`tools/cut_butterfly.py`). One image
+was still all it needed.
 
 ```
 ASSET: one small butterfly seen from directly in front, wings fully open

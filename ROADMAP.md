@@ -1,6 +1,6 @@
 # Roadmap
 
-What to do next, in order. Last updated 2026-09-25. Where the game stands
+What to do next, in order. Last updated 2026-10-07. Where the game stands
 today is in `HANDOFF.md`.
 
 Sizes are rough: **S** is a short session, **M** a full one, **L** several.
@@ -101,10 +101,12 @@ choice is made.
      Pusheen Corp.; this game isn't affiliated with or endorsed by them."*
    - A small "?" button next to the ♪ reopens it, with the feedback link
      (see Next, item 7).
-   - Sound starts on Pusheen's first move. Today the music is queued at
-     start-up and plays on the first key or tap of any kind
-     (`AudioController.startMusic`); call it from her first movement input
-     instead.
+   - [x] Sound starts on Pusheen's first move: her first walk or jump, by
+     key or touch, not start-up or any other key or tap
+     (`Pusheen.startMusicOnFirstMove`).
+   - [x] A real tab title, "Pusheen's Lazy Afternoon", and a favicon of
+     her head, plus a home-screen icon for the tablet
+     (`tools/cut_favicon.py`).
    - Phones held upright get a "turn your phone sideways" hint.
    - The ending card ("Play again") also shows the feedback link.
    - *Done when:* someone who's never seen it can start playing without
@@ -149,6 +151,13 @@ choice is made.
 
 ## Decided
 
+- 2026-10-07: The game's title is "Pusheen's Lazy Afternoon" (the browser
+  tab, and the splash's title when that's built). The favicon is her head,
+  cropped from her own concept art; her whole body is too wide to read at
+  16-32px. A pure butterfly icon was crisper but didn't say Pusheen.
+- 2026-10-07: The music starts on Pusheen's first move, not at start-up
+  or on any key or tap, so the first sound answers something the player
+  did with her.
 - 2026-10-07: The butterfly can land on Sloth as well as Pusheen. Each
   check, each target she could land on rolls its own chance (Sloth's much
   lower, since he's nearly always free), so a nearer Sloth never uses up a
