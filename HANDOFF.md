@@ -1,6 +1,6 @@
 # HANDOFF
 
-Where the game stands and how it hangs together. Last updated 2026-09-28.
+Where the game stands and how it hangs together. Last updated 2026-10-07.
 **What to do next is in [`ROADMAP.md`](ROADMAP.md)**; this file is the state
 of play.
 
@@ -22,11 +22,14 @@ of play.
   art work since are all merged.
 - **Signed off at the last playtest:** Sloth's hang from the branch and the
   kitchen climb.
-- **Not yet playtested:** the backyard butterfly (`ROADMAP.md` item 4, just
-  landed) — does the wander actually read as alive, does it ever look like
-  it's heading somewhere specific rather than meandering, and is the
-  landing on Pusheen's head rare enough to surprise but common enough that
-  a player standing still for a while gets to see it?
+- **The butterfly has had one look, on a deploy preview, not a tablet
+  playtest.** That look gave us her bank, her off-screen entrance, the
+  smaller cut, the wider roaming and the slow perched flap; it signed off
+  the approach and landing. Still owed on the tablet: does the wander read
+  as alive, and is the landing rare enough to surprise but common enough
+  that a player standing still gets to see it? (Standing still, she lands
+  about once every 60-90s, first after ~30s, but the gaps vary a
+  lot because she roams the whole sky.)
 
 ## The game today
 
@@ -43,7 +46,8 @@ The **Bedroom** is off the LivingRoom. Its costume box turns Pusheen into
 Pusheencorn, whose floatier jump reaches the high shelf. There are no fail
 states, timers or enemies anywhere.
 
-A shy **butterfly** wanders the Backyard's sky on its own; it drifts away if
+A shy **butterfly** flutters into the Backyard from one side ~10s after it
+opens, then wanders the sky on its own; it drifts away if
 Pusheen gets close and resumes wandering once she's gone. Now and then, if
 Pusheen stands still, it lands on her head (on the horn tip, as
 Pusheencorn) and flutters off when she moves. Nothing to catch, nothing to
@@ -100,6 +104,11 @@ chase — purely ambient.
   itself (the obvious-looking version) quietly makes her turn more
   sluggishly on a slower machine — she read as barely curving at all before
   this was caught. `Butterfly.js`'s `steer()` has the comment.
+- **The butterfly's wander heading follows the direction she's actually
+  being steered** (`BUTTERFLY.headingFollow`). Without it, a wall's push
+  and a wander still pointing into that wall balanced out, and she hovered
+  pinned against it, often in the top-left corner near where she used to
+  spawn, for ~20s at a time. With it, a wall turns her and she flies on.
 - **The hanging Sloth is two layers with the tree drawn between them.** The
   back layer lives outside his container, and `Sloth.syncBackLayer` copies
   his transforms onto it every frame. The hang pivots on `SLOTH.gripRow`,
