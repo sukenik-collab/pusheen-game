@@ -303,7 +303,7 @@ export const BUTTERFLY = {
     landMs: 1100,
     // How far above her head-top point the butterfly's centre sits, so the
     // lower wings rest on it rather than hovering or sinking in.
-    perchLift: 16,
+    perchLift: 15,
     perchMs: [1500, 5000],
     perchFlapScale: 0.3,
     // Pusheen moving (or the perch running out) sends her off -- after a

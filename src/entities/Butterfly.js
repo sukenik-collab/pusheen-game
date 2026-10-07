@@ -9,10 +9,10 @@ import { BUTTERFLY as B } from '../config/feel.js';
 // rounding when each is resized never opens a gap at the seam.
 const BODY_ORIGIN = { x: 0.4830, y: 0.6436 };
 const WING_ORIGIN = {
-    UL: { x: 0.9341, y: 0.9160 },
-    UR: { x: 0.0662, y: 0.9157 },
-    LL: { x: 0.9281, y: 0.0962 },
-    LR: { x: 0.0719, y: 0.0965 }
+    UL: { x: 0.9300, y: 0.9109 },
+    UR: { x: 0.0703, y: 0.9106 },
+    LL: { x: 0.9240, y: 0.1019 },
+    LR: { x: 0.0764, y: 0.1022 }
 };
 
 const TAU = Math.PI * 2;
