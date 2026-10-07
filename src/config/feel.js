@@ -312,7 +312,9 @@ export const BUTTERFLY = {
     // lower wings rest on it rather than hovering or sinking in.
     perchLift: 15,
     perchMs: [1500, 5000],
-    perchFlapScale: 0.3,
+    // Perched, no bursts: one slow, steady open-and-close (radians/sec of
+    // flap phase -- ~3.5s per close-and-open) until she takes off.
+    perchFlapSpeed: 0.9,
     // Pusheen moving (or the perch running out) sends her off -- after a
     // beat, so it reads as reacting to her rather than glued to her.
     takeoffReactMs: [120, 250],

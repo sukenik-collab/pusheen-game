@@ -336,6 +336,8 @@ export class Butterfly extends GameObjects.Container
                     this.state = 'perched';
                     this.perchTimer = randRange(B.perchMs) / 1000;
                     this.takeoffIn = null;
+                    // Pick the slow perched flap up from wherever the wings are.
+                    this.flapPhase = Math.asin(PMath.Clamp(this.wingOpen, 0, 1));
                 }
             }
         });
@@ -441,14 +443,11 @@ export class Butterfly extends GameObjects.Container
     // randomised within their range) -- a continuously vibrating butterfly
     // reads as an effect, not an animal. Speed nudges the flap rate up a
     // little; avoidance never spikes it into "frantic" -- shy, not scared.
-    // Perched, the same pattern runs at a fraction of the speed.
+    // Perched, no bursts: one slow, steady open-and-close until take-off.
     updateWings (dt)
     {
         const speedRatio = PMath.Clamp(this.velocity.length() / B.maxSpeed, 0, 1);
-        let flapSpeed = B.flapSpeed + speedRatio * B.flapSpeedFromSpeed;
-        if (this.state === 'perched') {
-            flapSpeed *= B.perchFlapScale;
-        }
+        const flapSpeed = B.flapSpeed + speedRatio * B.flapSpeedFromSpeed;
 
         this.flapTimer -= dt;
         if (this.flapTimer <= 0) {
@@ -456,7 +455,10 @@ export class Butterfly extends GameObjects.Container
             this.flapTimer = randRange(this.flapBurst ? B.flapBurstMs : B.flapGlideMs) / 1000;
         }
 
-        if (this.flapBurst) {
+        if (this.state === 'perched') {
+            this.flapPhase += B.perchFlapSpeed * dt;
+            this.wingOpen = Math.abs(Math.sin(this.flapPhase));
+        } else if (this.flapBurst) {
             this.flapPhase += flapSpeed * dt;
             this.wingOpen = Math.abs(Math.sin(this.flapPhase));
         } else {
