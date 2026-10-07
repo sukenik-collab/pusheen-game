@@ -32,7 +32,7 @@ the wing piece that's supposed to flap under it, freezing part of the flap.
 
 Usage:
     python3 tools/cut_butterfly.py [--src IN.jpg] [--out-dir DIR]
-        [--width 44] [--body-color R,G,B] [--body-tol 20]
+        [--width 53] [--body-color R,G,B] [--body-tol 20]
         [--antenna-box L,T,R,B] [--preview P.png]
 
 Needs: pillow, scipy  (pip install pillow scipy)
@@ -54,7 +54,7 @@ def main():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--src', default='docs/concept-art/butterfly.jpg')
     ap.add_argument('--out-dir', default='public/assets/sprites')
-    ap.add_argument('--width', type=int, default=44, help='the whole butterfly\'s wingspan')
+    ap.add_argument('--width', type=int, default=53, help='the whole butterfly\'s wingspan')
     ap.add_argument('--body-color', default='108,62,39', help='the thorax fill colour')
     ap.add_argument('--body-tol', type=int, default=20)
     ap.add_argument('--antenna-box', default='430,0,600,355',

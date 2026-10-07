@@ -38,7 +38,7 @@ python3 tools/cut_items.py --src docs/concept-art/fridge_items.jpg --same-scale 
 # quadrants, split at the body's own centre so Butterfly.js can flap each
 # wing independently. Copy the printed origins into WING_ORIGIN/BODY_ORIGIN
 # there on any re-cut.
-python3 tools/cut_butterfly.py --width 56
+python3 tools/cut_butterfly.py      # -> public/assets/sprites/butterfly-{body,wing-*}.png (53px wingspan)
 ```
 
 Add `--preview out.png` to any of them to see the result on the scene's
