@@ -28,8 +28,10 @@ of play.
   the approach and landing. Still owed on the tablet: does the wander read
   as alive, and is the landing rare enough to surprise but common enough
   that a player standing still gets to see it? (Standing still, she lands
-  about once every 60-90s, first after ~30s, but the gaps vary a
-  lot because she roams the whole sky.)
+  about once every 60-90s, first after ~30s, but the gaps vary a lot
+  because she roams the whole sky.) Her visits to Sloth are newer still:
+  about one every 2-3 minutes while Pusheen keeps moving, fewer while she
+  stands still. Are they seen often enough to be worth having?
 
 ## The game today
 
@@ -50,8 +52,9 @@ A shy **butterfly** flutters into the Backyard from one side ~10s after it
 opens, then wanders the sky on its own; it drifts away if
 Pusheen gets close and resumes wandering once she's gone. Now and then, if
 Pusheen stands still, it lands on her head (on the horn tip, as
-Pusheencorn) and flutters off when she moves. Nothing to catch, nothing to
-chase — purely ambient.
+Pusheencorn) and flutters off when she moves. Less often it lands on Sloth
+— on the branch over his head while he hangs, on his head or back once
+he's lying down. Nothing to catch, nothing to chase — purely ambient.
 
 ## Art: what's real and what isn't
 
@@ -115,9 +118,20 @@ chase — purely ambient.
   so breathing keeps his paws on the branch. `SLOTH.restHeight` is derived
   from the tree and sprite geometry: re-derive it, don't eyeball it (the
   comment on it in `feel.js` shows how).
-- **The butterfly is created after Pusheen** in `Backyard.js`, so it draws
-  over her head when it perches there. Move it earlier and a landed
-  butterfly sits behind her.
+- **The butterfly is created after Pusheen and Sloth** in `Backyard.js`,
+  so it draws over whichever it perches on. Move it earlier and a landed
+  butterfly sits behind them.
+- **Each landing target rolls its own chance** (`chooseTarget()` in
+  `Butterfly.js`). "Pick the nearest, then roll its chance" looks
+  equivalent but isn't: Sloth's chance is low, so whenever he was nearer
+  the check was mostly spent on a roll he failed, and Pusheen's landings
+  dropped noticeably.
+- **Headless test browsers run the game slow.** This container's Chromium
+  manages ~11fps, and Phaser caps each frame's step at 1/60s for 120
+  frames after boot or a refocus, so game time runs at about a sixth of
+  real time for ~11s after each. In Playwright, keep
+  `window.__pusheen.loop._coolDown = 0` on an interval when timing
+  matters. Real devices at 60fps never see it.
 - **The butterfly judges "Pusheen is still" by her position, not her
   velocity**, so a scripted slide (Sloth's shove, with her physics body off)
   still counts as moving and sends a perched butterfly off.

@@ -85,6 +85,10 @@ choice is made.
      rather than a rule. She curves in, drops onto the head along a short
      Bezier curve, sits 1.5-5s with one slow open-and-close flap, and
      flutters off when Pusheen moves or the time runs out.
+   - Less often she lands on Sloth: on the branch right over his head while
+     he hangs, or on his head or back once he's lying down, for 3-8s. Only
+     while Pusheen is clear of him, and she leaves if Pusheen comes right up
+     beside her, or when his wake beat starts.
    - *Done when:* it looks alive while idle and reads as shy when she comes
      close. Playtest still owed: does it actually feel alive on the tablet,
      and does the wander ever look like it's heading somewhere specific?
@@ -145,6 +149,15 @@ choice is made.
 
 ## Decided
 
+- 2026-10-07: The butterfly can land on Sloth as well as Pusheen. Each
+  check, each target she could land on rolls its own chance (Sloth's much
+  lower, since he's nearly always free), so a nearer Sloth never uses up a
+  check Pusheen could have won. "In range" and "nearer" are horizontal
+  only, since the hanging Sloth is far higher than Pusheen's head and
+  counting height would favour him. If both rolls come up, the nearer wins,
+  counted in 140px bands so it only wins by being clearly nearer, and
+  Pusheen wins a tie. While he hangs, his crown is tucked under the branch,
+  so she perches on the branch right over it.
 - 2026-10-07: After the first look at the butterfly (PR #20's preview), four
   changes. She enters from just past a side edge ~10s after the yard opens,
   instead of being on screen at the start. She's cut 5% smaller (53px

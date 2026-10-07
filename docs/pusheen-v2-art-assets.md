@@ -117,8 +117,12 @@ panel), `pusheen` / `pusheencorn` (carry accessory is a separate child sprite).
   from her sprite's centre facing left — between the ears on
   `pusheen.png`, and just below the horn tip on `pusheencorn.png` (lower on
   her head, it hides the horn). Re-measure both if either sprite is
-  redrawn. `BUTTERFLY.perchLift` (feel.js) is how far above that point the
-  butterfly's centre sits, so its lower wings rest on the head.
+  redrawn. `PERCH_SPOTS` in `Sloth.js` does the same for Sloth, per pose:
+  px from the top-left of `sloth-hanging-front.png` (on the branch over his
+  crown) and `sloth-sitting.png` (his head, with a lean, and his back).
+  Re-place them if either pose is redrawn. `BUTTERFLY.perchLift`
+  (feel.js) is how far above each point the butterfly's centre sits, so its
+  lower wings rest on it.
 
 ## Optional — P4 cozy extras (not built)
 
