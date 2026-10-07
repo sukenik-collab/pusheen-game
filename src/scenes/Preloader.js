@@ -91,6 +91,15 @@ export class Preloader extends Scene
         this.load.image('itemCheese', 'assets/sprites/item-cheese.png');
         this.load.image('itemLeftovers', 'assets/sprites/item-leftovers.png');
 
+        // The backyard butterfly's five-piece rig (tools/cut_butterfly.py):
+        // body+antennae plus four wing quadrants, each flapped independently
+        // in Butterfly.js rather than one flat sprite.
+        this.load.image('butterflyBody', 'assets/sprites/butterfly-body.png');
+        this.load.image('butterflyWingUL', 'assets/sprites/butterfly-wing-ul.png');
+        this.load.image('butterflyWingUR', 'assets/sprites/butterfly-wing-ur.png');
+        this.load.image('butterflyWingLL', 'assets/sprites/butterfly-wing-ll.png');
+        this.load.image('butterflyWingLR', 'assets/sprites/butterfly-wing-lr.png');
+
         // A tiny soft dot, reused as the sunbeam's dust-mote particle texture.
         const g = this.add.graphics();
         g.fillStyle(0xffffff, 1);

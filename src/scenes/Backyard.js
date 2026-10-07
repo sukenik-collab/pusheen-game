@@ -3,6 +3,7 @@ import { SLOTH, SPAWN } from '../config/feel.js';
 import { Pusheen } from '../entities/Pusheen.js';
 import { Sloth } from '../entities/Sloth.js';
 import { Door } from '../entities/Door.js';
+import { Butterfly } from '../entities/Butterfly.js';
 import { InteractionController } from '../systems/InteractionController.js';
 import { bindReveal } from '../systems/Reveal.js';
 import { fadeToRoom, fadeInRoom, resolveSpawn } from './roomTransition.js';
@@ -35,6 +36,17 @@ const SPAWN_POINTS = {
 // Sloth hangs from the tree's low branch, out along its level stretch and clear
 // of the leaf sprigs at the tip; the gate is revealed directly behind that spot.
 const SLOTH_X = 700;
+
+// Where the butterfly wanders: the open sky above the grass. Its soft walls
+// start curving her away boundaryMargin (90px) inside these, so the top and
+// bottom keep her on screen, while the sides sit 90px past the screen's
+// edges -- their push starts right at the edge itself. She slips wholly off
+// the left or right about once a minute, for up to ~3s, and drifts back
+// (measured over 50 simulated minutes). She enters from just past one of
+// those sides (Butterfly.enter()). No collision with the tree or Sloth --
+// golden rule 4, nothing to catch or be caught by, so a clipped wing is just
+// a rare, low-stakes overlap, not a bug.
+const BUTTERFLY_BOUNDS = { left: -90, right: 1370, top: 80, bottom: GRASS_TOP - 20 };
 
 export class Backyard extends Scene
 {
@@ -89,6 +101,11 @@ export class Backyard extends Scene
         this.pusheen = new Pusheen(this, spawn.x, groundTop - SPAWN.heightAboveGround);
         this.physics.add.collider(this.pusheen, this.ground);
         this.solids.forEach((solid) => this.physics.add.collider(this.pusheen, solid));
+
+        // A shy critter, not an NPC: she wanders on her own, leans away from
+        // Pusheen, and now and then lands on her head (golden rule 4 -- never
+        // chases or is chased). Built after Pusheen so it draws over her head.
+        this.butterfly = new Butterfly(this, BUTTERFLY_BOUNDS);
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keys = this.input.keyboard.addKeys('W,A,S,D,SPACE,E');
@@ -152,8 +169,12 @@ export class Backyard extends Scene
         });
     }
 
-    update ()
+    update (time, delta)
     {
+        // Her own life, independent of Pusheen's state -- keeps wandering
+        // through the wake beat and a room transition alike.
+        this.butterfly.update(time, delta, this.pusheen);
+
         if (this.transitioning) {
             this.pusheen.stopMoving();
             this.pusheen.update();

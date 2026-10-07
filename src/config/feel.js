@@ -197,6 +197,130 @@ export const SLOTH = {
     juiceCueStaggerMs: 70
 };
 
+// The backyard butterfly: no fail state, nothing to catch (golden rule 4) --
+// its whole personality is in how it moves. It has its own life (a wander
+// that never stops), and Pusheen only leans on it, gently, when she's close.
+// Never target-chases a waypoint and never target-flees Pusheen: everything
+// below is a steering force blended into one desired velocity, eased toward
+// frame-rate-independently (Butterfly.js's steer()), so nothing snaps. Tune
+// by playtest -- start by watching it for ~30s with Pusheen far away and see
+// if it looks alive on its own before tuning the avoidance.
+export const BUTTERFLY = {
+    // Wander: a slowly drifting heading, not per-frame jitter -- see
+    // wanderTurnRate. Speed breathes around wanderSpeed rather than holding
+    // it exactly, so it sometimes almost hovers while turning.
+    wanderSpeed: 35,
+    wanderSpeedRipple: 5,
+    wanderRippleHz: 0.7,
+    maxSpeed: 55,
+    // How fast the *wander heading* itself drifts -- low-frequency, so it
+    // carves broad lazy curves rather than a jittery walk. Lower holds a
+    // heading longer, so she roams further: 0.45 travels ~420px in a typical
+    // 20s, against ~375px at 0.6.
+    wanderTurnRate: 0.45,
+    // How hard actual velocity turns to follow the desired direction: higher
+    // snaps quicker, lower drifts languidly.
+    steeringResponse: 2.0,
+    // How fast the wander's own heading swings round to where the walls and
+    // Pusheen are turning her (per second). Without it she pinned herself
+    // against walls and in corners -- see steer().
+    headingFollow: 1.5,
+
+    // Sensor zones, same "outer leads" contract as every other radar in this
+    // file, but continuous rather than a single enable/disable line: outer
+    // ramps in a little avoidance, inner ramps in more. Backyard-scale, not
+    // the cabinet/Stormy defaults -- a butterfly's "personal space" reads
+    // bigger than a conversation radius.
+    outerRadius: 190,
+    innerRadius: 90,
+    outerAvoidance: 0.25,
+    innerAvoidance: 0.65,
+    // The wander's own pull in the blend (see steer() in Butterfly.js):
+    // avoidance never fully overrides it, so she nudges rather than commands.
+    wanderWeight: 1.0,
+
+    // Soft walls: she starts curving away boundaryMargin px before an edge of
+    // BUTTERFLY_BOUNDS (Backyard.js) rather than bouncing off an invisible
+    // box. The left and right edges sit just past the screen's, so she can
+    // slip briefly off either side and come back.
+    boundaryMargin: 90,
+    boundaryForce: 0.8,
+
+    // She isn't there when the yard opens: she waits just past a side edge
+    // and flutters in after entranceDelayMs, so she arrives rather than
+    // being found sitting on screen.
+    entranceDelayMs: [8000, 12000],
+
+    // Bob/sway: tweens on the art inside the butterfly (golden rule 1), never
+    // her flight position, so the path itself stays a smooth curve. Each
+    // half-swing re-rolls its own size and length within floatJitter, and the
+    // bob and sway run on unrelated timings, so the float never repeats.
+    bobAmplitude: 7,
+    bobHalfMs: 330,
+    swayAmplitude: 3,
+    swayHalfMs: 560,
+    floatJitter: 0.25,
+
+    // Wing flap: scaleX around each wing's attachment corner (its own
+    // origin -- see Butterfly.js), not rotation. Upper/lower wings get
+    // different amplitudes so the flap doesn't read as mechanically
+    // mirrored, and flapSpeed rises a little with ground speed.
+    flapSpeed: 7,
+    flapSpeedFromSpeed: 3.0,
+    upperFlapBase: 0.55,
+    upperFlapRange: 0.45,
+    lowerFlapBase: 0.65,
+    lowerFlapRange: 0.35,
+    // Bursty, not a constant metronome: flap for a bit, glide (wings near
+    // open) for a bit. Both durations vary randomly within their range so no
+    // two pauses match.
+    flapBurstMs: [500, 900],
+    flapGlideMs: [350, 700],
+
+    // She banks into her horizontal travel -- ~12deg at wander speed, capped
+    // at ~17deg -- but stays head-up. The art is seen from above, so turning
+    // her to face her heading would flip her upside down whenever she flew
+    // downward; a bank reads as a butterfly in a side-view yard. (The first
+    // cut leaned ~3deg, too little to see.)
+    tiltPerSpeed: 0.006,
+    maxTiltRad: 0.3,
+
+    // Landing on Pusheen's head: rare and opportunistic, never a rule she can
+    // learn ("stand near it and it lands"). Considered once per landCheckMs,
+    // only once Pusheen has been still for stillMs with her head in
+    // landRange, then only on a landChance roll. After a landing -- or an
+    // approach she spooks by moving -- it won't consider another for
+    // landCooldownMs (and not for landFirstCooldownMs after the room opens).
+    landCheckMs: [2000, 4000],
+    landChance: 0.35,
+    stillMs: 2000,
+    landRange: 420,
+    landCooldownMs: [20000, 40000],
+    landFirstCooldownMs: [8000, 15000],
+    // Approach: her usual flight with the shyness switched off and a gentle
+    // pull toward a point above and to one side of the head (the side she's
+    // already on), so she arrives curving rather than beelining like a
+    // projectile. Wander keeps some say, so the curve stays lazy.
+    approachSpeed: 42,
+    approachWanderWeight: 0.35,
+    approachOffset: { x: 70, y: -80 },
+    approachArrivePx: 24,
+    approachGiveUpMs: 12000,
+    // The last stretch is a short scripted curve down onto the head.
+    landMs: 1100,
+    // How far above her head-top point the butterfly's centre sits, so the
+    // lower wings rest on it rather than hovering or sinking in.
+    perchLift: 15,
+    perchMs: [1500, 5000],
+    // Perched, no bursts: one slow, steady open-and-close (radians/sec of
+    // flap phase -- ~3.5s per close-and-open) until she takes off.
+    perchFlapSpeed: 0.9,
+    // Pusheen moving (or the perch running out) sends her off -- after a
+    // beat, so it reads as reacting to her rather than glued to her.
+    takeoffReactMs: [120, 250],
+    takeoffSpeed: 50
+};
+
 // Room palettes -- lazy-summer-afternoon warmth.
 export const BACKYARD = {
     sky: 0xbfe0e8,
