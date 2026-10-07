@@ -44,7 +44,7 @@ Assume ~1280×720 logical canvas. All of these live in `src/config/feel.js`.
 - `src/main.js` — Phaser.Game config + scene list.
 - `src/config/` — `feel.js` (ALL tunable feel constants in one place), `gameState.js` (run-state registry keys), `audioManifest.js`.
 - `src/scenes/` — one scene per file: `Preloader`, the four rooms (`Backyard`, `Kitchen`, `LivingRoom`, `Bedroom`), and `UI` (HUD, touch controls, peek panel), which runs alongside them.
-- `src/entities/` — one game object per file (`Pusheen`, `Sloth`, `Stormy`, `Container`, `Door`, `HeldPickup`, …).
+- `src/entities/` — one game object per file (`Pusheen`, `Sloth`, `Stormy`, `Butterfly`, `Container`, `Door`, `HeldPickup`, …).
 - `src/systems/` — shared wiring: `roomBuilder` (data layouts), `InteractionController`, `Reveal`.
 - `src/audio/AudioController.js` — music and SFX.
 - `tools/` — Python scripts that cut concept art into sprites (`tools/README.md`).
@@ -60,7 +60,7 @@ Assume ~1280×720 logical canvas. All of these live in `src/config/feel.js`.
 ## Verification / test strategy
 The test strategy is **human playtests** answering feel questions ("does this delight?", "does my kid want to play again?"). **No automated test suite yet:** the core metric is subjective feel, and a test suite for Phaser rendering, tweens and input is high-effort for near-zero return at this stage. A real test setup is a deliberate later decision.
 
-Before calling a change to play, placement or art done, run the real game in a browser (Playwright with the preinstalled Chromium) and check it with real key input and screenshots.
+Before calling a change to play, placement or art done, run the real game in a browser (Playwright with the preinstalled Chromium) and check it with real key input and screenshots. Headless, the game runs far slower than real time; `HANDOFF.md` says why and how to keep timing tests honest.
 
 ## Definition of done
 Not "the cabinet opens." It's: does moving around, the juice quest, finding the snack and the nap payoff make a first-time player (a kid, or a stranger from Reddit) want to do it again? If the loop is pleasant-but-boring after ~90s, that's a finding — surface it, don't paper over it.

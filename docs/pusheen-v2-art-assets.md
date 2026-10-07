@@ -72,6 +72,18 @@ Sky (`#BACBF4`) and grass (`#80A56F`) are `add.rectangle` fills, not images.
 
 ---
 
+## Page icons
+
+Not game sprites: the browser tab and a tablet's home screen. Linked from
+`index.html`, served from `public/`, and all cut by `tools/cut_favicon.py`
+from `concept-art/cat.png`.
+
+| File | Size | Notes |
+|---|---|---|
+| `favicon.png` | 32×32 | Her head, cropped square: ears, eyes, whiskers. What a retina tablet's tab shows. |
+| `favicon-16.png` | 16×16 | The same crop, for non-retina screens. |
+| `apple-touch-icon.png` | 180×180 | All of her, on the backyard sky, opaque. Used when the game is added to a home screen. |
+
 ## Reused / shared (no new art)
 
 `door` (LivingRoom↔Bedroom↔Backyard interior doors), `drawer` (cabinet peek

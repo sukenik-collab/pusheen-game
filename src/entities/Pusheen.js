@@ -90,14 +90,25 @@ export class Pusheen extends GameObjects.Container
 
     moveLeft ()
     {
+        this.startMusicOnFirstMove();
         this.body.setAccelerationX(-MOVE.accel);
         this.setFacing('left');
     }
 
     moveRight ()
     {
+        this.startMusicOnFirstMove();
         this.body.setAccelerationX(MOVE.accel);
         this.setFacing('right');
+    }
+
+    // The music starts with her first move -- walk or jump -- rather than at
+    // boot or on any key or tap, so the first thing a player hears answers
+    // something they did with her. Only the scenes' movement input calls
+    // these, and startMusic() is a no-op once the music is going.
+    startMusicOnFirstMove ()
+    {
+        this.audio?.startMusic();
     }
 
     stopMoving ()
@@ -159,6 +170,7 @@ export class Pusheen extends GameObjects.Container
 
     jump ()
     {
+        this.startMusicOnFirstMove();
         if (this.body.blocked.down || this.body.touching.down) {
             this.body.setVelocityY(this.resolveJumpVelocity());
             this.audio?.play('jump');

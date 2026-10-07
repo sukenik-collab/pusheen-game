@@ -29,9 +29,11 @@ export class AudioController
     get currentTrack () { return TRACKS[this.trackIndex]; }
     get currentSet () { return SFX_SETS[this.sfxIndex]; }
 
-    // Called once. Browsers hold the audio context suspended until the first
-    // user gesture; Phaser's WebAudio manager auto-unlocks on that gesture and
-    // starts anything queued, so play()ing here now is correct even pre-unlock.
+    // Called on every one of her movement inputs (Pusheen's
+    // startMusicOnFirstMove); only the first starts the bed. That input is
+    // itself the gesture browsers wait for before letting audio play: Phaser
+    // resumes the audio context on it, and a bed started a frame before that
+    // resume simply begins playing as it lands.
     startMusic ()
     {
         if (this.music) {
