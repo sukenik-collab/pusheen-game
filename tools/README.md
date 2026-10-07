@@ -3,8 +3,9 @@
 Scripts that turn the concept art in `docs/concept-art/` into the transparent
 PNGs the game loads. They are how `backyard-tree.png`, the two hanging-sloth
 layers, the kitchen's climbing boxes, the two doorways, the fridge interior,
-the glasses, the fridge items and the butterfly rig were made; re-running any
-of them with no arguments reproduces the shipped files byte for byte
+the glasses, the fridge items, the butterfly rig and the browser-tab icons
+were made; re-running any of them with no arguments reproduces the shipped
+files byte for byte
 (`cut_prop.py` and `cut_items.py` need their `--src`/`--out`/size flags every
 time -- they cut whichever prop or item image you point them at, not one
 fixed source; `cut_butterfly.py` defaults to the one butterfly source there
@@ -39,6 +40,10 @@ python3 tools/cut_items.py --src docs/concept-art/fridge_items.jpg --same-scale 
 # wing independently. Copy the printed origins into WING_ORIGIN/BODY_ORIGIN
 # there on any re-cut.
 python3 tools/cut_butterfly.py      # -> public/assets/sprites/butterfly-{body,wing-*}.png (53px wingspan)
+
+# The page's icons, from Pusheen's own concept art: her head for the tab,
+# all of her on the backyard sky for a tablet's home screen.
+python3 tools/cut_favicon.py        # -> public/{favicon,favicon-16,apple-touch-icon}.png
 ```
 
 Add `--preview out.png` to any of them to see the result on the scene's
@@ -188,6 +193,22 @@ a fraction -- is printed on every run and goes straight into `BODY_ORIGIN`/
 essentially never exactly on it, once `--wing-overlap` has pushed that
 corner's edge past the split line.
 
+## `cut_favicon.py`
+
+The tab favicon (32px, plus 16px for non-retina screens) is just her head,
+cropped square (`--head-box`, in source px): her whole body is too wide to
+read at that size, and her ears, eyes and whiskers are unmistakably her.
+The home-screen icon (`apple-touch-icon.png`, 180px) is all of her,
+centred on the backyard's sky colour. It's opaque because iOS fills a
+transparent touch icon with black. It has a 14% margin because iOS rounds
+the corners itself.
+
+Its source is `cat.png`, the same art `pusheen.png` was cut from: flat
+vector art on plain white at 400px. The 110px game sprite is too small to
+source a 180px icon from. White is keyed by a flood from the border, since
+nothing inside her is white, then the rim is un-mixed and resized with
+`cut_tree.py`'s helpers, like every cut above.
+
 ## The numbers they print
 
 `cut_tree.py` reports the trunk base row and the branch's thickness and height
@@ -223,6 +244,7 @@ all.
 | `glasses.jpg` | `cut_items.py` | Empty and full glass, side by side. |
 | `fridge_items.jpg` | `cut_items.py --same-scale 100` | Milk, cheese, leftovers tub and the OJ pitcher, left to right in the source (not the prompt's pitcher-first order -- match `--item` specs by shape, not by re-reading the prompt). |
 | `butterfly.jpg` | `cut_butterfly.py` | The butterfly alone on flat magenta, symmetric about its own body. |
+| `cat.png` | `cut_favicon.py` | Pusheen alone on plain white, 400px. Also the source `pusheen.png` was cut from, by a one-off script that wasn't kept. |
 
 `SLOTH.restHeight` and `SLOTH.gripRow` in `feel.js` are derived from whichever
 sprites are currently cut in — re-derive them (the comments on those
