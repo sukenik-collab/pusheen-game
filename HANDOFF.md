@@ -7,8 +7,11 @@ of play.
 ## Start here next time
 
 1. Open `ROADMAP.md` at **Now**. Items 1 (fridge labels), 2 (the art batch)
-   and 4 (the butterfly) are done; item 3 (Sloth's wake beat) is next. The
-   butterfly hasn't had a playtest yet — see "Where things stand".
+   and 4 (the butterfly, landing on Pusheen and on Sloth) are done, and
+   item 5 (first impressions) is under way: the title, favicon and the
+   music starting on her first move are in. Item 3 (Sloth's wake beat) is
+   next. The butterfly has only had a look on a deploy preview, not a
+   tablet playtest — see "Where things stand".
 2. `npm run dev` serves the game at http://localhost:8080 (it boots in the
    Backyard). `npm run build` must pass before any PR.
 3. Work on a branch; `main` is what's live.
@@ -18,8 +21,9 @@ of play.
 - **`main` is the playable build.** Netlify deploys it to
   https://pusheen-game.netlify.app/ on every merge, and every PR gets its
   own deploy preview (the Netlify bot comments the link).
-- **Nothing is in flight.** v2 ("Wake Me for Juice", Room Pair #2) and the
-  art work since are all merged.
+- **Nothing is in flight.** v2 ("Wake Me for Juice", Room Pair #2), the
+  art batch (PR #19), the butterfly (PRs #20 and #21) and the title,
+  favicon and music start are all merged.
 - **Signed off at the last playtest:** Sloth's hang from the branch and the
   kitchen climb.
 - **The butterfly has had one look, on a deploy preview, not a tablet
@@ -35,7 +39,8 @@ of play.
 
 ## The game today
 
-One small connected house. It boots in the Backyard:
+*Pusheen's Lazy Afternoon* (the tab title; the repo and specs call it the
+Pusheen Cozy Game). One small connected house. It boots in the Backyard:
 
 > Meet **Sloth**, asleep on the backyard tree. He'd like juice. In the
 > **Kitchen**, climb two cardboard boxes onto the counter for a **glass**,
@@ -46,7 +51,7 @@ One small connected house. It boots in the Backyard:
 
 The **Bedroom** is off the LivingRoom. Its costume box turns Pusheen into
 Pusheencorn, whose floatier jump reaches the high shelf. There are no fail
-states, timers or enemies anywhere.
+states, timers or enemies anywhere. The music starts with her first move.
 
 A shy **butterfly** flutters into the Backyard from one side ~10s after it
 opens, then wanders the sky on its own; it drifts away if
@@ -61,9 +66,10 @@ he's lying down. Nothing to catch, nothing to chase — purely ambient.
 - **Real, cut from `docs/concept-art/` by the scripts in `tools/`:** the
   backyard tree, the hanging Sloth (two layers), the kitchen boxes, the
   garden gate, the screen door, the fridge interior, the glass and juice
-  glass, the four fridge items (OJ pitcher, milk, cheese, leftovers), and the
-  butterfly's five-piece rig (body+antennae, four wings). See
-  `tools/README.md`.
+  glass, the four fridge items (OJ pitcher, milk, cheese, leftovers), the
+  butterfly's five-piece rig (body+antennae, four wings), and the page's
+  favicon and home-screen icon (from `cat.png`, Pusheen's own concept
+  art). See `tools/README.md`.
 - **Real, from earlier work:** the kitchen backdrop, Sloth's awake and
   sitting poses, and the original rooms' sprites (Pusheen, Pusheencorn,
   Stormy, furniture). Some of those were cut from concept art; others are
@@ -135,6 +141,11 @@ he's lying down. Nothing to catch, nothing to chase — purely ambient.
 - **The butterfly judges "Pusheen is still" by her position, not her
   velocity**, so a scripted slide (Sloth's shove, with her physics body off)
   still counts as moving and sends a perched butterfly off.
+- **The music starts from Pusheen's movement methods** (`moveLeft`,
+  `moveRight` and `jump` call `startMusicOnFirstMove`), which only the
+  rooms' input code calls. A scripted move that called them would start
+  the music without the player doing anything, so script her with tweens
+  or the physics body, as Sloth's shove does.
 - **In the Backyard, creation order is depth order** (sky, clouds, sun,
   grass, hedge, tree). There's no `setDepth`.
 
@@ -162,7 +173,7 @@ he's lying down. Nothing to catch, nothing to chase — purely ambient.
 | `ROADMAP.md` | What's next, in order, and a log of decisions |
 | `HANDOFF.md` | This file: the state of play |
 | `CLAUDE.md` | Working rules for Claude sessions |
-| `docs/art-prompts.md` | Gemini prompts for the art still missing |
+| `docs/art-prompts.md` | Gemini prompts for the game's art: which are done, which are still to generate |
 | `docs/pusheen-v2-art-assets.md` | Every v2 sprite: size, status, tuning notes |
 | `tools/README.md` | How concept art becomes sprites |
 | `docs/pusheen-mvp-product-brief.md` | The why, plus the success and kill criteria |
