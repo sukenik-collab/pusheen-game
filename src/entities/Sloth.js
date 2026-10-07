@@ -1,4 +1,4 @@
-import { GameObjects, Geom, Scenes } from 'phaser';
+import { GameObjects, Geom, Scenes, Math as PMath } from 'phaser';
 import { SLOTH, SLOTH_RADAR } from '../config/feel.js';
 
 const SPARKLE_COLOR = '#fff3b0';
@@ -24,6 +24,19 @@ const HANG_ZONE_DY = 58;
 const POSE_HANGING = { texture: 'slothHangingFront', back: 'slothHangingBack', scale: 1, pivotRow: SLOTH.gripRow };
 const POSE_STANDING = { texture: 'slothAwake', scale: 1 };
 const POSE_SITTING = { texture: 'slothSitting', scale: 1 };
+
+// Where the butterfly may perch on him (Butterfly.js), per pose: px from the
+// top-left of that pose's art, and the lean she sits at (degrees). Like
+// Pusheen's HEAD_TOP, each is the surface point her centre sits
+// BUTTERFLY.perchLift above, along that lean. Hanging, his crown is tucked
+// under the branch, so she sits on the branch right over it, beside his paw;
+// lying down, on top of his head (leaning with its slope) or on his back.
+// Placed by eye from in-game renders -- re-place them if a pose is redrawn.
+// The standing pose has none: he only stands mid wake beat.
+const PERCH_SPOTS = {
+    slothHangingFront: [{ x: 38, y: 37, tilt: 0 }],
+    slothSitting: [{ x: 39, y: 29, tilt: -12 }, { x: 118, y: 13, tilt: 0 }]
+};
 
 function copyTransform (from, to)
 {
@@ -117,6 +130,9 @@ export class Sloth extends GameObjects.Container
         this.innerZone = new Geom.Circle(this.x, zoneY, SLOTH_RADAR.interactRadius);
         this.inOuterZone = false;
         this.inInnerZone = false;
+
+        this.perchMatrix = new GameObjects.Components.TransformMatrix();
+        this.perchParentMatrix = new GameObjects.Components.TransformMatrix();
     }
 
     update (pusheen)
@@ -165,6 +181,22 @@ export class Sloth extends GameObjects.Container
         copyTransform(this, this.back);
         copyTransform(this.visual, this.backVisual);
         copyTransform(this.art, this.backArt);
+    }
+
+    // Where a butterfly may land on him right now, in world space, with the
+    // lean in radians -- none mid wake beat. Mapped through the art's own
+    // transform, so a perched butterfly rides his breathing.
+    getPerchSpots ()
+    {
+        const spots = this.busy ? undefined : PERCH_SPOTS[this.pose.texture];
+        if (!spots) {
+            return [];
+        }
+        const m = this.art.getWorldTransformMatrix(this.perchMatrix, this.perchParentMatrix);
+        return spots.map((spot) => {
+            const p = m.transformPoint(spot.x - this.art.displayOriginX, spot.y - this.art.displayOriginY);
+            return { x: p.x, y: p.y, tilt: PMath.DegToRad(spot.tilt) };
+        });
     }
 
     // Where his centre sits so the current pose's feet meet the floor. The
