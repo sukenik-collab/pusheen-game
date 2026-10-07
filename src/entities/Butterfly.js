@@ -72,8 +72,9 @@ export class Butterfly extends GameObjects.Container
         this.flapTimer = randRange(B.flapBurstMs) / 1000;
 
         // Off-stage until the entrance -- on the scene clock, so it's ~10s
-        // whatever the frame rate (Phaser only slows that clock while the
-        // page is unfocused, as in a headless test browser).
+        // whatever the frame rate. (Phaser caps each frame's step at 1/60s for
+        // 120 frames after boot or a refocus, so on a machine far below 60fps,
+        // like a headless test browser, it runs long; at 60fps it can't.)
         this.state = 'offstage';
         this.setVisible(false);
         scene.time.delayedCall(randRange(B.entranceDelayMs), () => this.enter());
