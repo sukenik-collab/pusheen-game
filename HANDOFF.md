@@ -1,13 +1,14 @@
 # HANDOFF
 
-Where the game stands and how it hangs together. Last updated 2026-09-28.
+Where the game stands and how it hangs together. Last updated 2026-10-07.
 **What to do next is in [`ROADMAP.md`](ROADMAP.md)**; this file is the state
 of play.
 
 ## Start here next time
 
-1. Open `ROADMAP.md` at **Now**. Items 1 (fridge labels) and 2 (the art
-   batch) are done; item 3 (Sloth's wake beat) is next.
+1. Open `ROADMAP.md` at **Now**. Items 1 (fridge labels), 2 (the art batch)
+   and 4 (the butterfly) are done; item 3 (Sloth's wake beat) is next. The
+   butterfly hasn't had a playtest yet — see "Where things stand".
 2. `npm run dev` serves the game at http://localhost:8080 (it boots in the
    Backyard). `npm run build` must pass before any PR.
 3. Work on a branch; `main` is what's live.
@@ -21,6 +22,14 @@ of play.
   art work since are all merged.
 - **Signed off at the last playtest:** Sloth's hang from the branch and the
   kitchen climb.
+- **The butterfly has had one look, on a deploy preview, not a tablet
+  playtest.** That look gave us her bank, her off-screen entrance, the
+  smaller cut, the wider roaming and the slow perched flap; it signed off
+  the approach and landing. Still owed on the tablet: does the wander read
+  as alive, and is the landing rare enough to surprise but common enough
+  that a player standing still gets to see it? (Standing still, she lands
+  about once every 60-90s, first after ~30s, but the gaps vary a
+  lot because she roams the whole sky.)
 
 ## The game today
 
@@ -37,13 +46,21 @@ The **Bedroom** is off the LivingRoom. Its costume box turns Pusheen into
 Pusheencorn, whose floatier jump reaches the high shelf. There are no fail
 states, timers or enemies anywhere.
 
+A shy **butterfly** flutters into the Backyard from one side ~10s after it
+opens, then wanders the sky on its own; it drifts away if
+Pusheen gets close and resumes wandering once she's gone. Now and then, if
+Pusheen stands still, it lands on her head (on the horn tip, as
+Pusheencorn) and flutters off when she moves. Nothing to catch, nothing to
+chase — purely ambient.
+
 ## Art: what's real and what isn't
 
 - **Real, cut from `docs/concept-art/` by the scripts in `tools/`:** the
   backyard tree, the hanging Sloth (two layers), the kitchen boxes, the
   garden gate, the screen door, the fridge interior, the glass and juice
-  glass, and the four fridge items (OJ pitcher, milk, cheese, leftovers).
-  See `tools/README.md`.
+  glass, the four fridge items (OJ pitcher, milk, cheese, leftovers), and the
+  butterfly's five-piece rig (body+antennae, four wings). See
+  `tools/README.md`.
 - **Real, from earlier work:** the kitchen backdrop, Sloth's awake and
   sitting poses, and the original rooms' sprites (Pusheen, Pusheencorn,
   Stormy, furniture). Some of those were cut from concept art; others are
@@ -80,12 +97,30 @@ states, timers or enemies anywhere.
   alone, narrower than the sprite. Widening the zone to match the full
   sprite would let her trigger the transition from a stride still visibly
   short of the gate's opening.
+- **The butterfly's wander heading drifts by `noise * sqrt(dt)`, not
+  `noise * dt`.** It's a random walk, and a walk's accumulated turning over
+  real time only comes out the same regardless of frame rate if each step's
+  noise scales with the *square root* of its own timestep. Scaling by `dt`
+  itself (the obvious-looking version) quietly makes her turn more
+  sluggishly on a slower machine — she read as barely curving at all before
+  this was caught. `Butterfly.js`'s `steer()` has the comment.
+- **The butterfly's wander heading follows the direction she's actually
+  being steered** (`BUTTERFLY.headingFollow`). Without it, a wall's push
+  and a wander still pointing into that wall balanced out, and she hovered
+  pinned against it, often in the top-left corner near where she used to
+  spawn, for ~20s at a time. With it, a wall turns her and she flies on.
 - **The hanging Sloth is two layers with the tree drawn between them.** The
   back layer lives outside his container, and `Sloth.syncBackLayer` copies
   his transforms onto it every frame. The hang pivots on `SLOTH.gripRow`,
   so breathing keeps his paws on the branch. `SLOTH.restHeight` is derived
   from the tree and sprite geometry: re-derive it, don't eyeball it (the
   comment on it in `feel.js` shows how).
+- **The butterfly is created after Pusheen** in `Backyard.js`, so it draws
+  over her head when it perches there. Move it earlier and a landed
+  butterfly sits behind her.
+- **The butterfly judges "Pusheen is still" by her position, not her
+  velocity**, so a scripted slide (Sloth's shove, with her physics body off)
+  still counts as moving and sends a perched butterfly off.
 - **In the Backyard, creation order is depth order** (sky, clouds, sun,
   grass, hedge, tree). There's no `setDepth`.
 
