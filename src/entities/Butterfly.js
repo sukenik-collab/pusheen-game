@@ -37,7 +37,8 @@ function randRange ([lo, hi])
 // "arrive" at or a scripted return once Pusheen leaves.
 //
 // She starts off-stage and flutters in after a few seconds (enter()). Now and
-// then, if Pusheen has been still a while, she lands on her head:
+// then she lands -- on Pusheen's head if she's been still a while, or, less
+// often, on Sloth:
 //   offstage -> wander -> approach -> land -> perched -> (take off) -> wander
 // Rare and opportunistic (see BUTTERFLY's landing notes in feel.js), never a
 // rule, so it reads as curiosity rather than a mechanic. There are no SHY /
@@ -54,13 +55,21 @@ export class Butterfly extends GameObjects.Container
 {
     // `bounds` is the soft-wall rectangle she wanders inside (the backyard sky
     // above the grass line, reaching just past the screen's side edges) --
-    // see Backyard.js. She starts off-stage and flies in on her own.
-    constructor (scene, bounds)
+    // see Backyard.js. She starts off-stage and flies in on her own. She
+    // shies from `pusheen` and may land on her or on `sloth`.
+    constructor (scene, bounds, { pusheen, sloth })
     {
         super(scene, 0, 0);
         scene.add.existing(this);
 
         this.bounds = bounds;
+        this.pusheen = pusheen;
+        this.sloth = sloth;
+
+        // What she's landing on, from the approach until take-off:
+        // { who: 'pusheen' } or { who: 'sloth', spot } (an index into his
+        // getPerchSpots()).
+        this.target = null;
 
         this.heading = PMath.FloatBetween(0, TAU);
         this.velocity = new PMath.Vector2(Math.cos(this.heading), Math.sin(this.heading)).scale(B.wanderSpeed);
@@ -72,8 +81,9 @@ export class Butterfly extends GameObjects.Container
         this.flapTimer = randRange(B.flapBurstMs) / 1000;
 
         // Off-stage until the entrance -- on the scene clock, so it's ~10s
-        // whatever the frame rate (Phaser only slows that clock while the
-        // page is unfocused, as in a headless test browser).
+        // whatever the frame rate. (Phaser caps each frame's step at 1/60s for
+        // 120 frames after boot or a refocus, so on a machine far below 60fps,
+        // like a headless test browser, it runs long; at 60fps it can't.)
         this.state = 'offstage';
         this.setVisible(false);
         scene.time.delayedCall(randRange(B.entranceDelayMs), () => this.enter());
@@ -97,7 +107,7 @@ export class Butterfly extends GameObjects.Container
         this.startFloat();
     }
 
-    update (time, delta, pusheen)
+    update (time, delta)
     {
         const dt = Math.min(delta / 1000, 1 / 20);   // clamp a stall/tab-switch, not real gameplay
         const t = time / 1000;                       // Phaser's own clock, in seconds
@@ -106,22 +116,22 @@ export class Butterfly extends GameObjects.Container
             return;
         }
 
-        this.watchPusheen(dt, pusheen);
+        this.watchPusheen(dt);
 
         if (this.state === 'wander') {
-            this.considerLanding(dt, pusheen);
+            this.considerLanding(dt);
         }
 
         if (this.state === 'wander') {
-            this.steer(dt, t, pusheen);
+            this.steer(dt, t);
             this.fly(dt);
         } else if (this.state === 'approach') {
-            this.steerApproach(dt, t, pusheen);
+            this.steerApproach(dt, t);
             this.fly(dt);
         } else if (this.state === 'land') {
-            this.followLanding(pusheen);
+            this.followLanding();
         } else {
-            this.perch(dt, pusheen);
+            this.perch(dt);
         }
 
         this.updateWings(dt);
@@ -152,8 +162,9 @@ export class Butterfly extends GameObjects.Container
     }
 
     // How long Pusheen has held still, and whether she moved this frame.
-    watchPusheen (dt, pusheen)
+    watchPusheen (dt)
     {
+        const pusheen = this.pusheen;
         this.pusheenMoved = this.lastPusheenX !== null &&
             Math.hypot(pusheen.x - this.lastPusheenX, pusheen.y - this.lastPusheenY) > STILL_EPS;
         this.lastPusheenX = pusheen.x;
@@ -165,10 +176,10 @@ export class Butterfly extends GameObjects.Container
 
     // Wander + Pusheen avoidance + boundary, blended (never a switch between
     // them) into one desired velocity, then eased toward.
-    steer (dt, t, pusheen)
+    steer (dt, t)
     {
         const desired = this.wanderVector(dt, t, B.wanderWeight)
-            .add(this.avoidanceForce(pusheen))
+            .add(this.avoidanceForce())
             .add(this.boundaryForce());
 
         // The wander heading follows wherever the other forces turn her. Left
@@ -213,10 +224,10 @@ export class Butterfly extends GameObjects.Container
     // at zero distance -- "gentle" and "moderate", never a sudden flee.
     // Blended with the wander rather than replacing it, so she curves off her
     // existing heading instead of snapping to face directly away.
-    avoidanceForce (pusheen)
+    avoidanceForce ()
     {
-        const dx = this.x - pusheen.x;
-        const dy = this.y - pusheen.y;
+        const dx = this.x - this.pusheen.x;
+        const dy = this.y - this.pusheen.y;
         const dist = Math.hypot(dx, dy) || 1;
 
         let strength;
@@ -249,11 +260,11 @@ export class Butterfly extends GameObjects.Container
         return f.scale(B.boundaryForce * B.maxSpeed);
     }
 
-    // ---- landing on Pusheen -----------------------------------------------
+    // ---- landing ------------------------------------------------------------
 
-    // Every few seconds, and only if she's been still a while with her head in
-    // range, roll for it. Never "stand near it and it lands".
-    considerLanding (dt, pusheen)
+    // Every few seconds, roll for landing on whatever she could land on right
+    // now (chooseTarget). Never "stand near it and it lands".
+    considerLanding (dt)
     {
         this.landCooldown -= dt;
         this.landCheckIn -= dt;
@@ -262,60 +273,145 @@ export class Butterfly extends GameObjects.Container
         }
         this.landCheckIn = randRange(B.landCheckMs) / 1000;
 
-        if (this.landCooldown > 0 || this.pusheenStill < B.stillMs / 1000) {
+        if (this.landCooldown > 0) {
             return;
         }
-        const head = pusheen.getHeadTop();
-        if (Math.hypot(head.x - this.x, head.y - this.y) > B.landRange || Math.random() >= B.landChance) {
+        const option = this.chooseTarget();
+        if (!option) {
             return;
         }
 
+        this.target = option.target;
         this.state = 'approach';
         this.approachTime = 0;
-        this.approachSide = Math.sign(this.x - head.x) || 1;
+        this.approachSide = Math.sign(this.x - option.x) || 1;
     }
 
-    // Her usual flight with the shyness off and a pull toward a point above
-    // and beside the head (on the side she's already on). No soft walls: her
-    // head sits below the wander bounds, and that's where she's going.
-    // Pusheen moving spooks her back to plain wandering.
-    steerApproach (dt, t, pusheen)
+    // Each target she could land on right now rolls its own chance: Pusheen
+    // once she's been still a while, Sloth whenever Pusheen is clear of his
+    // spot (she stays shy of Pusheen unless it's Pusheen she's landing on).
+    // Separate rolls, so each keeps its own odds -- a nearer Sloth never
+    // uses up a check Pusheen could have won. Nearness counts twice:
+    // - in range means within landRange across. Height is left out: the
+    //   hanging Sloth is far higher than Pusheen's head and she flies at
+    //   every height, so counting it would just favour him.
+    // - if both rolls come up, the nearer wins, counted in landBandPx bands
+    //   so it only wins by being clearly nearer. Within a band, Pusheen wins:
+    //   she's the one the player is standing still for.
+    chooseTarget ()
+    {
+        const options = [];
+        if (this.pusheenStill >= B.stillMs / 1000) {
+            options.push({ target: { who: 'pusheen' }, x: this.pusheen.getHeadTop().x, chance: B.landChance });
+        }
+        const spots = this.sloth.getPerchSpots();
+        if (spots.length > 0) {
+            const spot = PMath.Between(0, spots.length - 1);
+            if (!this.pusheenNear(spots[spot], B.outerRadius)) {
+                options.push({ target: { who: 'sloth', spot }, x: spots[spot].x, chance: B.slothLandChance });
+            }
+        }
+
+        let best = null;
+        let bestBand = Infinity;
+        for (const option of options) {
+            const dx = Math.abs(option.x - this.x);
+            const band = Math.floor(dx / B.landBandPx);
+            if (dx <= B.landRange && Math.random() < option.chance && band < bestBand) {
+                best = option;
+                bestBand = band;
+            }
+        }
+        return best;
+    }
+
+    pusheenNear (point, radius)
+    {
+        return Math.hypot(point.x - this.pusheen.x, point.y - this.pusheen.y) < radius;
+    }
+
+    // The point on the target she lands on, and its lean -- null once it's
+    // gone (Sloth's spots go when his wake beat starts).
+    targetSpot ()
+    {
+        if (this.target.who === 'pusheen') {
+            const head = this.pusheen.getHeadTop();
+            return { x: head.x, y: head.y, tilt: 0 };
+        }
+        return this.sloth.getPerchSpots()[this.target.spot] ?? null;
+    }
+
+    // Where her centre sits on it: perchLift above the spot, along its lean.
+    perchPoint ()
+    {
+        const spot = this.targetSpot();
+        if (!spot) {
+            return null;
+        }
+        return {
+            x: spot.x + Math.sin(spot.tilt) * B.perchLift,
+            y: spot.y - Math.cos(spot.tilt) * B.perchLift,
+            tilt: spot.tilt
+        };
+    }
+
+    // What sends her off, from the approach until she's perched: Pusheen
+    // moving, if it's Pusheen she's landing on. If it's Sloth, his spot going
+    // (the wake beat) or Pusheen coming right up beside her (innerRadius).
+    targetSpooked ()
+    {
+        if (this.target.who === 'pusheen') {
+            return this.pusheenMoved;
+        }
+        return !this.targetSpot() || this.pusheenNear(this, B.innerRadius);
+    }
+
+    // Her usual flight with a pull toward a point above and beside the
+    // target (on the side she's already on). No soft walls: most spots sit
+    // below the wander bounds, and that's where she's going. Shy of Pusheen
+    // as ever, unless it's Pusheen she's landing on.
+    steerApproach (dt, t)
     {
         this.approachTime += dt;
-        if (this.pusheenMoved || this.approachTime > B.approachGiveUpMs / 1000) {
+        if (this.targetSpooked() || this.approachTime > B.approachGiveUpMs / 1000) {
             this.giveUpLanding();
             return;
         }
 
-        const head = pusheen.getHeadTop();
-        const dx = head.x + this.approachSide * B.approachOffset.x - this.x;
-        const dy = head.y + B.approachOffset.y - this.y;
+        const spot = this.targetSpot();
+        const dx = spot.x + this.approachSide * B.approachOffset.x - this.x;
+        const dy = spot.y + B.approachOffset.y - this.y;
         const dist = Math.hypot(dx, dy);
         if (dist < B.approachArrivePx) {
-            this.startLanding(pusheen);
+            this.startLanding();
             return;
         }
 
         const seek = new PMath.Vector2(dx / dist, dy / dist).scale(B.approachSpeed);
-        this.easeToward(this.wanderVector(dt, t, B.approachWanderWeight).add(seek), dt);
+        const desired = this.wanderVector(dt, t, B.approachWanderWeight).add(seek);
+        if (this.target.who !== 'pusheen') {
+            desired.add(this.avoidanceForce());
+        }
+        this.easeToward(desired, dt);
     }
 
     giveUpLanding ()
     {
         this.state = 'wander';
+        this.target = null;
         this.landCooldown = randRange(B.landCooldownMs) / 1000;
     }
 
     // The last stretch is a short scripted curve rather than more steering:
     // it leaves her current position along her momentum, and drops onto the
-    // head from just above and beside it. Its end tracks the head each frame
-    // (followLanding), so she lands on her breathing, not where it was.
-    startLanding (pusheen)
+    // spot from just above and beside it. Its end tracks the spot each frame
+    // (followLanding), so she lands on a breathing head, not where it was.
+    startLanding ()
     {
         this.state = 'land';
         this.stopFloat();
 
-        const end = this.perchPoint(pusheen);
+        const end = this.perchPoint();
         this.landCurve = new Curves.CubicBezier(
             new PMath.Vector2(this.x, this.y),
             new PMath.Vector2(this.x + this.velocity.x * 0.6, this.y + this.velocity.y * 0.6),
@@ -334,7 +430,8 @@ export class Butterfly extends GameObjects.Container
                 this.landTween = null;
                 if (this.state === 'land') {
                     this.state = 'perched';
-                    this.perchTimer = randRange(B.perchMs) / 1000;
+                    const stay = this.target.who === 'pusheen' ? B.perchMs : B.slothPerchMs;
+                    this.perchTimer = randRange(stay) / 1000;
                     this.takeoffIn = null;
                     // Pick the slow perched flap up from wherever the wings are.
                     this.flapPhase = Math.asin(PMath.Clamp(this.wingOpen, 0, 1));
@@ -343,29 +440,32 @@ export class Butterfly extends GameObjects.Container
         });
     }
 
-    followLanding (pusheen)
+    followLanding ()
     {
-        if (this.pusheenMoved) {
+        if (this.targetSpooked()) {
             this.takeOff();
             return;
         }
-        const end = this.perchPoint(pusheen);
+        const end = this.perchPoint();
         this.landCurve.p3.set(end.x, end.y);
         this.landCurve.getPoint(this.landT, this.curvePoint);
         this.setPosition(this.curvePoint.x, this.curvePoint.y);
     }
 
-    // Sits on her head -- tracked each frame, not parented to her, so her
-    // squash tweens never squash the butterfly too. Her moving, or the perch
-    // running out, sends her off after a beat.
-    perch (dt, pusheen)
+    // Sits on the spot -- tracked each frame, not parented to whoever it's
+    // on, so their squash and yawn tweens never squash the butterfly too.
+    // Being spooked, or the perch running out, sends her off after a beat;
+    // until then she holds still even if the spot has just gone.
+    perch (dt)
     {
-        const p = this.perchPoint(pusheen);
-        this.setPosition(p.x, p.y);
+        const p = this.perchPoint();
+        if (p) {
+            this.setPosition(p.x, p.y);
+        }
 
         if (this.takeoffIn === null) {
             this.perchTimer -= dt;
-            if (this.pusheenMoved || this.perchTimer <= 0) {
+            if (this.targetSpooked() || this.perchTimer <= 0) {
                 this.takeoffIn = randRange(B.takeoffReactMs) / 1000;
             }
         } else {
@@ -374,12 +474,6 @@ export class Butterfly extends GameObjects.Container
                 this.takeOff();
             }
         }
-    }
-
-    perchPoint (pusheen)
-    {
-        const head = pusheen.getHeadTop();
-        return { x: head.x, y: head.y - B.perchLift };
     }
 
     // Up and away on the side she came in from, flapping, back to wandering
@@ -391,6 +485,7 @@ export class Butterfly extends GameObjects.Container
             this.landTween = null;
         }
         this.state = 'wander';
+        this.target = null;
         this.landCooldown = randRange(B.landCooldownMs) / 1000;
 
         this.heading = Math.atan2(-1, this.approachSide * 0.6);
@@ -475,11 +570,16 @@ export class Butterfly extends GameObjects.Container
 
     // A bank toward horizontal travel, eased so she tips into turns rather
     // than snapping -- see BUTTERFLY.tiltPerSpeed for why not a full turn.
-    // Level while landing and perched.
+    // Landing and perched, she settles to the spot's own lean (level on
+    // Pusheen).
     updateTilt (dt)
     {
-        const flying = this.state === 'wander' || this.state === 'approach';
-        const target = flying ? PMath.Clamp(this.velocity.x * B.tiltPerSpeed, -B.maxTiltRad, B.maxTiltRad) : 0;
-        this.rig.rotation += (target - this.rig.rotation) * Math.min(1, dt * 4);
+        let lean;
+        if (this.state === 'wander' || this.state === 'approach') {
+            lean = PMath.Clamp(this.velocity.x * B.tiltPerSpeed, -B.maxTiltRad, B.maxTiltRad);
+        } else {
+            lean = this.perchPoint()?.tilt ?? 0;
+        }
+        this.rig.rotation += (lean - this.rig.rotation) * Math.min(1, dt * 4);
     }
 }
