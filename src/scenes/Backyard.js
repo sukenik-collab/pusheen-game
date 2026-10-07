@@ -37,13 +37,16 @@ const SPAWN_POINTS = {
 // of the leaf sprigs at the tip; the gate is revealed directly behind that spot.
 const SLOTH_X = 700;
 
-// Where the butterfly wanders: the open sky above the grass, inset from the
-// screen edges (its own boundaryMargin softens the approach to these well
-// before she'd visibly reach them). No collision with the tree or Sloth --
+// Where the butterfly wanders: the open sky above the grass. Its soft walls
+// start curving her away boundaryMargin (90px) inside these, so the top and
+// bottom keep her on screen, while the sides sit 90px past the screen's
+// edges -- their push starts right at the edge itself. She slips wholly off
+// the left or right about once a minute, for up to ~3s, and drifts back
+// (measured over 50 simulated minutes). She enters from just past one of
+// those sides (Butterfly.enter()). No collision with the tree or Sloth --
 // golden rule 4, nothing to catch or be caught by, so a clipped wing is just
 // a rare, low-stakes overlap, not a bug.
-const BUTTERFLY_BOUNDS = { left: 40, right: 1240, top: 80, bottom: GRASS_TOP - 20 };
-const BUTTERFLY_SPAWN = { x: 300, y: 240 };
+const BUTTERFLY_BOUNDS = { left: -90, right: 1370, top: 80, bottom: GRASS_TOP - 20 };
 
 export class Backyard extends Scene
 {
@@ -102,7 +105,7 @@ export class Backyard extends Scene
         // A shy critter, not an NPC: she wanders on her own, leans away from
         // Pusheen, and now and then lands on her head (golden rule 4 -- never
         // chases or is chased). Built after Pusheen so it draws over her head.
-        this.butterfly = new Butterfly(this, BUTTERFLY_SPAWN.x, BUTTERFLY_SPAWN.y, BUTTERFLY_BOUNDS);
+        this.butterfly = new Butterfly(this, BUTTERFLY_BOUNDS);
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keys = this.input.keyboard.addKeys('W,A,S,D,SPACE,E');

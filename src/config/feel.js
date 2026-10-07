@@ -239,10 +239,17 @@ export const BUTTERFLY = {
     // avoidance never fully overrides it, so she nudges rather than commands.
     wanderWeight: 1.0,
 
-    // Soft walls a little in from the actual backyard edges, so it curves
-    // away instead of visibly bouncing off an invisible box.
+    // Soft walls: she starts curving away boundaryMargin px before an edge of
+    // BUTTERFLY_BOUNDS (Backyard.js) rather than bouncing off an invisible
+    // box. The left and right edges sit just past the screen's, so she can
+    // slip briefly off either side and come back.
     boundaryMargin: 90,
     boundaryForce: 0.8,
+
+    // She isn't there when the yard opens: she waits just past a side edge
+    // and flutters in after entranceDelayMs, so she arrives rather than
+    // being found sitting on screen.
+    entranceDelayMs: [8000, 12000],
 
     // Bob/sway: tweens on the art inside the butterfly (golden rule 1), never
     // her flight position, so the path itself stays a smooth curve. Each
