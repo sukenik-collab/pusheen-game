@@ -185,10 +185,10 @@ export class Preloader extends Scene
     {
         // Created once and kept in the registry so it (and the current track/
         // set choice) survives every LivingRoom restart -- Play again keeps the
-        // same audio playing without a beat skip.
+        // same audio playing without a beat skip. The music itself waits for
+        // her first move (Pusheen.startMusicOnFirstMove).
         const audio = new AudioController(this.game);
         this.registry.set('audio', audio);
-        audio.startMusic();
 
         resetRunState(this.registry);
 
