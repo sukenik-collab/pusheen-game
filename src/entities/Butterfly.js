@@ -142,6 +142,15 @@ export class Butterfly extends GameObjects.Container
         const desired = this.wanderVector(dt, t, B.wanderWeight)
             .add(this.avoidanceForce(pusheen))
             .add(this.boundaryForce());
+
+        // The wander heading follows wherever the other forces turn her. Left
+        // independent, a wall could only push back against a wander that kept
+        // pointing into it: the two balanced and she hovered, pinned, until the
+        // heading's slow drift happened to swing it round -- ~20s in a corner.
+        // Now a wall turns her instead, and she flies on in the new direction.
+        const turn = PMath.Angle.Wrap(Math.atan2(desired.y, desired.x) - this.heading);
+        this.heading += turn * (1 - Math.exp(-B.headingFollow * dt));
+
         this.easeToward(desired, dt);
     }
 

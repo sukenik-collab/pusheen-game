@@ -213,12 +213,18 @@ export const BUTTERFLY = {
     wanderSpeedRipple: 5,
     wanderRippleHz: 0.7,
     maxSpeed: 55,
-    // Max radians/sec the *wander heading* itself drifts by -- low-frequency,
-    // so it carves broad lazy curves rather than a random walk.
-    wanderTurnRate: 0.6,
+    // How fast the *wander heading* itself drifts -- low-frequency, so it
+    // carves broad lazy curves rather than a jittery walk. Lower holds a
+    // heading longer, so she roams further: 0.45 travels ~420px in a typical
+    // 20s, against ~375px at 0.6.
+    wanderTurnRate: 0.45,
     // How hard actual velocity turns to follow the desired direction: higher
     // snaps quicker, lower drifts languidly.
     steeringResponse: 2.0,
+    // How fast the wander's own heading swings round to where the walls and
+    // Pusheen are turning her (per second). Without it she pinned herself
+    // against walls and in corners -- see steer().
+    headingFollow: 1.5,
 
     // Sensor zones, same "outer leads" contract as every other radar in this
     // file, but continuous rather than a single enable/disable line: outer
