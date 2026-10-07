@@ -103,9 +103,10 @@ export class Backyard extends Scene
         this.solids.forEach((solid) => this.physics.add.collider(this.pusheen, solid));
 
         // A shy critter, not an NPC: she wanders on her own, leans away from
-        // Pusheen, and now and then lands on her head (golden rule 4 -- never
-        // chases or is chased). Built after Pusheen so it draws over her head.
-        this.butterfly = new Butterfly(this, BUTTERFLY_BOUNDS);
+        // Pusheen, and now and then lands on her head or on Sloth (golden
+        // rule 4 -- never chases or is chased). Built after both, so it draws
+        // over whichever she's sitting on.
+        this.butterfly = new Butterfly(this, BUTTERFLY_BOUNDS, { pusheen: this.pusheen, sloth: this.sloth });
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keys = this.input.keyboard.addKeys('W,A,S,D,SPACE,E');
@@ -173,7 +174,7 @@ export class Backyard extends Scene
     {
         // Her own life, independent of Pusheen's state -- keeps wandering
         // through the wake beat and a room transition alike.
-        this.butterfly.update(time, delta, this.pusheen);
+        this.butterfly.update(time, delta);
 
         if (this.transitioning) {
             this.pusheen.stopMoving();

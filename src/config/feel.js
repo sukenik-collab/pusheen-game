@@ -285,38 +285,50 @@ export const BUTTERFLY = {
     tiltPerSpeed: 0.006,
     maxTiltRad: 0.3,
 
-    // Landing on Pusheen's head: rare and opportunistic, never a rule she can
-    // learn ("stand near it and it lands"). Considered once per landCheckMs,
-    // only once Pusheen has been still for stillMs with her head in
-    // landRange, then only on a landChance roll. After a landing -- or an
-    // approach she spooks by moving -- it won't consider another for
-    // landCooldownMs (and not for landFirstCooldownMs after the room opens).
+    // Landing: rare and opportunistic, never a rule the player can learn
+    // ("stand near it and it lands"). Once per landCheckMs she looks at what
+    // she could land on: Pusheen's head once Pusheen has been still for
+    // stillMs, and Sloth whenever Pusheen is clear of his spot (outerRadius)
+    // and he isn't mid wake beat. Each within landRange (measured across
+    // only) rolls its own chance -- Sloth's lower, since he's almost always
+    // free to land on -- and if both come up the nearer wins, in landBandPx
+    // bands, Pusheen on a tie (Butterfly.js's chooseTarget()). After any
+    // landing -- or an approach that's abandoned -- there's no other for
+    // landCooldownMs (and none for landFirstCooldownMs after the room opens).
     landCheckMs: [2000, 4000],
     landChance: 0.35,
+    slothLandChance: 0.04,
     stillMs: 2000,
     landRange: 420,
+    landBandPx: 140,
     landCooldownMs: [20000, 40000],
     landFirstCooldownMs: [8000, 15000],
-    // Approach: her usual flight with the shyness switched off and a gentle
-    // pull toward a point above and to one side of the head (the side she's
-    // already on), so she arrives curving rather than beelining like a
-    // projectile. Wander keeps some say, so the curve stays lazy.
+    // Approach: her usual flight with a gentle pull toward a point above and
+    // to one side of the spot (the side she's already on), so she arrives
+    // curving rather than beelining like a projectile. Wander keeps some say,
+    // so the curve stays lazy. Heading for Pusheen, the shyness is off.
     approachSpeed: 42,
     approachWanderWeight: 0.35,
     approachOffset: { x: 70, y: -80 },
     approachArrivePx: 24,
-    approachGiveUpMs: 12000,
-    // The last stretch is a short scripted curve down onto the head.
+    // A safety net, not a feel knob. With range measured across only, she
+    // can start from the top of the sky, so it allows that whole trip at
+    // approachSpeed (12s cut ~1 in 6 Sloth approaches short).
+    approachGiveUpMs: 16000,
+    // The last stretch is a short scripted curve down onto the spot.
     landMs: 1100,
-    // How far above her head-top point the butterfly's centre sits, so the
-    // lower wings rest on it rather than hovering or sinking in.
+    // How far above the spot (Pusheen's HEAD_TOP, Sloth's PERCH_SPOTS) the
+    // butterfly's centre sits, so the lower wings rest on it rather than
+    // hovering or sinking in.
     perchLift: 15,
     perchMs: [1500, 5000],
+    // A dozing sloth is a calm perch: she stays longer.
+    slothPerchMs: [3000, 8000],
     // Perched, no bursts: one slow, steady open-and-close (radians/sec of
     // flap phase -- ~3.5s per close-and-open) until she takes off.
     perchFlapSpeed: 0.9,
-    // Pusheen moving (or the perch running out) sends her off -- after a
-    // beat, so it reads as reacting to her rather than glued to her.
+    // Being spooked (or the perch running out) sends her off -- after a beat,
+    // so it reads as reacting rather than glued on.
     takeoffReactMs: [120, 250],
     takeoffSpeed: 50
 };
