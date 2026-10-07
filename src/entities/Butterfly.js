@@ -36,8 +36,9 @@ function randRange ([lo, hi])
 // steer()), so nothing snaps or teleports and there's no waypoint list to
 // "arrive" at or a scripted return once Pusheen leaves.
 //
-// Now and then, if Pusheen has been still a while, she lands on her head:
-//   wander -> approach -> land -> perched -> (take off) -> wander
+// She starts off-stage and flutters in after a few seconds (enter()). Now and
+// then, if Pusheen has been still a while, she lands on her head:
+//   offstage -> wander -> approach -> land -> perched -> (take off) -> wander
 // Rare and opportunistic (see BUTTERFLY's landing notes in feel.js), never a
 // rule, so it reads as curiosity rather than a mechanic. There are no SHY /
 // MORE_SHY states: the shyness is the avoidance force ramping with distance.
@@ -51,11 +52,12 @@ function randRange ([lo, hi])
 // pivots exactly at the attachment.
 export class Butterfly extends GameObjects.Container
 {
-    // `bounds` is the soft-wall rectangle she wanders inside (backyard sky
-    // above the grass line, inset from the screen edges) -- see Backyard.js.
-    constructor (scene, x, y, bounds)
+    // `bounds` is the soft-wall rectangle she wanders inside (the backyard sky
+    // above the grass line, reaching just past the screen's side edges) --
+    // see Backyard.js. She starts off-stage and flies in on her own.
+    constructor (scene, bounds)
     {
-        super(scene, x, y);
+        super(scene, 0, 0);
         scene.add.existing(this);
 
         this.bounds = bounds;
@@ -69,7 +71,12 @@ export class Butterfly extends GameObjects.Container
         this.flapBurst = true;
         this.flapTimer = randRange(B.flapBurstMs) / 1000;
 
-        this.state = 'wander';
+        // Off-stage until the entrance -- on the scene clock, so it's ~10s
+        // whatever the frame rate (Phaser only slows that clock while the
+        // page is unfocused, as in a headless test browser).
+        this.state = 'offstage';
+        this.setVisible(false);
+        scene.time.delayedCall(randRange(B.entranceDelayMs), () => this.enter());
         this.landCooldown = randRange(B.landFirstCooldownMs) / 1000;
         this.landCheckIn = randRange(B.landCheckMs) / 1000;
         this.pusheenStill = 0;
@@ -95,6 +102,10 @@ export class Butterfly extends GameObjects.Container
         const dt = Math.min(delta / 1000, 1 / 20);   // clamp a stall/tab-switch, not real gameplay
         const t = time / 1000;                       // Phaser's own clock, in seconds
 
+        if (this.state === 'offstage') {
+            return;
+        }
+
         this.watchPusheen(dt, pusheen);
 
         if (this.state === 'wander') {
@@ -115,6 +126,23 @@ export class Butterfly extends GameObjects.Container
 
         this.updateWings(dt);
         this.updateTilt(dt);
+    }
+
+    // In from just past one side of the screen (her 53px span wholly hidden),
+    // at a random height, heading roughly inward -- so she's in view within
+    // a second rather than flying the width of the off-screen margin first.
+    enter ()
+    {
+        if (this.state !== 'offstage') {
+            return;
+        }
+        const { top, bottom } = this.bounds;
+        const fromLeft = Math.random() < 0.5;
+        this.setPosition(fromLeft ? -30 : this.scene.scale.width + 30, PMath.FloatBetween(top + 60, bottom - 100));
+        this.heading = (fromLeft ? 0 : Math.PI) + PMath.FloatBetween(-0.4, 0.4);
+        this.velocity.set(Math.cos(this.heading), Math.sin(this.heading)).scale(B.wanderSpeed);
+        this.state = 'wander';
+        this.setVisible(true);
     }
 
     fly (dt)
