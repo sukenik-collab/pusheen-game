@@ -1,6 +1,7 @@
 {
   "name": "pusheen-cozy",
-  "description": "Pusheen Cozy Game -- MVP vibe-slice.",
+  "description": "Pusheen's Lazy Afternoon -- an unofficial, cozy fan game.",
+  "license": "MIT",
   "version": "0.1.0",
   "private": true,
   "type": "module",

@@ -10,13 +10,14 @@ pleasant-but-boring? See
 `docs/pusheen-mvp-product-brief.md` for the full hypothesis and success
 criteria.
 
-An unofficial, non-commercial fan project; not affiliated with Pusheen Corp.
+An unofficial, non-commercial fan project. Pusheen and friends belong to
+Pusheen Corp.; this game isn't affiliated with or endorsed by them.
 
 ![screenshot](screenshot.png)
 
 ## Play it
 
-Live build: deployed to Netlify from `main` on every push. 
+Live build: deployed to Netlify from `main` on every push.
 
 https://pusheen-game.netlify.app/
 
@@ -30,11 +31,17 @@ https://pusheen-game.netlify.app/
 | Select an item in the cabinet or fridge | 1 – 4 | Tap the item |
 | Play again (after the nap) | Space | Tap the button |
 | Music / SFX menu | — | ♪ button, top-right |
+| How to play and the fan-project note | — | ? button, next to the ♪ |
+
+A splash with the same information opens when the game loads; any key or a
+tap closes it.
 
 ## Stack
 
 - **Phaser 4** + **Vite**, vanilla JavaScript (no TypeScript, no backend).
-- Static client only, deployed on **Netlify** from `main`.
+- Static client only, deployed on **Netlify** from `main`. The one outside
+  call is a cookieless [GoatCounter](https://www.goatcounter.com/) script
+  on the live site only (see Privacy).
 - Node.js 22 for tooling.
 
 ## Getting started
@@ -50,6 +57,7 @@ npm run build    # production build to dist/
 | Path | Contents |
 |---|---|
 | `src/main.js` | Phaser game config + scene list |
+| `src/splash.js`, `src/analytics.js` | The how-to-play splash; the production-only usage counts |
 | `src/config/` | `feel.js` (all tunable movement/animation constants), `gameState.js` (run state), `audioManifest.js` (music + SFX sets) |
 | `src/scenes/` | `Preloader`, the four rooms (`Backyard`, `Kitchen`, `LivingRoom`, `Bedroom`), `UI` (HUD, controls, peek panel; runs alongside) |
 | `src/entities/` | One class per game object — `Pusheen`, `Sloth`, `Stormy`, `Butterfly`, `Container`, `Door`, … |
@@ -76,3 +84,24 @@ Where things stand is in `HANDOFF.md`; what's next, in order, is in
 validated through playtesting against the feel-based success criteria in
 `docs/pusheen-mvp-product-brief.md`, not a checklist of features. See
 `CLAUDE.md` for the project's working rules and `docs/` for the full spec set.
+
+## Privacy
+
+The live site counts visits and a few milestones (reached the kitchen, woke
+Sloth, napped, played again) with [GoatCounter](https://www.goatcounter.com/),
+which sets no cookies and stores no personal data, to tell whether the game is
+fun to come back to. It's off in development and on deploy previews
+(`src/analytics.js`).
+
+## License and credits
+
+- **Code:** MIT, see [`LICENSE`](LICENSE). Built with [Phaser](https://phaser.io/)
+  (MIT) and [Vite](https://vite.dev/) (MIT); the build setup started from the
+  Phaser Vite template.
+- **Art and characters:** Pusheen, Sloth, Stormy and the other characters
+  belong to Pusheen Corp. The art here is unofficial fan art, generated with
+  Gemini and cut to size by the scripts in `tools/`. It is **not** covered by
+  the MIT license, and no right to reuse it is granted. If you are the
+  rights holder and want something changed or removed, please open an issue.
+- **Audio:** the music and sound effects are synthesized CC0 placeholders
+  (`public/assets/audio/CREDITS.md`).

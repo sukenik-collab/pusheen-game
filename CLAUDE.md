@@ -42,6 +42,7 @@ Assume ~1280×720 logical canvas. All of these live in `src/config/feel.js`.
 
 ## Structure
 - `src/main.js` — Phaser.Game config + scene list.
+- `src/splash.js` — the how-to-play splash (DOM overlay); `src/analytics.js` — the production-only GoatCounter events.
 - `src/config/` — `feel.js` (ALL tunable feel constants in one place), `gameState.js` (run-state registry keys), `audioManifest.js`.
 - `src/scenes/` — one scene per file: `Preloader`, the four rooms (`Backyard`, `Kitchen`, `LivingRoom`, `Bedroom`), and `UI` (HUD, touch controls, peek panel), which runs alongside them.
 - `src/entities/` — one game object per file (`Pusheen`, `Sloth`, `Stormy`, `Butterfly`, `Container`, `Door`, `HeldPickup`, …).
