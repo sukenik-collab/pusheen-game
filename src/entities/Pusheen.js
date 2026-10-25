@@ -1,6 +1,7 @@
 import { GameObjects } from 'phaser';
 import { MOVE, JUMP, LAND_SQUASH, IDLE, SNIFF_REACT, NAP, COSTUME, CARRY } from '../config/feel.js';
 import { subscribeRegistry } from '../systems/registryHelpers.js';
+import { track } from '../analytics.js';
 
 // The held-item accessory texture per held:item value. 'none' -> no accessory.
 const HELD_SPRITE = { glass: 'glass', juice: 'orangeJuice' };
@@ -109,6 +110,7 @@ export class Pusheen extends GameObjects.Container
     startMusicOnFirstMove ()
     {
         this.audio?.startMusic();
+        track('first-move');
     }
 
     stopMoving ()
