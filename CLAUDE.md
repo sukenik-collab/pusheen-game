@@ -9,7 +9,7 @@ A cozy 2D fan game: a plump cat potters around a small connected house (Backyard
 
 ## Stack
 - **Phaser 4** + **Vite**, **vanilla JavaScript** (no TypeScript).
-- Static client only — **no backend, no database, no server calls.** One planned exception: a cookieless analytics script (`ROADMAP.md`, Next). Amend this line when adding it, and allow nothing else.
+- Static client only — **no backend, no database, no server calls.** One exception: the cookieless GoatCounter analytics script (`src/analytics.js`, production host only, no ids or personal data). Allow nothing else.
 - Deployed on **Netlify**, auto-built from the GitHub repo on push to `main`. Every PR gets a deploy preview.
 - Node.js 22 for tooling.
 
