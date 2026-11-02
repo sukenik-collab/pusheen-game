@@ -156,8 +156,9 @@ choice is made.
 
 - 2026-10-25: Code is MIT under the author's name (Phaser Studio's notice kept for
   the template's Vite config). The art is fan art and explicitly not
-  licensed for reuse. Still open: whether `docs/concept-art/` stays in the
-  public repo.
+  licensed for reuse.
+- 2026-11-02: `docs/concept-art/` is local only: gitignored and scrubbed from
+  history before the repo goes public.
 - 2026-10-25: Usage metrics are GoatCounter, a separate site from the
   author's other one, counted on `pusheen-game.netlify.app` only.
 
