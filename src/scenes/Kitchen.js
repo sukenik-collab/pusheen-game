@@ -114,6 +114,8 @@ export class Kitchen extends Scene
         const { width, height } = this.scale;
         const groundTop = height - GROUND_HEIGHT;
 
+        this.registry.get('audio')?.enterRoom(this, 'Kitchen');
+
         this.add.image(width / 2, height / 2, 'kitchenBg').setDisplaySize(width, height);
 
         buildLayout(this, LAYOUT, groundTop);

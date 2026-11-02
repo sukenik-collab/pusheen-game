@@ -78,6 +78,8 @@ export class Bedroom extends Scene
         const { width, height } = this.scale;
         const groundTop = height - GROUND_HEIGHT;
 
+        this.registry.get('audio')?.enterRoom(this, 'Bedroom');
+
         this.add.rectangle(width / 2, height / 2, width, height, WALL_COLOR);
 
         // Quest: one yarn ball hides behind the bed (created before the
