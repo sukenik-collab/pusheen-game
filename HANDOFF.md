@@ -1,6 +1,6 @@
 # HANDOFF
 
-Where the game stands and how it hangs together. Last updated 2026-10-07.
+Where the game stands and how it hangs together. Last updated 2026-10-25.
 **What to do next is in [`ROADMAP.md`](ROADMAP.md)**; this file is the state
 of play.
 
@@ -8,8 +8,11 @@ of play.
 
 1. Open `ROADMAP.md` at **Now**. Items 1 (fridge labels), 2 (the art batch)
    and 4 (the butterfly, landing on Pusheen and on Sloth) are done, and
-   item 5 (first impressions) is under way: the title, favicon and the
-   music starting on her first move are in. Item 3 (Sloth's wake beat) is
+   item 5 (first impressions) is mostly in: the title, favicon, the music on
+   her first move, the splash (`src/splash.js`) and the "?" chip beside
+   the ♪. Only the ending card's feedback link is left (with Next, item 7).
+   Usage metrics are in too (`src/analytics.js`, GoatCounter, production
+   host only). Item 3 (Sloth's wake beat) is
    next. The butterfly has only had a look on a deploy preview, not a
    tablet playtest — see "Where things stand".
 2. `npm run dev` serves the game at http://localhost:8080 (it boots in the

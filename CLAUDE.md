@@ -9,7 +9,7 @@ A cozy 2D fan game: a plump cat potters around a small connected house (Backyard
 
 ## Stack
 - **Phaser 4** + **Vite**, **vanilla JavaScript** (no TypeScript).
-- Static client only — **no backend, no database, no server calls.** One planned exception: a cookieless analytics script (`ROADMAP.md`, Next). Amend this line when adding it, and allow nothing else.
+- Static client only — **no backend, no database, no server calls.** One exception: the cookieless GoatCounter analytics script (`src/analytics.js`, production host only, no ids or personal data). Allow nothing else.
 - Deployed on **Netlify**, auto-built from the GitHub repo on push to `main`. Every PR gets a deploy preview.
 - Node.js 22 for tooling.
 
@@ -42,6 +42,7 @@ Assume ~1280×720 logical canvas. All of these live in `src/config/feel.js`.
 
 ## Structure
 - `src/main.js` — Phaser.Game config + scene list.
+- `src/splash.js` — the how-to-play splash (DOM overlay); `src/analytics.js` — the production-only GoatCounter events.
 - `src/config/` — `feel.js` (ALL tunable feel constants in one place), `gameState.js` (run-state registry keys), `audioManifest.js`.
 - `src/scenes/` — one scene per file: `Preloader`, the four rooms (`Backyard`, `Kitchen`, `LivingRoom`, `Bedroom`), and `UI` (HUD, touch controls, peek panel), which runs alongside them.
 - `src/entities/` — one game object per file (`Pusheen`, `Sloth`, `Stormy`, `Butterfly`, `Container`, `Door`, `HeldPickup`, …).

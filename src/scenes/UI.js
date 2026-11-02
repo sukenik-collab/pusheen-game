@@ -1,5 +1,6 @@
 import { Scene, Input } from 'phaser';
 import { passesGate } from '../entities/Container.js';
+import { showSplash } from '../splash.js';
 
 const BUTTON_ALPHA = 0.35;
 const BUTTON_RADIUS = 36;
@@ -470,6 +471,12 @@ export class UI extends Scene
         const toggleBg = this.add.rectangle(right, 20, 44, 40, 0x3e2c23, 0.6).setOrigin(1, 0).setInteractive();
         this.add.text(right - 22, 40, '♪', { fontSize: '22px', color: '#ffffff' }).setOrigin(0.5);
         toggleBg.on('pointerdown', () => this.setAudioMenuVisible(!this.audioMenuOpen));
+
+        // A matching "?" chip beside it reopens the splash (how to play, the
+        // fan-project note).
+        const helpBg = this.add.rectangle(right - 44 - 8, 20, 44, 40, 0x3e2c23, 0.6).setOrigin(1, 0).setInteractive();
+        this.add.text(right - 44 - 8 - 22, 40, '?', { fontSize: '22px', color: '#ffffff' }).setOrigin(0.5);
+        helpBg.on('pointerdown', () => showSplash(this.game));
     }
 
     addMenuButton (x, y, w, h, label, onClick)

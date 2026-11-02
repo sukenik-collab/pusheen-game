@@ -94,27 +94,30 @@ choice is made.
      and does the wander ever look like it's heading somewhere specific?
 
 5. [ ] **First-impression pass** (M): for strangers, before sharing.
-   - A splash overlay on load: the title, "a fan project", a disclaimer, and
+   - [x] A splash overlay on load (`src/splash.js`): the title, "a fan project", a disclaimer, and
      how to play (keys and touch). Dismissed by any key, a tap, or its
      button. Suggested disclaimer (the final wording is yours): *"An
      unofficial, non-commercial fan project. Pusheen and friends belong to
      Pusheen Corp.; this game isn't affiliated with or endorsed by them."*
-   - A small "?" button next to the ♪ reopens it, with the feedback link
-     (see Next, item 7).
+   - [x] A small "?" button next to the ♪ reopens it. (The feedback link
+     joins it with Next, item 7.)
    - [x] Sound starts on Pusheen's first move: her first walk or jump, by
      key or touch, not start-up or any other key or tap
      (`Pusheen.startMusicOnFirstMove`).
    - [x] A real tab title, "Pusheen's Lazy Afternoon", and a favicon of
      her head, plus a home-screen icon for the tablet
      (`tools/cut_favicon.py`).
-   - Phones held upright get a "turn your phone sideways" hint.
+   - [x] Phones held upright get a "turn your phone sideways" hint (in the
+     splash only, not a live prompt).
    - The ending card ("Play again") also shows the feedback link.
    - *Done when:* someone who's never seen it can start playing without
      being told anything.
 
 ## Next: share it and measure
 
-6. [ ] **Usage metrics** (S to M).
+6. [x] **Usage metrics** (S to M). Done: GoatCounter site
+   `pusheen-game`, events in `src/analytics.js`, live on the production host
+   only. What's left is reading the dashboard after launch. Original plan:
    - First, amend the "no server calls" line in `CLAUDE.md` for this one
      exception.
    - Cookieless, privacy-friendly analytics through a script tag, not an npm
@@ -150,6 +153,13 @@ choice is made.
   `public/assets/audio/CREDITS.md` suggests replacements.
 
 ## Decided
+
+- 2026-10-25: Code is MIT under the author's name (Phaser Studio's notice kept for
+  the template's Vite config). The art is fan art and explicitly not
+  licensed for reuse. Still open: whether `docs/concept-art/` stays in the
+  public repo.
+- 2026-10-25: Usage metrics are GoatCounter, a separate site from the
+  author's other one, counted on `pusheen-game.netlify.app` only.
 
 - 2026-10-07: The game's title is "Pusheen's Lazy Afternoon" (the browser
   tab, and the splash's title when that's built). The favicon is her head,

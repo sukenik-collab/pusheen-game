@@ -2,6 +2,8 @@ import { Scene } from 'phaser';
 import { TRACKS, SFX_SETS } from '../config/audioManifest.js';
 import { resetRunState } from '../config/gameState.js';
 import { AudioController } from '../audio/AudioController.js';
+import { initAnalytics } from '../analytics.js';
+import { showSplash } from '../splash.js';
 
 // The Backyard's scenery palette, sampled from the tree art so the generated
 // layers sit in the same world as it. Sky and grass are flat fills the scene
@@ -191,11 +193,13 @@ export class Preloader extends Scene
         this.registry.set('audio', audio);
 
         resetRunState(this.registry);
+        initAnalytics(this.game);
 
         // The connected house boots in the garden -- the LivingRoom/Bedroom
         // pair is reached later, once waking Sloth reveals the hidden path.
         this.scene.start('Backyard');
         this.scene.launch('UI');
+        showSplash(this.game);
     }
 
     // Draw a flat placeholder texture with a graphics callback, then free the
