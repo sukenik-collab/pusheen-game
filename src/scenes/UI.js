@@ -426,10 +426,11 @@ export class UI extends Scene
         });
     }
 
-    // Part B: an unobtrusive in-game picker, top-right, collapsed to a single
-    // "♪" chip so it never clutters the cozy screen. Tap to reveal three rows:
-    // cycle music track, cycle SFX set, mute. Selection lives on the audio
-    // controller (registry), so it persists across Play again but not reload.
+    // A "♪" chip, top-right, that turns the sound on and off (music and SFX --
+    // the master mute). Off dims the note and strikes it through. The tracks
+    // are chosen per room (ROOM_MUSIC), not by the player. The mute state lives
+    // on the audio controller (registry), so it persists across Play again but
+    // not a reload.
     createAudioMenu ()
     {
         if (!this.audio) {
@@ -437,62 +438,26 @@ export class UI extends Scene
         }
 
         const { width } = this.scale;
-        const ROW_W = 210;
-        const ROW_H = 38;
-        const GAP = 8;
         const right = width - 20;
-        const rowX = right - ROW_W;
-        let y = 20 + 40 + GAP;
 
-        this.audioMenuOpen = false;
-        this.audioPanelParts = [];
-
-        this.musicRow = this.addMenuButton(rowX, y, ROW_W, ROW_H, `♪ ${this.audio.currentTrack.name}`, () => {
-            const track = this.audio.cycleTrack();
-            this.musicRow.text.setText(`♪ ${track.name}`);
-        });
-        y += ROW_H + GAP;
-
-        this.sfxRow = this.addMenuButton(rowX, y, ROW_W, ROW_H, `SFX: ${this.audio.currentSet.name}`, () => {
-            const set = this.audio.cycleSfxSet();
-            this.sfxRow.text.setText(`SFX: ${set.name}`);
-            this.audio.play('collect'); // audition the new set
-        });
-        y += ROW_H + GAP;
-
-        this.muteRow = this.addMenuButton(rowX, y, ROW_W, ROW_H, 'Sound: On', () => {
-            const muted = this.audio.toggleMute();
-            this.muteRow.text.setText(muted ? 'Sound: Off' : 'Sound: On');
-        });
-
-        this.setAudioMenuVisible(false);
-
-        // The always-visible toggle chip.
         const toggleBg = this.add.rectangle(right, 20, 44, 40, 0x3e2c23, 0.6).setOrigin(1, 0).setInteractive();
-        this.add.text(right - 22, 40, '♪', { fontSize: '22px', color: '#ffffff' }).setOrigin(0.5);
-        toggleBg.on('pointerdown', () => this.setAudioMenuVisible(!this.audioMenuOpen));
+        const note = this.add.text(right - 22, 40, '♪', { fontSize: '22px', color: '#ffffff' }).setOrigin(0.5);
+        const strike = this.add.graphics();
+        strike.lineStyle(3, 0xffffff, 1);
+        strike.lineBetween(right - 33, 29, right - 11, 51);
+
+        const showMuted = (muted) => {
+            note.setAlpha(muted ? 0.5 : 1);
+            strike.setVisible(muted);
+        };
+        showMuted(this.audio.muted);
+        toggleBg.on('pointerdown', () => showMuted(this.audio.toggleMute()));
 
         // A matching "?" chip beside it reopens the splash (how to play, the
         // fan-project note).
         const helpBg = this.add.rectangle(right - 44 - 8, 20, 44, 40, 0x3e2c23, 0.6).setOrigin(1, 0).setInteractive();
         this.add.text(right - 44 - 8 - 22, 40, '?', { fontSize: '22px', color: '#ffffff' }).setOrigin(0.5);
         helpBg.on('pointerdown', () => showSplash(this.game));
-    }
-
-    addMenuButton (x, y, w, h, label, onClick)
-    {
-        const bg = this.add.rectangle(x, y, w, h, 0x3e2c23, 0.72).setOrigin(0, 0).setInteractive();
-        const text = this.add.text(x + 12, y + h / 2, label, { fontSize: '16px', color: '#ffffff' }).setOrigin(0, 0.5);
-        bg.on('pointerdown', onClick);
-
-        this.audioPanelParts.push(bg, text);
-        return { bg, text };
-    }
-
-    setAudioMenuVisible (visible)
-    {
-        this.audioMenuOpen = visible;
-        this.audioPanelParts.forEach((part) => part.setVisible(visible));
     }
 }
 

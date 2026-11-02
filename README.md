@@ -30,7 +30,7 @@ https://pusheen-game.netlify.app/
 | Interact (talk, open/close the cabinet or fridge, take an item) | E | On-screen `E` button |
 | Select an item in the cabinet or fridge | 1 – 4 | Tap the item |
 | Play again (after the nap) | Space | Tap the button |
-| Music / SFX menu | — | ♪ button, top-right |
+| Sound on / off | — | ♪ button, top-right |
 | How to play and the fan-project note | — | ? button, next to the ♪ |
 
 A splash with the same information opens when the game loads; any key or a
@@ -70,7 +70,9 @@ npm run build    # production build to dist/
 ## Audio
 
 The music starts with Pusheen's first move (a walk or a jump), not at
-load. The shipped music and SFX are synthesized CC0 placeholders (generated via
+load. Each room has its own track (`ROOM_MUSIC` in `src/config/audioManifest.js`:
+the garden and bedroom share one, the kitchen and living room have their own),
+crossfading as she goes through a door. The shipped music and SFX are synthesized CC0 placeholders (generated via
 `scripts/gen-placeholder-audio.mjs`) so the game has a real, working audio
 layer to playtest with. Each track/SFX set in `src/config/audioManifest.js`
 notes a recommended real replacement — see `public/assets/audio/CREDITS.md`.

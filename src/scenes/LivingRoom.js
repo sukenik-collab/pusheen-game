@@ -73,6 +73,7 @@ export class LivingRoom extends Scene
         // above its base volume) -- put it back before this visit begins.
         this.audio = this.registry.get('audio');
         this.audio?.resetMusicVolume();
+        this.audio?.enterRoom(this, 'LivingRoom');
 
         this.add.rectangle(width / 2, height / 2, width, height, FLOOR_COLOR);
 

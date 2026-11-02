@@ -60,6 +60,8 @@ export class Backyard extends Scene
         const { width, height } = this.scale;
         const groundTop = height - GROUND_HEIGHT;
 
+        this.registry.get('audio')?.enterRoom(this, 'Backyard');
+
         // Scenery, back to front -- creation order is depth order here as it is
         // everywhere else in this codebase.
         this.add.rectangle(width / 2, height / 2, width, height, BACKYARD.sky);

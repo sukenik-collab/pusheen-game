@@ -1,4 +1,4 @@
-import { TRACKS, SFX_SETS, AUDIO_MIX } from '../config/audioManifest.js';
+import { TRACKS, SFX_SETS, ROOM_MUSIC, DEFAULT_SFX_SET, AUDIO_MIX } from '../config/audioManifest.js';
 
 // Owns the whole Phase-5 mix: one looping music bed + one-shot SFX on top,
 // through independent music/sfx volumes and a master mute. A single instance
@@ -16,7 +16,7 @@ export class AudioController
         this.sound = game.sound;
 
         this.trackIndex = 0;
-        this.sfxIndex = 0;
+        this.sfxIndex = Math.max(0, SFX_SETS.findIndex((set) => set.key === DEFAULT_SFX_SET));
         this.muted = false;
 
         this.musicVolume = AUDIO_MIX.musicVolume;
@@ -58,16 +58,42 @@ export class AudioController
         this.music.play();
     }
 
-    cycleTrack ()
+    // Called from each room's create(): pick that room's track. Before the
+    // music has started (it waits for her first move) this only chooses what
+    // startMusic() will play; after, a different track crossfades in over the
+    // door's fade, and a track shared with the last room just plays on.
+    enterRoom (scene, room)
     {
-        this.playTrack(this.trackIndex + 1);
-        return this.currentTrack;
-    }
+        const index = TRACKS.findIndex((track) => track.key === ROOM_MUSIC[room]);
+        if (index < 0 || index === this.trackIndex) {
+            return;
+        }
 
-    cycleSfxSet ()
-    {
-        this.sfxIndex = (this.sfxIndex + 1) % SFX_SETS.length;
-        return this.currentSet;
+        this.trackIndex = index;
+        if (!this.music) {
+            return;
+        }
+
+        const outgoing = this.music;
+        const incoming = this.sound.add(this.currentTrack.file, { loop: true, volume: 0 });
+        incoming.play();
+        this.music = incoming;
+
+        // Both fades ride the new room's tweens; if that room is left before
+        // they finish, settle them on the spot so nothing is left half-faded.
+        let settled = false;
+        const settle = () => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            outgoing.stop();
+            outgoing.destroy();
+            incoming.setVolume(this.musicVolume);
+        };
+        scene.tweens.add({ targets: outgoing, volume: 0, duration: AUDIO_MIX.roomFadeMs, onComplete: settle });
+        scene.tweens.add({ targets: incoming, volume: this.musicVolume, duration: AUDIO_MIX.roomFadeMs });
+        scene.events.once('shutdown', settle);
     }
 
     // One-shot SFX. Slight per-play rate variation so a repeated sample never

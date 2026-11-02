@@ -12,7 +12,7 @@ const BASE = 'assets/audio/';
 // calls audio.play(<eventKey>); the current set decides which file sounds.
 export const SFX_EVENTS = ['land', 'jump', 'squish', 'sniff', 'peek', 'nope', 'collect', 'sigh'];
 
-// Background music options, in selector order. `file` is the placeholder in the
+// Background music options (assigned to rooms in ROOM_MUSIC below). `file` is the placeholder in the
 // repo now; `recommended` is the real track to swap in (keep the key stable).
 export const TRACKS = [
     {
@@ -41,7 +41,7 @@ export const TRACKS = [
     }
 ];
 
-// SFX sets, in selector order. Each maps every SFX_EVENTS key to a file.
+// SFX sets (DEFAULT_SFX_SET picks the one in use). Each maps every SFX_EVENTS key to a file.
 export const SFX_SETS = [
     {
         key: 'soft',
@@ -57,8 +57,21 @@ export const SFX_SETS = [
     }
 ];
 
+// Which track each room plays (a TRACKS key). Rooms that share a track keep it
+// playing straight through; a different one crossfades in on entering.
+export const ROOM_MUSIC = {
+    Backyard: 'simple-trifle',
+    Bedroom: 'simple-trifle',
+    Kitchen: 'carefree',
+    LivingRoom: 'wallpaper'
+};
+
+// The SFX set the game uses (an SFX_SETS key). There's no in-game picker.
+export const DEFAULT_SFX_SET = 'soft';
+
 // Mix defaults. Music sits under everything; SFX comfortably above but soft.
 export const AUDIO_MIX = {
+    roomFadeMs: 800, // crossfade between room tracks
     musicVolume: 0.4,
     sfxVolume: 0.7,
     napDuckVolume: 0.22, // music dips on the curl-up...
