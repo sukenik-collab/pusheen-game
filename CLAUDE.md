@@ -50,7 +50,7 @@ Assume ~1280×720 logical canvas. All of these live in `src/config/feel.js`.
 - `src/audio/AudioController.js` — music and SFX.
 - `tools/` — Python scripts that cut concept art into sprites (`tools/README.md`).
 - `public/assets/` — sprites and audio, served at runtime.
-- `/docs` — specs, the art asset list, the art prompts, and `concept-art/` (the sources `tools/` cuts from).
+- `/docs` — specs, the art asset list, the art prompts, and `concept-art/` (the sources `tools/` cuts from; local only, gitignored, never commit it).
 
 ## Conventions
 - ES modules; one class per file; small, named functions over clever one-liners.

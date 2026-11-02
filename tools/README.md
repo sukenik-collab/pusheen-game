@@ -1,7 +1,9 @@
 # tools — art cutting
 
 Scripts that turn the concept art in `docs/concept-art/` into the transparent
-PNGs the game loads. They are how `backyard-tree.png`, the two hanging-sloth
+PNGs the game loads. That folder is **local only** (gitignored, not in the
+repo), so a fresh clone has the shipped sprites but not the sources: the
+scripts only run on a machine that has the folder. They are how `backyard-tree.png`, the two hanging-sloth
 layers, the kitchen's climbing boxes, the two doorways, the fridge interior,
 the glasses, the fridge items, the butterfly rig and the browser-tab icons
 were made; re-running any of them with no arguments reproduces the shipped

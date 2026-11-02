@@ -66,7 +66,7 @@ he's lying down. Nothing to catch, nothing to chase — purely ambient.
 
 ## Art: what's real and what isn't
 
-- **Real, cut from `docs/concept-art/` by the scripts in `tools/`:** the
+- **Real, cut from `docs/concept-art/` (local only, gitignored) by the scripts in `tools/`:** the
   backyard tree, the hanging Sloth (two layers), the kitchen boxes, the
   garden gate, the screen door, the fridge interior, the glass and juice
   glass, the four fridge items (OJ pitcher, milk, cheese, leftovers), the

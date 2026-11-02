@@ -20,7 +20,7 @@ things in is in `ROADMAP.md`.
    game.
 3. Check the result against the checklist below. Regenerate rather than
    fixing by hand; the cutter can't repair a wrong shape.
-4. Save it to `docs/concept-art/` under the file name given, then ask Claude
+4. Save it to `docs/concept-art/` (local only, gitignored) under the file name given, then ask Claude
    to "cut `docs/concept-art/<file>`". Claude cuts it to size with the
    scripts in `tools/`, wires it in, and checks it in the game.
 
