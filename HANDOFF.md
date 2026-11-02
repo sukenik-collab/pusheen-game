@@ -83,8 +83,10 @@ he's lying down. Nothing to catch, nothing to chase — purely ambient.
   unused `fridge` closed-door texture (the fridge is painted into
   `kitchenBg`). Sizes and status of every sprite are in
   `docs/pusheen-v2-art-assets.md`.
-- **Audio** is synthesized CC0 placeholders;
-  `public/assets/audio/CREDITS.md` suggests real replacements.
+- **Audio:** the music is three real tracks, one per room (garden and bedroom
+  share one); credits and how they were prepared are in
+  `public/assets/audio/CREDITS.md`. The SFX are still synthesized CC0
+  placeholders (the Soft set).
 
 ## Load-bearing details (don't "fix" these)
 

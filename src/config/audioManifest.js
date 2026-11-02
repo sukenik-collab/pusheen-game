@@ -12,26 +12,33 @@ const BASE = 'assets/audio/';
 // calls audio.play(<eventKey>); the current set decides which file sounds.
 export const SFX_EVENTS = ['land', 'jump', 'squish', 'sniff', 'peek', 'nope', 'collect', 'sigh'];
 
-// Background music options (assigned to rooms in ROOM_MUSIC below). `file` is the placeholder in the
-// repo now; `recommended` is the real track to swap in (keep the key stable).
+// Background music options (assigned to rooms in ROOM_MUSIC below). `file` is
+// what loads (and the sound's key); `alt` lists fallback formats the browser
+// can use if it can't play `file` (the loader takes the first playable one).
+// `credit` is the licence line, kept in sync with public/assets/audio/CREDITS.md.
+// The three real tracks are level-matched to about -19 LUFS, so a room
+// crossfade doesn't jump in volume; match any replacement to that.
 export const TRACKS = [
     {
         key: 'wallpaper',
         name: 'Wallpaper',
-        file: `${BASE}music-wallpaper.wav`,
-        recommended: 'Kevin MacLeod - "Wallpaper" (CC-BY 3.0)'
-    },
-	{
-        key: 'carefree',
-        name: 'Carefree',
-        file: `${BASE}music-carefree.wav`,
-        recommended: 'Kevin MacLeod - "Carefree" (CC-BY 4.0)'
+        file: `${BASE}music-wallpaper.mp3`,
+        credit: 'Kevin MacLeod (incompetech.com), via Free Music Archive, CC BY'
     },
     {
+        key: 'carefree',
+        name: 'Carefree',
+        file: `${BASE}music-carefree.mp3`,
+        credit: 'Kevin MacLeod (incompetech.com), via Free Music Archive, CC BY'
+    },
+    {
+        // A 24s loop, so it ships as Ogg (loops without a gap); Safari/iOS
+        // can't play Ogg and falls back to the mp3.
         key: 'simple-trifle',
         name: 'A Simple Trifle',
-        file: `${BASE}music-simple-trifle.wav`,
-        recommended: 'OpenGameArt - "A Simple Trifle"'
+        file: `${BASE}music-simple-trifle.ogg`,
+        alt: [`${BASE}music-simple-trifle.mp3`],
+        credit: 'jestar, via OpenGameArt, CC0'
     },
     {
         key: 'sneaky',
