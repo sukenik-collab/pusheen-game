@@ -72,11 +72,12 @@ npm run build    # production build to dist/
 The music starts with Pusheen's first move (a walk or a jump), not at
 load. Each room has its own track (`ROOM_MUSIC` in `src/config/audioManifest.js`:
 the garden and bedroom share one, the kitchen and living room have their own),
-crossfading as she goes through a door. The shipped music and SFX are synthesized CC0 placeholders (generated via
-`scripts/gen-placeholder-audio.mjs`) so the game has a real, working audio
-layer to playtest with. Each track/SFX set in `src/config/audioManifest.js`
-notes a recommended real replacement — see `public/assets/audio/CREDITS.md`.
-Swapping to real audio is a drop-in-the-file-and-change-a-path change, no
+crossfading as she goes through a door. The music is three real tracks
+(Kevin MacLeod's "Carefree" and "Wallpaper", jestar's "A Simple Trifle"; credits
+and how they were prepared are in `public/assets/audio/CREDITS.md`). The sound
+effects are still synthesized CC0 placeholders (generated via
+`scripts/gen-placeholder-audio.mjs`). Swapping audio is a
+drop-in-the-file-and-change-a-path change in `src/config/audioManifest.js`, no
 logic changes needed.
 
 ## Status
@@ -105,5 +106,11 @@ fun to come back to. It's off in development and on deploy previews
   Gemini and cut to size by the scripts in `tools/`. It is **not** covered by
   the MIT license, and no right to reuse it is granted. If you are the
   rights holder and want something changed or removed, please open an issue.
-- **Audio:** the music and sound effects are synthesized CC0 placeholders
-  (`public/assets/audio/CREDITS.md`).
+- **Music:** "Carefree" and "Wallpaper" by Kevin MacLeod
+  ([incompetech.com](https://incompetech.com)), from the Free Music Archive,
+  licensed [CC BY](https://creativecommons.org/licenses/by/4.0/); both were
+  re-encoded and volume-adjusted. "A Simple Trifle" by
+  [jestar](https://opengameart.org/users/jestar), from
+  [OpenGameArt](https://opengameart.org/content/a-simple-trifle), CC0.
+- **Sound effects:** synthesized CC0 placeholders. Details in
+  `public/assets/audio/CREDITS.md`.

@@ -177,7 +177,7 @@ export class Preloader extends Scene
         });
         // Audio: every selectable track + every SFX set's clips. The file path
         // doubles as the load key, so the manifest is the only place paths live.
-        TRACKS.forEach((track) => this.load.audio(track.file, track.file));
+        TRACKS.forEach((track) => this.load.audio(track.file, [track.file, ...(track.alt ?? [])]));
         SFX_SETS.forEach((set) => {
             Object.values(set.clips).forEach((path) => this.load.audio(path, path));
         });

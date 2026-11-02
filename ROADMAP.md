@@ -149,8 +149,9 @@ choice is made.
   exists; fast travel (hedgehog-guided, or shipping-box warp points).
 - **More cozy extras** (v2 spec §5): sniff flowers, open cupboards, a
   hammock with a bounce, a lemon to bat around.
-- **Real audio.** The music and SFX are synthesized placeholders;
-  `public/assets/audio/CREDITS.md` suggests replacements.
+- **Real SFX.** The music is real now (three tracks, one per room); the SFX
+  are still synthesized placeholders, and `public/assets/audio/CREDITS.md`
+  suggests replacements.
 
 ## Decided
 
