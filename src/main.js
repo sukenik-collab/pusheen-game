@@ -3,6 +3,7 @@ import { Preloader } from './scenes/Preloader';
 import { Backyard } from './scenes/Backyard';
 import { Kitchen } from './scenes/Kitchen';
 import { LivingRoom } from './scenes/LivingRoom';
+import { Laundry } from './scenes/Laundry';
 import { Bedroom } from './scenes/Bedroom';
 import { UI } from './scenes/UI';
 
@@ -36,6 +37,7 @@ const config = {
         Backyard,
         Kitchen,
         LivingRoom,
+        Laundry,
         Bedroom,
         UI
     ]

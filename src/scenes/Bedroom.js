@@ -13,13 +13,21 @@ const GROUND_HEIGHT = 40;
 const WALL_COLOR = 0x55486b;   // dusky lavender -- night-time contrast to the living room
 const GROUND_COLOR = 0x46394f;
 
-// Named entry points. Bedroom is only reached from the living room (and is
-// never the boot room), so default == fromLivingRoom: just inside the right-
-// wall door, clear of its trigger zone so it can't instantly re-fire.
+// Named entry points. Bedroom is only reached from the Laundry Room (and is
+// never the boot room), so default == fromLaundry: just inside the left-wall
+// door, clear of its trigger zone so it can't instantly re-fire.
 const SPAWN_POINTS = {
-    default: { x: 1130 },
-    fromLivingRoom: { x: 1130 }
+    default: { x: 150 },
+    fromLaundry: { x: 150 }
 };
+
+// The room runs left to right with the rest of the house wing, and is laid
+// out so she meets the problem before the fix: the too-high shelf (and its
+// yarn) is just inside the door, the costume box at the far right. The bed
+// is mirrored from its art (headboard on the right).
+const BED_X = 840;
+const SHELF_X = 250;
+const COSTUME_BOX_X = 1170;
 
 // The bed's *mattress* surface -- where she actually stands -- is not the top
 // of the bed sprite. The sprite is 64 tall but its mattress top sits at the
@@ -52,18 +60,20 @@ const SHELF_THICKNESS = 16;
 // `sprite` art is sized to match w/h exactly, so the static body a sprite
 // gets from its image bounds equals the declared footprint.
 const LAYOUT = [
-    { name: 'rug', role: 'background', sprite: 'rug', x: 400, w: 340, h: 14, yFromGround: 7 },
+    { name: 'rug', role: 'background', sprite: 'rug', x: BED_X, w: 340, h: 14, yFromGround: 7 },
     { name: 'moonWindow', role: 'background', sprite: 'moonWindow', x: 640, w: 110, h: 140, yFromGround: 510 },
     // Bed is drawn only; its real standable surface (the mattress, inset below
     // the sprite top) is a separate solid body built in create(), and the
     // pillow is the squishy Pillow entity -- both live in create(), not here.
-    { name: 'bed', role: 'background', sprite: 'bed', x: 400, w: 280, h: 64 },
+    { name: 'bed', role: 'background', sprite: 'bed', flipX: true, x: BED_X, w: 280, h: 64 },
     // Low enough (< the ~82px jump apex) to hop over -- it sits mid-room and
-    // must never wall off the left half.
-    { name: 'dresser', role: 'solid', sprite: 'dresser', x: 780, w: 120, h: 70 },
+    // must never wall off the far end of the room.
+    { name: 'dresser', role: 'solid', sprite: 'dresser', x: 500, w: 120, h: 70 },
     // The costume-gated high shelf, one-way so she floats up through it and
-    // lands on top. Kept horizontally clear of anything standable.
-    { name: 'shelf', role: 'standable', sprite: 'shelf', oneWay: true, x: 130, w: 180, h: SHELF_THICKNESS, yFromGround: SHELF_SURFACE_HEIGHT - SHELF_THICKNESS / 2 }
+    // lands on top. Kept horizontally clear of anything standable (it spans
+    // 160..340; the dresser, whose 70px top is as high as the pillow surface
+    // the shelf height is derived from, starts at 440).
+    { name: 'shelf', role: 'standable', sprite: 'shelf', oneWay: true, x: SHELF_X, w: 180, h: SHELF_THICKNESS, yFromGround: SHELF_SURFACE_HEIGHT - SHELF_THICKNESS / 2 }
 ];
 
 export class Bedroom extends Scene
@@ -87,9 +97,10 @@ export class Bedroom extends Scene
         // last one sits up on the costume-gated shelf, visible from below
         // but only reachable with the Pusheencorn jump.
         this.yarnBalls = [];
-        this.spawnYarn('bed', 262, groundTop - 14);
-        // Tucked toward the left end of the shelf, clear of the bed below.
-        this.spawnYarn('shelf', 70, groundTop - SHELF_SURFACE_HEIGHT - 14);
+        // Peeking out past the headboard (right) end of the mirrored bed.
+        this.spawnYarn('bed', BED_X + 138, groundTop - 14);
+        // On the shelf, a little toward the room side so it reads from below.
+        this.spawnYarn('shelf', SHELF_X + 20, groundTop - SHELF_SURFACE_HEIGHT - 14);
 
         this.solids = buildLayout(this, LAYOUT, groundTop);
 
@@ -99,23 +110,23 @@ export class Bedroom extends Scene
         // the raised end frame is handled by the posts below. Invisible (the
         // bed sprite draws the bed).
         const mattressTop = groundTop - BED_SURFACE_HEIGHT;
-        this.bedBody = this.add.rectangle(400, (mattressTop + groundTop) / 2, 240, BED_SURFACE_HEIGHT)
+        this.bedBody = this.add.rectangle(BED_X, (mattressTop + groundTop) / 2, 240, BED_SURFACE_HEIGHT)
             .setVisible(false);
         this.physics.add.existing(this.bedBody, true);
         this.solids.push(this.bedBody);
 
-        // Headboard (left) and footboard (right) are DIFFERENT heights in the
-        // art -- measured from bed.png, whose bottom sits on the floor: the
+        // Headboard and footboard are DIFFERENT heights in the art -- measured from bed.png, whose bottom sits on the floor: the
         // headboard rises ~63px (nearly the full 64), the footboard only ~46px
         // (a low foot, barely above the 44px mattress). Two posts so each blocks
         // to the height it's actually drawn: at floor level both stop her
         // walking into the frame; up on the sheets the tall headboard walls off
         // the head end while the low footboard lets her step off the foot. She
-        // still mounts the bed by hopping onto the mattress.
+        // still mounts the bed by hopping onto the mattress. The bed is drawn
+        // flipped, so the headboard is on the right here.
         const POST_W = 20;   // frame inset: (spriteW 280 - mattress 240) / 2
         [
-            { x: 270, h: 63 },   // headboard, left
-            { x: 530, h: 46 }    // footboard, right
+            { x: BED_X + 130, h: 63 },   // headboard, right
+            { x: BED_X - 130, h: 46 }    // footboard, left
         ].forEach(({ x, h }) => {
             const top = groundTop - h;
             const post = this.add.rectangle(x, (top + groundTop) / 2, POST_W, h)
@@ -124,14 +135,17 @@ export class Bedroom extends Scene
             this.solids.push(post);
         });
 
-        // Squishy pillow -- a small raised step on the left of the mattress she
-        // hops onto. Built after the layout so it renders over the bed's art.
-        this.pillow = new Pillow(this, 330, groundTop - PILLOW_SURFACE_HEIGHT + PILLOW_HEIGHT / 2);
+        // Squishy pillow -- a small raised step at the headboard (right) end of
+        // the mattress she hops onto. Built after the layout so it renders over
+        // the bed's art.
+        this.pillow = new Pillow(this, BED_X + 70, groundTop - PILLOW_SURFACE_HEIGHT + PILLOW_HEIGHT / 2);
 
-        this.doorToLivingRoom = new Door(this, 1240, groundTop, { side: 'left', to: 'LivingRoom', enterAt: 'fromBedroom' });
+        this.doorToLaundry = new Door(this, 40, groundTop, { side: 'right', to: 'Laundry', enterAt: 'fromBedroom' });
 
-        // The Pusheencorn box, between the dresser and the door.
-        this.costumeBox = new CostumeBox(this, 970, groundTop);
+        // The Pusheencorn box, at the far right past the bed: the fix comes
+        // after the problem. She pops out to its left (COSTUME.popOutOffsetX),
+        // clear of the headboard.
+        this.costumeBox = new CostumeBox(this, COSTUME_BOX_X, groundTop);
 
         // One dispatcher for every E-press interaction in this room. Register
         // yarn before the box to preserve the old yarn-first tie-break (moot
@@ -213,8 +227,8 @@ export class Bedroom extends Scene
 
         // The door is a walk-into trigger, handled here rather than through the
         // interaction controller (see the controller's note on triggers).
-        if (this.doorToLivingRoom.checkTrigger(this.pusheen)) {
-            fadeToRoom(this, this.doorToLivingRoom.to, { spawn: this.doorToLivingRoom.enterAt, fadeIn: true });
+        if (this.doorToLaundry.checkTrigger(this.pusheen)) {
+            fadeToRoom(this, this.doorToLaundry.to, { spawn: this.doorToLaundry.enterAt, fadeIn: true });
         }
 
         this.pusheen.update();

@@ -57,7 +57,7 @@ Naming these now so a mediocre result can't be rationalized into a green light l
 
 ## In scope — the slice
 - One fixed (or minimally scrolling) 2D screen: cozy living-room corner.
-- Left: a cabinet/counter. Center: a couch with a squashable cushion. Right: a window with a sunbeam on the carpet.
+- Left: a cabinet/counter. Center: a couch with a squashable cushion. Right: a window with a sunbeam on the carpet. (The built room has since been mirrored, sunbeam left and cabinet right; see the design doc §1.)
 - Placeholder cat (a plump gray oval is fine). Placeholder art throughout.
 - The four core mechanics above.
 - Lo-fi background track + squish/boing SFX. **Audio is not optional** — it carries ~half the vibe.

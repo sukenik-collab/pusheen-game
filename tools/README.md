@@ -36,6 +36,29 @@ python3 tools/cut_items.py --src docs/concept-art/fridge_items.jpg --same-scale 
     --item "itemCheese:public/assets/sprites/item-cheese.png" \
     --item "itemLeftovers:public/assets/sprites/item-leftovers.png" \
     --item "juicePitcher:public/assets/sprites/juice-pitcher.png"
+# The laundry washer and dryer: a matched pair, each to the same box. Their
+# 110px height is LAUNDRY.dryerHeight in src/config/feel.js; re-cut if it moves.
+python3 tools/cut_items.py --src docs/concept-art/laundry_machines.png \
+    --item "dryer=96x110:public/assets/sprites/dryer.png" \
+    --item "washer=96x110:public/assets/sprites/washer.png"
+# The laundry sink and its wall tap, at one scale (the sink 110 tall, as above).
+python3 tools/cut_items.py --src docs/concept-art/laundry_sink.jpg --same-scale 110 \
+    --item "sink:public/assets/sprites/sink.png" \
+    --item "sinkTap:public/assets/sprites/sink-tap.png"
+# The folding table, basket and heap, each to its own box at its drawn
+# proportions. The table's 60 and the heap's 50 are LAUNDRY.tableHeight and
+# LAUNDRY.heapHeight; the basket is sized to look as full as the heap.
+python3 tools/cut_items.py --src docs/concept-art/laundry_set.jpg \
+    --item "foldingTable=147x60:public/assets/sprites/folding-table.png" \
+    --item "laundryBasket=81x60:public/assets/sprites/laundry-basket.png" \
+    --item "laundryHeap=114x50:public/assets/sprites/laundry-heap.png"
+# The laundry wall decor. --bg-score 60 (default 15) stops the key eating the
+# clothesline's thin line, whose anti-aliased pixels lean magenta, and the
+# purple bottle cap; the background itself scores ~200 (see the script's
+# docstring).
+python3 tools/cut_items.py --src docs/concept-art/laundry_decor.jpg --bg-score 60 \
+    --item "clothesline=240x122:public/assets/sprites/clothesline.png" \
+    --item "suppliesShelf=150x74:public/assets/sprites/supplies-shelf.png"
 
 # A five-piece animated rig from one image: body+antennae plus four wing
 # quadrants, split at the body's own centre so Butterfly.js can flap each

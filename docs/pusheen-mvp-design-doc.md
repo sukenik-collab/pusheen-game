@@ -32,6 +32,8 @@ One fixed screen (no scroll for v0), cozy living-room corner:
 
 Whimsical arrangement over realism. Playtest moved the start position: Pusheen now starts near the sunbeam (right) rather than the cabinet, so the loop is "wake up in the light, wander left to the cabinet for the snack, play on the couch, return to the sunbeam to nap" rather than a single left-to-right pass.
 
+*Since mirrored (2026-11-23):* the LivingRoom now runs left to right with the rest of the house (Backyard → Kitchen, LivingRoom → Laundry Room → Bedroom), so it reads as this layout flipped: the sunbeam and the arrival from the garden on the **left**, the couch in the centre, the cabinet on the **right** by the door on to the Laundry Room. She still starts near the sunbeam; the loop is now "wander right to the cabinet, back left to nap". See `ROADMAP.md` (Decided, 2026-11-23).
+
 ## 2. The cat: movement feel
 She should read as **plump and unhurried** — eases into motion, coasts to a stop with a little slide.
 - Horizontal accel: ~1200 px/s² · max speed: ~180 px/s (a gentle stroll) · deceleration/drag: ~1000 px/s² so she glides to rest rather than snapping.

@@ -1,5 +1,5 @@
 import { GameObjects } from 'phaser';
-import { MOVE, JUMP, LAND_SQUASH, IDLE, SNIFF_REACT, NAP, COSTUME, CARRY } from '../config/feel.js';
+import { MOVE, JUMP, LAND_SQUASH, IDLE, SNIFF_REACT, NAP, COSTUME, CARRY, LAUNDRY } from '../config/feel.js';
 import { subscribeRegistry } from '../systems/registryHelpers.js';
 import { track } from '../analytics.js';
 
@@ -243,6 +243,29 @@ export class Pusheen extends GameObjects.Container
             yoyo: true,
             ease: 'Sine.easeInOut',
             onComplete: () => this.breatheTween.resume()
+        });
+    }
+
+    // A quick paw-swipe toward `dir`: she turns that way and leans into it
+    // and back. Tween-only, so it never fights her physics body.
+    playPawSwipe (dir)
+    {
+        this.setFacing(dir);
+        this.breatheTween.pause();
+        this.visual.setScale(1, 1);
+        this.visual.y = 0;
+
+        this.scene.tweens.add({
+            targets: this.visual,
+            angle: (dir === 'left' ? -1 : 1) * LAUNDRY.swipeLeanDeg,
+            scaleX: SNIFF_REACT.scaleX,
+            duration: LAUNDRY.swipeMs,
+            yoyo: true,
+            ease: 'Quad.easeOut',
+            onComplete: () => {
+                this.visual.setAngle(0);
+                this.breatheTween.resume();
+            }
         });
     }
 

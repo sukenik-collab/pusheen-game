@@ -1,6 +1,6 @@
 # Roadmap
 
-What to do next, in order. Last updated 2026-11-23. Where the game stands
+What to do next, in order. Last updated 2026-11-23 (the Laundry Room). Where the game stands
 today is in `HANDOFF.md`.
 
 Sizes are rough: **S** is a short session, **M** a full one, **L** several.
@@ -147,8 +147,10 @@ choice is made.
   #3 (no spec yet); characters named but not built (Pip, the hedgehogs);
   rooms with several states (time × weather × quest) once a sleep system
   exists; fast travel (hedgehog-guided, or shipping-box warp points).
-- **A Laundry Room between the LivingRoom and the Bedroom** (M; design
-  agreed, not scheduled). A knock-it-over-then-stand-on-it puzzle. She
+- [x] **A Laundry Room between the LivingRoom and the Bedroom** (M).
+  *Built 2026-11-23 on branch `ccr-30ca541b-l5u4wn`, with placeholder art;
+  not yet run in a browser or playtested (see `HANDOFF.md`, "Where things
+  stand").* The design as agreed: A knock-it-over-then-stand-on-it puzzle. She
   enters from the LivingRoom on the left; just inside that door is a tall
   dryer with a fourth yarn ball on top, a bit higher than her best hop
   from the floor (~110px vs a ~82px hop). Deeper in, toward the right door
@@ -193,6 +195,17 @@ choice is made.
 
 ## Decided
 
+- 2026-11-23: Laundry Room details, settled while building it. The dryer
+  and the folding table are one-way, top-only platforms she walks in front
+  of, so neither walls off the walk through. The basket swipe is offered
+  only from the table top, and the dryer yarn only from the dryer top (its
+  pickup radius would otherwise reach it from the floor). The room plays
+  the LivingRoom's track. The LivingRoom cabinet moved in from the right
+  door (x 970), so arriving through it no longer fires its sniff cue on the
+  spot. After the first playtest: the sink, washer and dryer stand side by
+  side as one counter run along the left wall (the order laundry goes),
+  all walkable once she's up; the basket stays something she walks past,
+  not a platform (she'd be standing on the thing she has to knock off).
 - 2026-11-23: The planned Laundry Room goes between the LivingRoom and the
   Bedroom, not off the Bedroom, so she meets its knock-over puzzle before
   she can get the costume (which would skip it). The LivingRoom → Laundry
