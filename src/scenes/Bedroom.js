@@ -13,12 +13,12 @@ const GROUND_HEIGHT = 40;
 const WALL_COLOR = 0x55486b;   // dusky lavender -- night-time contrast to the living room
 const GROUND_COLOR = 0x46394f;
 
-// Named entry points. Bedroom is only reached from the living room (and is
-// never the boot room), so default == fromLivingRoom: just inside the left-
-// wall door, clear of its trigger zone so it can't instantly re-fire.
+// Named entry points. Bedroom is only reached from the Laundry Room (and is
+// never the boot room), so default == fromLaundry: just inside the left-wall
+// door, clear of its trigger zone so it can't instantly re-fire.
 const SPAWN_POINTS = {
     default: { x: 150 },
-    fromLivingRoom: { x: 150 }
+    fromLaundry: { x: 150 }
 };
 
 // The room runs left to right with the rest of the house wing, and is laid
@@ -140,7 +140,7 @@ export class Bedroom extends Scene
         // the bed's art.
         this.pillow = new Pillow(this, BED_X + 70, groundTop - PILLOW_SURFACE_HEIGHT + PILLOW_HEIGHT / 2);
 
-        this.doorToLivingRoom = new Door(this, 40, groundTop, { side: 'right', to: 'LivingRoom', enterAt: 'fromBedroom' });
+        this.doorToLaundry = new Door(this, 40, groundTop, { side: 'right', to: 'Laundry', enterAt: 'fromBedroom' });
 
         // The Pusheencorn box, at the far right past the bed: the fix comes
         // after the problem. She pops out to its left (COSTUME.popOutOffsetX),
@@ -227,8 +227,8 @@ export class Bedroom extends Scene
 
         // The door is a walk-into trigger, handled here rather than through the
         // interaction controller (see the controller's note on triggers).
-        if (this.doorToLivingRoom.checkTrigger(this.pusheen)) {
-            fadeToRoom(this, this.doorToLivingRoom.to, { spawn: this.doorToLivingRoom.enterAt, fadeIn: true });
+        if (this.doorToLaundry.checkTrigger(this.pusheen)) {
+            fadeToRoom(this, this.doorToLaundry.to, { spawn: this.doorToLaundry.enterAt, fadeIn: true });
         }
 
         this.pusheen.update();

@@ -343,3 +343,50 @@ export const KITCHEN = {
     wall: 0xf2e4c9,
     floor: 0xd8c39a
 };
+
+// The Laundry Room's knock-it-over-then-stand-on-it puzzle. Heights are
+// derived from JUMP (apex = v^2/2g, ~82px) so retuning the hop can't quietly
+// make the dryer reachable from the floor, or the heap too low to help:
+//   dryer : a bit above her best hop from the floor (~110 vs ~82)
+//   heap  : low enough to hop onto, high enough that heap + hop clears the
+//           dryer top with room to spare (~50 + 82 = 132 vs 110)
+//   table : a low step she hops onto to reach the basket (well under a hop)
+// The placeholder textures (Preloader) are drawn at these sizes, so the art
+// and the bodies stay matched.
+const NORMAL_HOP_APEX = (JUMP.velocity * JUMP.velocity) / (2 * JUMP.gravity);
+const DRYER_HEIGHT = Math.round(NORMAL_HOP_APEX + 28);
+
+export const LAUNDRY = {
+    dryerHeight: DRYER_HEIGHT,
+    heapHeight: Math.round(DRYER_HEIGHT - NORMAL_HOP_APEX + 22),
+    tableHeight: 46,
+
+    // The basket's radar. Approaching on the floor, the outer zone wobbles
+    // it (the sniff cue); the swipe itself is only offered once she's up on
+    // the table beside it (Basket.js checks her feet are on the table top).
+    sniffRadius: 150,
+    interactRadius: 90,
+
+    // Sniff cue: a little rock on its base, there and back a few times.
+    wobbleDeg: 7,
+    wobbleMs: 90,
+    wobbleRepeats: 3,
+
+    // The paw-swipe that tips it: her quick lean toward it.
+    swipeLeanDeg: 14,
+    swipeMs: 110,
+
+    // The tip-off: a scripted arc to a fixed landing spot beside the dryer
+    // (never physics, so it can't land somewhere unhelpful). It rises by
+    // `tipArcPx` above its start before dropping, tumbling as it goes.
+    tipMs: 720,
+    tipArcPx: 90,
+    tipSpinDeg: -160,
+
+    // The heap plopping down: a volume-conserving squash on landing, then a
+    // springy rebound (golden rule 2), heavier than her own land squash.
+    plopScaleY: 0.7,
+    plopScaleX: 1.22,
+    plopDownMs: 100,
+    plopUpMs: 220
+};

@@ -5,7 +5,7 @@
 
 // One entry per hidden yarn ball; each room spawns the balls it hosts
 // unless that ball is already collected this run.
-export const YARN_IDS = ['couch', 'bed', 'shelf'];
+export const YARN_IDS = ['couch', 'dryer', 'bed', 'shelf'];
 
 export function resetRunState (registry)
 {
@@ -17,6 +17,10 @@ export function resetRunState (registry)
     registry.set('quest:complete', false);
 
     registry.set('costume:pusheencorn', false);
+
+    // The Laundry Room's basket, once tipped, stays a heap by the dryer for
+    // the rest of the run.
+    registry.set('laundry:basketTipped', false);
 
     // v2 -- the juice quest (Room Pair #2).
     registry.set('sloth:met', false);

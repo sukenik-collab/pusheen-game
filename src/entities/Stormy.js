@@ -19,9 +19,10 @@ const BUBBLE_OFFSET_Y = -104;
 
 // Quest copy, keyed by how many yarn balls are found so far.
 const HINTS = [
-    'I can\'t find my yarn!\nI lost 3 balls somewhere...',
-    'You found one!\n2 more to go...',
-    'Ooh, two already!\nJust 1 left...'
+    'I can\'t find my yarn!\nI lost 4 balls somewhere...',
+    'You found one!\n3 more to go...',
+    'Ooh, two already!\n2 more to go...',
+    'Three! Just 1 left...'
 ];
 const THANKS = 'You\'re the best, Pusheen! ♥';
 const CELEBRATE = 'My yarn!! Thank you!!';

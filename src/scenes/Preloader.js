@@ -4,6 +4,7 @@ import { resetRunState } from '../config/gameState.js';
 import { AudioController } from '../audio/AudioController.js';
 import { initAnalytics } from '../analytics.js';
 import { showSplash } from '../splash.js';
+import { LAUNDRY } from '../config/feel.js';
 
 // The Backyard's scenery palette, sampled from the tree art so the generated
 // layers sit in the same world as it. Sky and grass are flat fills the scene
@@ -175,6 +176,11 @@ export class Preloader extends Scene
             gfx.fillRect(0, 68, 150, 6);           // door split
             gfx.fillRoundedRect(122, 22, 12, 44, 6);   // handle
         });
+        // Laundry Room placeholders (no real art yet; prompts to come in
+        // docs/art-prompts.md). Heights come from LAUNDRY in feel.js, which
+        // derives them from the jump, so the art and the bodies stay matched.
+        this.makeLaundryTextures();
+
         // Audio: every selectable track + every SFX set's clips. The file path
         // doubles as the load key, so the manifest is the only place paths live.
         TRACKS.forEach((track) => this.load.audio(track.file, track.file));
@@ -200,6 +206,87 @@ export class Preloader extends Scene
         this.scene.start('Backyard');
         this.scene.launch('UI');
         showSplash(this.game);
+    }
+
+    // Flat placeholder shapes for the Laundry Room, in the same chunky
+    // outlined style as the backyard's generated scenery.
+    makeLaundryTextures ()
+    {
+        const OUTLINE = 0x4a3b33;
+        const drumMachine = (key, body, trim, drum) => {
+            const h = LAUNDRY.dryerHeight;
+            this.makeTexture(key, 110, h, (gfx) => {
+                gfx.fillStyle(OUTLINE, 1);
+                gfx.fillRoundedRect(0, 0, 110, h, 10);
+                gfx.fillStyle(body, 1);
+                gfx.fillRoundedRect(4, 4, 102, h - 8, 8);
+                gfx.fillStyle(trim, 1);
+                gfx.fillRect(4, 18, 102, 4);                   // control panel line
+                gfx.fillStyle(OUTLINE, 1);
+                gfx.fillCircle(20, 11, 4);                     // dial
+                gfx.fillCircle(55, 22 + (h - 22) / 2, 32);     // door rim
+                gfx.fillStyle(drum, 1);
+                gfx.fillCircle(55, 22 + (h - 22) / 2, 26);     // door glass
+            });
+        };
+        drumMachine('dryer', 0xfbf7ef, 0xe2d6c4, 0xd7a86e);   // warm: the dryer
+        drumMachine('washer', 0xf1f4f6, 0xc9d3da, 0x9ec6dd);  // cool: the washer
+
+        this.makeTexture('foldingTable', 200, LAUNDRY.tableHeight, (gfx) => {
+            const h = LAUNDRY.tableHeight;
+            gfx.fillStyle(OUTLINE, 1);
+            gfx.fillRoundedRect(0, 0, 200, 14, 5);             // top
+            gfx.fillRect(22, 10, 10, h - 10);                  // legs
+            gfx.fillRect(168, 10, 10, h - 10);
+            gfx.fillStyle(0xc89b6d, 1);
+            gfx.fillRoundedRect(3, 3, 194, 8, 4);
+            gfx.fillRect(25, 12, 4, h - 14);
+            gfx.fillRect(171, 12, 4, h - 14);
+        });
+
+        this.makeTexture('laundryBasket', 70, 46, (gfx) => {
+            gfx.fillStyle(0xf6a6c1, 1);                        // a sock poking out
+            gfx.fillRoundedRect(12, 0, 16, 16, 6);
+            gfx.fillStyle(0x9fd0e8, 1);                        // and a shirt
+            gfx.fillCircle(44, 12, 11);
+            gfx.fillStyle(OUTLINE, 1);
+            gfx.fillRoundedRect(2, 12, 66, 34, 8);
+            gfx.fillStyle(0xe7c48e, 1);
+            gfx.fillRoundedRect(6, 16, 58, 26, 6);
+            gfx.fillStyle(0xc99d5f, 1);                        // weave
+            [24, 32].forEach((y) => gfx.fillRect(8, y, 54, 3));
+        });
+
+        this.makeTexture('laundryHeap', 100, LAUNDRY.heapHeight, (gfx) => {
+            const h = LAUNDRY.heapHeight;
+            const lumps = [
+                [22, h - 18, 18, 0xf6a6c1],
+                [50, h - 25, 20, 0x9fd0e8],
+                [78, h - 18, 18, 0xfff1a8],
+                [38, h - 32, 13, 0xc7e8b5],
+                [64, h - 31, 12, 0xf9d1a6]
+            ];
+            for (const [color, grow] of [[OUTLINE, 4], [null, 0]]) {
+                lumps.forEach(([x, y, r, fill]) => {
+                    gfx.fillStyle(color ?? fill, 1);
+                    gfx.fillCircle(x, y, r + grow);
+                });
+            }
+            gfx.fillStyle(OUTLINE, 1);
+            gfx.fillRoundedRect(4, h - 14, 92, 14, 6);
+            gfx.fillStyle(0xe8d7f1, 1);
+            gfx.fillRoundedRect(8, h - 11, 84, 8, 4);
+        });
+
+        this.makeTexture('roundWindow', 96, 96, (gfx) => {
+            gfx.fillStyle(OUTLINE, 1);
+            gfx.fillCircle(48, 48, 48);
+            gfx.fillStyle(0xfff6d8, 1);
+            gfx.fillCircle(48, 48, 40);
+            gfx.fillStyle(OUTLINE, 1);
+            gfx.fillRect(44, 8, 8, 80);                        // cross frame
+            gfx.fillRect(8, 44, 80, 8);
+        });
     }
 
     // Draw a flat placeholder texture with a graphics callback, then free the

@@ -35,14 +35,14 @@ const CABINET_CONTENTS = [
 // the rest of the house is through the right-wall door. default = a fresh lap
 // near the sunbeam (now reached only via a door -- a fresh boot/Play again
 // starts in the Backyard); fromBackyard = just inside the left-wall hidden
-// path, clear of its trigger; fromBedroom = just inside the right-wall door.
+// path, clear of its trigger; fromLaundry = just inside the right-wall door.
 const SPAWN_POINTS = {
     default: { x: 330 },
     fromBackyard: { x: 150 },
-    fromBedroom: { x: 1130 }
+    fromLaundry: { x: 1130 }
 };
 // The cabinet stands a little in from the right door, so arriving through
-// it (fromBedroom, x 1130) lands her outside its sniff zone (RADAR.sniffRadius
+// it (fromLaundry, x 1130) lands her outside its sniff zone (RADAR.sniffRadius
 // around the cabinet's centre, 80px up; her centre is ~39px up, so the zone
 // reaches ~134px either side at her height). She walks into the cue instead
 // of it firing the moment she arrives.
@@ -99,8 +99,8 @@ export class LivingRoom extends Scene
         // arrives from the garden (playtest moved the spawn near it).
         this.sunbeam = new Sunbeam(this, 200, groundTop);
 
-        // Far right -- doorway on into the rest of the house
-        this.doorToBedroom = new Door(this, 1240, groundTop, { side: 'left', to: 'Bedroom', enterAt: 'fromLivingRoom' });
+        // Far right -- doorway on into the Laundry Room (and the Bedroom past it)
+        this.doorToLaundry = new Door(this, 1240, groundTop, { side: 'left', to: 'Laundry', enterAt: 'fromLivingRoom' });
 
         // Far left -- the revealed hidden path back to the Backyard. Always
         // active here: the LivingRoom is only reachable at all once Sloth's been
@@ -262,8 +262,8 @@ export class LivingRoom extends Scene
                 this.startNapSequence();
             }
 
-            if (this.doorToBedroom.checkTrigger(this.pusheen)) {
-                fadeToRoom(this, this.doorToBedroom.to, { spawn: this.doorToBedroom.enterAt, fadeIn: true });
+            if (this.doorToLaundry.checkTrigger(this.pusheen)) {
+                fadeToRoom(this, this.doorToLaundry.to, { spawn: this.doorToLaundry.enterAt, fadeIn: true });
             } else if (this.doorToBackyard.checkTrigger(this.pusheen)) {
                 fadeToRoom(this, this.doorToBackyard.to, { spawn: this.doorToBackyard.enterAt, fadeIn: true });
             }
