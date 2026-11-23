@@ -35,11 +35,11 @@ const SPAWN_POINTS = {
 const SINK_W = 110;
 const MACHINE_W = 96;
 const UNIT_GAP = 5;
-const SINK_X = 235;
+const SINK_X = 325;
 const WASHER_X = SINK_X + SINK_W / 2 + UNIT_GAP + MACHINE_W / 2;
 const DRYER_X = WASHER_X + MACHINE_W + UNIT_GAP;
 const HEAP_X = DRYER_X + MACHINE_W / 2 + UNIT_GAP + HEAP_WIDTH / 2;
-const TABLE_X = 860;
+const TABLE_X = 950;
 const TABLE_W = 200;
 const BASKET_X = TABLE_X - TABLE_W / 2 + 20;
 
