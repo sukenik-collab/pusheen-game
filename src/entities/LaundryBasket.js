@@ -105,10 +105,10 @@ export class LaundryBasket extends GameObjects.Container
     {
         this.audio?.play('jump');
 
-        const start = new Geom.Point(this.x, this.y);
+        const start = { x: this.x, y: this.y };
         const end = this.landAt;
         const peakY = Math.min(start.y, end.y) - LAUNDRY.tipArcPx;
-        const control = new Geom.Point((start.x + end.x) / 2, peakY);
+        const control = { x: (start.x + end.x) / 2, y: peakY };
 
         this.scene.tweens.addCounter({
             from: 0,

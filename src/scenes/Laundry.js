@@ -88,6 +88,8 @@ export class Laundry extends Scene
         const tipped = this.registry.get('laundry:basketTipped');
         this.heap = new LaundryHeap(this, HEAP_X, groundTop, { present: tipped });
 
+        // (Scene instances are reused across visits, so clear last visit's.)
+        this.basket = null;
         if (!tipped) {
             this.basket = new LaundryBasket(this, BASKET_X, tableTop, {
                 landAt: { x: HEAP_X, y: groundTop - LAUNDRY.heapHeight / 2 },
