@@ -6,14 +6,19 @@ const CUE_COLOR = '#ffd8ec';
 // A hidden quest item, tucked behind furniture. Same concentric sensor-zone
 // pattern as the cabinet's snack radar: the outer zone fires a cue that
 // leads the player, the inner zone enables the pickup.
+//
+// opts.standOnY: a world y her feet must be at or above to pick it up -- for
+// a ball on top of something she has to climb (the laundry dryer), where the
+// generous interact radius would otherwise reach it from the floor below.
 export class YarnBall extends GameObjects.Container
 {
-    constructor (scene, x, y, id)
+    constructor (scene, x, y, id, opts = {})
     {
         super(scene, x, y);
         scene.add.existing(this);
 
         this.id = id;
+        this.standOnY = opts.standOnY ?? null;
         this.audio = scene.registry.get('audio');
         this.verb = 'take';
 
@@ -41,6 +46,7 @@ export class YarnBall extends GameObjects.Container
         // the generous interact radius otherwise lets a normal hop grab the
         // shelf ball from directly below, defeating its costume gate.
         this.inInnerZone = pusheen.isGrounded() &&
+            (this.standOnY === null || pusheen.body.bottom <= this.standOnY + 2) &&
             Geom.Circle.Contains(this.innerZone, pusheen.x, pusheen.y);
 
         if (nowOuter && !this.inOuterZone) {

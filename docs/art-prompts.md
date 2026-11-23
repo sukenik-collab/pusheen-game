@@ -8,7 +8,10 @@ storyboard for exploring the Sloth's wake-up, not a sprite.
 **Done:** 1-5 and 7 are generated, cut and in the game. Their prompts stay
 here for regenerating, and each one's "In game" line says how it was
 actually cut. **Still to generate:** 6 (Sloth walking) and 8 (the wake-up
-storyboard), both for `ROADMAP.md`'s Sloth wake beat item. Sizes and status
+storyboard), both for `ROADMAP.md`'s Sloth wake beat item; and the round
+window from 11, the Laundry Room's optional decoration (its clothesline is
+done). The Laundry Room's 9 and 10 are done
+(each one's "As cut" line says how). Sizes and status
 of every sprite are in `docs/pusheen-v2-art-assets.md`; what order to do
 things in is in `ROADMAP.md`.
 
@@ -268,4 +271,121 @@ in every frame, each frame separated by a wide gap of magenta.
 Draw the branch only in frames 1 to 3, as a simple brown bar.
 COMPOSITION: wide landscape image, about 2400x800. All six frames share
 one baseline.
+```
+
+## 9. Sink and tap (washer and dryer done)
+
+*Done.* *As cut:* the sink 99×110 and the tap 33×39, at one scale, from
+`docs/concept-art/laundry_sink.jpg`.
+
+**Done: the washer and dryer.** Generated as their own pair, saved as
+`docs/concept-art/laundry_machines.png` (dryer left, washer right), and cut
+to 96×110 each (`tools/README.md` has the command). Its thick, even
+outlines are the look the rest of this room should match.
+
+**The sink and its tap** (the prompt below). **Save as**
+`docs/concept-art/laundry_sink.jpg`. **In game:** `sink`, about 110×110,
+and `sinkTap`, about 44×34. The sink stands first in the counter run along
+the Laundry Room's left wall (sink, washer, dryer), the same height as the
+machines; once she's up on the dryer she can walk along all three, so
+**the sink's top edge is a standing surface**: a low, level back rim is
+fine (she walks along its top), but nothing tall on it. The tap is a
+separate wall-mounted piece above the sink. **The look:** a freestanding
+vintage utility basin with an open underside, supported by legs, so its
+silhouette is clearly different from the machines. Not a kitchen vanity,
+cupboard or cabinet sink. **Attach:** `washer.png` and `dryer.png` (the
+outline weight and flat fills to match), and a Laundry Room screenshot.
+*To cut:* `tools/cut_items.py`, the sink to about 110×110 at its own
+proportions (its height must be `LAUNDRY.dryerHeight` in `feel.js`), the
+tap to its own box.
+
+```
+ASSET: two separate laundry-room pieces side by side, with a wide gap of
+magenta between them. They must not touch or overlap. Match the attached
+washer and dryer exactly in style: the same thick, even dark-brown outline
+weight, flat solid fills, no shading, no texture, no speckle.
+1. A freestanding vintage utility sink, seen straight-on from the front: a
+   deep rectangular basin in warm off-white enamel (#F2ECE0) with a slightly
+   rolled front rim and a low, level back rim, standing on four plain
+   straight legs (the same off-white), with the open space underneath
+   showing a simple grey drain pipe (#C9D3DA) curving down in a U-bend.
+   About as tall as it is wide. Its top is level: no tap, splashback panel
+   or anything else on top. Not a kitchen vanity, cupboard or cabinet sink;
+   no doors or panels below the basin.
+2. A small wall-mounted tap: a rounded wall plate, one round handle on top,
+   and a short spout curving down. Pale grey metal (#C9D3DA). About a third
+   of the sink's width.
+COMPOSITION: landscape image, about 1536x1024. The sink fills about 60% of
+the image height; the tap sits to its right, level with the sink's top.
+```
+
+## 10. Folding table, laundry basket and laundry heap
+
+*Done.* *As cut:* each at its drawn proportions, from
+`docs/concept-art/laundry_set.jpg`: the table 147×60 (it came out about 2.4
+times as wide as tall, not 4.5, so it's a little taller and narrower than
+planned rather than squashed), the basket 81×60 (sized up to look as full
+as the heap) and the heap 114×50.
+
+**Save as** `docs/concept-art/laundry_set.jpg`. **In game:** `foldingTable`
+200×46, `laundryBasket` 70×46, `laundryHeap` 100×50. She hops onto the low
+table, paw-swipes the basket off its edge, and it tumbles through the air
+and lands as the heap beside the dryer, which she then stands on. So: the
+**table's top edge and the heap's top are standing surfaces** (flat-ish and
+level), and **the heap must read as the basket's clothes spilled out** (the
+same clothes, same colours). They're one image so they match. **Attach:** a
+Laundry Room screenshot, `cushion.png`, `pillow.png` (the heap should feel
+as soft as those). *To cut:* `tools/cut_items.py`, each to its own box
+(the table's and heap's heights are `LAUNDRY.tableHeight` and
+`LAUNDRY.heapHeight` in `feel.js`).
+
+```
+ASSET: three separate laundry-room things in a row, left to right, each
+with a wide gap of magenta around it. They must not touch or overlap.
+1. A low wooden folding table, seen straight-on from the side: a long flat
+   tabletop (light wood, #E1A578, with a darker edge, #C8915F) on two thin
+   straight legs near its ends. About 4.5 times as wide as it is tall. The
+   tabletop's top edge is perfectly flat and level. Nothing on the table.
+2. A wicker laundry basket, seen straight-on: a rounded tub, about 1.5
+   times as wide as it is tall, tan wicker (#D9A86C) with two or three
+   darker horizontal weave bands (#B9844A) and a small cut-out handle on
+   each side. A few clothes poke out of the top: a yellow sock (#F6C945),
+   a blue shirt sleeve (#7DB7E8) and a green towel corner (#9CCB86).
+3. A soft, squishy heap of laundry on the floor: the same clothes as in
+   the basket (the yellow sock, the blue shirt, the green towel, plus an
+   orange (#FFA03C) and an off-white (#F6EFE2) piece), piled into a low,
+   wide mound about twice as wide as it is tall. Its top is a gentle,
+   fairly level curve, NOT a peak, and its bottom edge is flat. It should
+   look soft and bouncy, like a cushion.
+COMPOSITION: wide landscape image, about 2048x768. The three items are
+spread along one baseline; the table is the widest.
+```
+
+## 11. Round window and clothesline (optional decoration)
+
+*Clothesline done,* in a variation that also gave a supplies shelf for over
+the sink: `docs/concept-art/laundry_decor.jpg`, cut to `clothesline`
+240×122 and `suppliesShelf` 150×74 with `--bg-score 60` (`tools/README.md`).
+The round window is still a placeholder; regenerate the prompt below for it
+alone if wanted.
+
+**Save as** `docs/concept-art/laundry_decor.jpg`. **In game:** `roundWindow`
+96×96 high on the Laundry Room's back wall (today a placeholder), and an
+optional `clothesline`, about 300×70, strung across the upper wall as on
+`docs/house-map.png` (not in the game yet; it would be a new background
+sprite). Nothing stands on either. Only worth doing once 9 and 10 are in.
+**Attach:** a Laundry Room screenshot, `moon-window.png`, `window.png`.
+
+```
+ASSET: two separate wall decorations side by side, with a wide gap of
+magenta between them.
+1. A round porthole-style window: a thick light-wood frame (#E1A578) around
+   a pale sunny sky (#FFF6D8), divided into four by a simple cross of wood.
+   A perfect circle.
+2. A clothesline: a thin, gently sagging line (#8A6A50) between two small
+   wooden end posts, with three pegged socks hanging from it, evenly
+   spaced: yellow (#F6C945), blue (#7DB7E8) and green (#9CCB86). About four
+   times as wide as it is tall.
+COMPOSITION: landscape image, about 1536x768. Both items on one baseline,
+the window about as tall as the clothesline.
 ```

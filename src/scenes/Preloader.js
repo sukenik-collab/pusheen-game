@@ -45,6 +45,23 @@ export class Preloader extends Scene
         this.load.image('pillow', 'assets/sprites/pillow.png');
         this.load.image('dresser', 'assets/sprites/dresser.png');
         this.load.image('shelf', 'assets/sprites/shelf.png');
+
+        // Laundry Room art, all cut by tools/cut_items.py (tools/README.md).
+        // Heights are tied to LAUNDRY in feel.js: the counter units are
+        // dryerHeight (110), the table tableHeight (60), the heap heapHeight
+        // (50) -- re-cut if those change. Only the round window is still a
+        // placeholder (makeLaundryTextures).
+        this.load.image('dryer', 'assets/sprites/dryer.png');
+        this.load.image('washer', 'assets/sprites/washer.png');
+        this.load.image('sink', 'assets/sprites/sink.png');
+        this.load.image('sinkTap', 'assets/sprites/sink-tap.png');
+        this.load.image('foldingTable', 'assets/sprites/folding-table.png');
+        this.load.image('laundryBasket', 'assets/sprites/laundry-basket.png');
+        this.load.image('laundryHeap', 'assets/sprites/laundry-heap.png');
+        // Wall decor, background only (cut with --bg-score 60 to keep the
+        // clothesline's thin line and a purple bottle cap).
+        this.load.image('suppliesShelf', 'assets/sprites/supplies-shelf.png');
+        this.load.image('clothesline', 'assets/sprites/clothesline.png');
         this.load.image('rug', 'assets/sprites/rug.png');
         this.load.image('moonWindow', 'assets/sprites/moon-window.png');
         // Stormy has two faces: sad while her yarn is lost, happy once it's back.
@@ -175,6 +192,10 @@ export class Preloader extends Scene
             gfx.fillRect(0, 68, 150, 6);           // door split
             gfx.fillRoundedRect(122, 22, 12, 44, 6);   // handle
         });
+        // The Laundry Room's last placeholder, the round window (prompt 11 in
+        // docs/art-prompts.md); the rest of its art is loaded above.
+        this.makeLaundryTextures();
+
         // Audio: every selectable track + every SFX set's clips. The file path
         // doubles as the load key, so the manifest is the only place paths live.
         TRACKS.forEach((track) => this.load.audio(track.file, [track.file, ...(track.alt ?? [])]));
@@ -200,6 +221,24 @@ export class Preloader extends Scene
         this.scene.start('Backyard');
         this.scene.launch('UI');
         showSplash(this.game);
+    }
+
+    // The Laundry Room's one remaining placeholder shape (the rest is real
+    // art, loaded in preload()), in the same chunky outlined style as the
+    // backyard's generated scenery.
+    makeLaundryTextures ()
+    {
+        const OUTLINE = 0x4a3b33;
+
+        this.makeTexture('roundWindow', 96, 96, (gfx) => {
+            gfx.fillStyle(OUTLINE, 1);
+            gfx.fillCircle(48, 48, 48);
+            gfx.fillStyle(0xfff6d8, 1);
+            gfx.fillCircle(48, 48, 40);
+            gfx.fillStyle(OUTLINE, 1);
+            gfx.fillRect(44, 8, 8, 80);                        // cross frame
+            gfx.fillRect(8, 44, 80, 8);
+        });
     }
 
     // Draw a flat placeholder texture with a graphics callback, then free the

@@ -15,7 +15,7 @@
 //       grab the costume-gated shelf ball from below).
 //   update(pusheen)
 //       Recompute the zones; fire the lead cue once per outer-zone entry.
-//   verb : 'talk' | 'peek' | 'take'
+//   verb : 'talk' | 'peek' | 'take' | 'swipe'
 //       Advisory metadata for now (not yet branched on).
 //   isActionable(scene) -> boolean            (optional; treated as true if absent)
 //       Semantic gate: is the verb valid right now? (e.g. the cabinet only

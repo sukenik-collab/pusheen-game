@@ -1,6 +1,6 @@
 # Roadmap
 
-What to do next, in order. Last updated 2026-10-07. Where the game stands
+What to do next, in order. Last updated 2026-11-23 (the Laundry Room). Where the game stands
 today is in `HANDOFF.md`.
 
 Sizes are rough: **S** is a short session, **M** a full one, **L** several.
@@ -147,6 +147,47 @@ choice is made.
   #3 (no spec yet); characters named but not built (Pip, the hedgehogs);
   rooms with several states (time × weather × quest) once a sleep system
   exists; fast travel (hedgehog-guided, or shipping-box warp points).
+- [x] **A Laundry Room between the LivingRoom and the Bedroom** (M).
+  *Built 2026-11-23 on branch `ccr-30ca541b-l5u4wn`, with placeholder art;
+  not yet run in a browser or playtested (see `HANDOFF.md`, "Where things
+  stand").* The design as agreed: A knock-it-over-then-stand-on-it puzzle. She
+  enters from the LivingRoom on the left; just inside that door is a tall
+  dryer with a fourth yarn ball on top, a bit higher than her best hop
+  from the floor (~110px vs a ~82px hop). Deeper in, toward the right door
+  to the Bedroom, a low folding table she *can* hop onto holds a laundry
+  basket at its edge; it wobbles as the sniff cue. A paw-swipe (E) tips it
+  off, and a squishy laundry heap lands next to the dryer (a scripted
+  tween with a fixed landing spot, not physics, so it can't land somewhere
+  unhelpful). She hops on the heap (cushion-style squash) and up onto the
+  dryer. The yarn is optional, so nothing blocks the walk through.
+  - *Order:* LivingRoom → Laundry Room → Bedroom. The costume lives in the
+    Bedroom, now the last room, so she meets the dryer in her normal form;
+    Pusheencorn's jump (~192px) would clear it from the floor and skip the
+    basket. Coming back through in costume later is fine, she's already
+    met the puzzle. It also builds: a simple trick first, the magical one
+    last.
+  - *Direction: the house wing runs left to right,* like Backyard →
+    Kitchen already does, so every new room is "further right". Same piece
+    of work, done before the Laundry Room and Bedroom are built:
+    - Mirror the LivingRoom (x → 1280 − x, flip sprites): she arrives
+      from the garden gate on the left, by the sunbeam (keeping the
+      playtested "spawn near the sunbeam"), with the cabinet on the right.
+      It's the most-tested room, so re-check it in the browser and
+      playtest it after.
+    - Doors: the LivingRoom's right door leads to the Laundry Room's left
+      door; the Laundry Room's right door leads to the Bedroom's door,
+      which moves to its left wall. The Bedroom still needs only one door.
+      The early quest flow is untouched.
+  - *Yarn:* adds a fourth ball (`YARN_IDS` in `src/config/gameState.js`
+    and Stormy's "3 balls" line).
+  - *Needs the Bedroom reshuffled too:* today the costume box sits by the
+    entrance and the shelf at the far end, so she meets the fix before
+    the problem. Move the shelf to the door end and the box to the far
+    end, so she sees the out-of-reach yarn first. Laid out mirrored to
+    today: door on the left, shelf just inside it, box at the far right.
+    The dresser top (70px) is as high as the pillow surface the shelf
+    height is derived from, so the maths holds, but keep the shelf
+    horizontally clear of the dresser.
 - **More cozy extras** (v2 spec §5): sniff flowers, open cupboards, a
   hammock with a bounce, a lemon to bat around.
 - **Real SFX.** The music is real now (three tracks, one per room); the SFX
@@ -155,6 +196,22 @@ choice is made.
 
 ## Decided
 
+- 2026-11-23: Laundry Room details, settled while building it. The dryer
+  and the folding table are one-way, top-only platforms she walks in front
+  of, so neither walls off the walk through. The basket swipe is offered
+  only from the table top, and the dryer yarn only from the dryer top (its
+  pickup radius would otherwise reach it from the floor). The room plays
+  the LivingRoom's track. The LivingRoom cabinet moved in from the right
+  door (x 970), so arriving through it no longer fires its sniff cue on the
+  spot. After the first playtest: the sink, washer and dryer stand side by
+  side as one counter run along the left wall (the order laundry goes),
+  all walkable once she's up; the basket stays something she walks past,
+  not a platform (she'd be standing on the thing she has to knock off).
+- 2026-11-23: The planned Laundry Room goes between the LivingRoom and the
+  Bedroom, not off the Bedroom, so she meets its knock-over puzzle before
+  she can get the costume (which would skip it). The LivingRoom → Laundry
+  Room → Bedroom wing runs left to right, so the LivingRoom gets mirrored
+  in the same piece of work. See **Later**.
 - 2026-10-25: Code is MIT under the author's name (Phaser Studio's notice kept for
   the template's Vite config). The art is fan art and explicitly not
   licensed for reuse.

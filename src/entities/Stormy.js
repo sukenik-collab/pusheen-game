@@ -19,9 +19,10 @@ const BUBBLE_OFFSET_Y = -104;
 
 // Quest copy, keyed by how many yarn balls are found so far.
 const HINTS = [
-    'I can\'t find my yarn!\nI lost 3 balls somewhere...',
-    'You found one!\n2 more to go...',
-    'Ooh, two already!\nJust 1 left...'
+    'I can\'t find my yarn!\nI lost 4 balls somewhere...',
+    'You found one!\n3 more to go...',
+    'Ooh, two already!\n2 more to go...',
+    'Three! Just 1 left...'
 ];
 const THANKS = 'You\'re the best, Pusheen! ♥';
 const CELEBRATE = 'My yarn!! Thank you!!';
@@ -31,7 +32,10 @@ const CELEBRATE = 'My yarn!! Thank you!!';
 // enables talking to her.
 export class Stormy extends GameObjects.Container
 {
-    constructor (scene, x, groundTop)
+    // opts.flipX: mirror her (tail on the left), e.g. to face a player
+    // arriving from the left. The anchor mirrors with the art so her body
+    // midline still sits on x.
+    constructor (scene, x, groundTop, opts = {})
     {
         super(scene, x, groundTop);
         scene.add.existing(this);
@@ -42,8 +46,11 @@ export class Stormy extends GameObjects.Container
         // Sad while the yarn is lost; if the quest was already finished this
         // run (she's revisited), she's already happy.
         const face = scene.registry.get('quest:complete') ? 'stormyHappy' : 'stormySad';
+        const flipX = opts.flipX ?? false;
+        const originX = BODY_CENTER_X / SPRITE_W;
         this.visual = scene.add.image(0, 0, face)
-            .setOrigin(BODY_CENTER_X / SPRITE_W, BODY_BASELINE_Y / SPRITE_H);
+            .setFlipX(flipX)
+            .setOrigin(flipX ? 1 - originX : originX, BODY_BASELINE_Y / SPRITE_H);
         this.add(this.visual);
 
         // Idle breathing, same as Pusheen's.

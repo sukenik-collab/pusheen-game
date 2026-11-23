@@ -1,6 +1,7 @@
 import { Scene, Input } from 'phaser';
 import { passesGate } from '../entities/Container.js';
 import { showSplash } from '../splash.js';
+import { YARN_IDS } from '../config/gameState.js';
 
 const BUTTON_ALPHA = 0.35;
 const BUTTON_RADIUS = 36;
@@ -82,7 +83,7 @@ export class UI extends Scene
             color: '#3e2c23'
         });
 
-        this.yarnCounterText = this.add.text(20, 48, 'Yarn: 0/3', {
+        this.yarnCounterText = this.add.text(20, 48, `Yarn: 0/${YARN_IDS.length}`, {
             fontSize: '22px',
             color: '#3e2c23'
         });
@@ -119,7 +120,7 @@ export class UI extends Scene
         });
 
         this.registry.events.on('changedata-yarn:count', (parent, value) => {
-            this.yarnCounterText.setText(`Yarn: ${value}/3`);
+            this.yarnCounterText.setText(`Yarn: ${value}/${YARN_IDS.length}`);
         });
 
         this.registry.events.on('changedata-nap:showCard', (parent, value) => {

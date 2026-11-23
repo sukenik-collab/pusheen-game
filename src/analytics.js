@@ -18,13 +18,14 @@ const REGISTRY_EVENTS = [
     ['held:item', 'juice', 'filled'],
     ['juice:delivered', true, 'sloth-woke'],
     ['snack:collected', true, 'snack'],
+    ['laundry:basketTipped', true, 'basket-tipped'],
     ['quest:complete', true, 'yarn-found'],
     ['nap:active', true, 'napped'],
     ['game:restartRequested', true, 'play-again']
 ];
 
 // First arrival in a room, by scene key.
-const ROOM_EVENTS = { Kitchen: 'kitchen', LivingRoom: 'livingroom', Bedroom: 'bedroom' };
+const ROOM_EVENTS = { Kitchen: 'kitchen', LivingRoom: 'livingroom', Laundry: 'laundry', Bedroom: 'bedroom' };
 
 // Once per page load, except play-again which is the signal worth repeating.
 const REPEATABLE = new Set(['play-again']);

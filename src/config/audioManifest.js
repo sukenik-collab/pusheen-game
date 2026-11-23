@@ -70,6 +70,9 @@ export const ROOM_MUSIC = {
     Backyard: 'simple-trifle',
     Bedroom: 'simple-trifle',
     Kitchen: 'carefree',
+    // The Laundry Room shares the LivingRoom's track, so it carries on
+    // through that end of the house.
+    Laundry: 'wallpaper',
     LivingRoom: 'wallpaper'
 };
 
