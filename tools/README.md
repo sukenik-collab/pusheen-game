@@ -52,6 +52,13 @@ python3 tools/cut_items.py --src docs/concept-art/laundry_set.jpg \
     --item "foldingTable=147x60:public/assets/sprites/folding-table.png" \
     --item "laundryBasket=81x60:public/assets/sprites/laundry-basket.png" \
     --item "laundryHeap=114x50:public/assets/sprites/laundry-heap.png"
+# The laundry wall decor. --bg-score 60 (default 15) stops the key eating the
+# clothesline's thin line, whose anti-aliased pixels lean magenta, and the
+# purple bottle cap; the background itself scores ~200 (see the script's
+# docstring).
+python3 tools/cut_items.py --src docs/concept-art/laundry_decor.jpg --bg-score 60 \
+    --item "clothesline=240x122:public/assets/sprites/clothesline.png" \
+    --item "suppliesShelf=150x74:public/assets/sprites/supplies-shelf.png"
 
 # A five-piece animated rig from one image: body+antennae plus four wing
 # quadrants, split at the body's own centre so Butterfly.js can flap each

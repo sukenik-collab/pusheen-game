@@ -21,6 +21,14 @@ sized one of two ways:
   side (the fridge items on their shelf), where forcing each into its own box
   stretches some and makes the row's sizes arbitrary.
 
+`--bg-score N` (default 15) is how magenta a pixel must be to count as
+background: min(R, B) - G above N. The default keys out the whole magenta
+and purple family, which is what most sources want. Raise it (60 works)
+for a source with a thin dark line, whose anti-aliased pixels blend toward
+magenta and otherwise get keyed into dashes, or a legitimately purple
+detail (the laundry decor's clothesline and bottle cap). The magenta
+background itself scores ~200, so there's plenty of room.
+
 Usage:
     python3 tools/cut_items.py --src IN.jpg \
         --item name1=W1xH1:out1.png --item name2=W2xH2:out2.png ...
@@ -52,6 +60,9 @@ def main():
                     help='one per item, left to right in the source; repeatable')
     ap.add_argument('--same-scale', type=int, metavar='PX',
                     help='one scale for all items, the tallest coming out PX tall')
+    ap.add_argument('--bg-score', type=float, default=BG_SCORE, metavar='N',
+                    help=f'background threshold, min(R,B)-G > N (default {BG_SCORE}); '
+                         'raise it to keep thin dark lines and purple details')
     ap.add_argument('--preview', help='also write each cut item at 3x on a mid-grey')
     args = ap.parse_args()
 
@@ -73,7 +84,7 @@ def main():
 
     # Direct key, not border-flooded -- see the module docstring.
     score = np.minimum(a[..., 0], a[..., 2]) - a[..., 1]
-    bg_like = score > BG_SCORE
+    bg_like = score > args.bg_score
     fg = ~bg_like
 
     lab, n = ndimage.label(fg, structure=np.ones((3, 3)))

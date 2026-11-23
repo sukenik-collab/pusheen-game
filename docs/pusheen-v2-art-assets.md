@@ -77,8 +77,8 @@ Sky (`#BACBF4`) and grass (`#80A56F`) are `add.rectangle` fills, not images.
 All real art except the round window, which is still a placeholder drawn in
 `Preloader.makeLaundryTextures`. Every sprite is cut by `tools/cut_items.py`
 (the commands are in `tools/README.md`) from three images in
-`docs/concept-art/`: `laundry_machines.png`, `laundry_sink.jpg` and
-`laundry_set.jpg`. Heights marked *derived* are tied to `LAUNDRY` in
+`docs/concept-art/`: `laundry_machines.png`, `laundry_sink.jpg`,
+`laundry_set.jpg` and `laundry_decor.jpg`. Heights marked *derived* are tied to `LAUNDRY` in
 `feel.js`, which works the counter and heap heights out from the jump so
 the puzzle holds (counter above a floor hop, heap + hop above the
 counter): the art is cut to them, so re-cut it if `JUMP` is retuned. Each
@@ -94,8 +94,9 @@ the surface she stands on.
 | `foldingTable` | 147×60 (`LAUNDRY.tableHeight`) | ✅ `folding-table.png` | Low one-way platform she hops onto to reach the basket. Cut at its drawn shape rather than squashed to the planned 200×46, so the table is a little taller (60, still 22px under a hop) and narrower. From `laundry_set.jpg`. |
 | `laundryBasket` | 81×60 | ✅ `laundry-basket.png` | Sits at the table's left edge; wobbles as the sniff cue, tumbles off in a tween. Anchored at its base. Sized up from the planned 70×46 so it looks as full as the heap it becomes. Same source as the table. |
 | `laundryHeap` | 114×50 (height *derived*) | ✅ `laundry-heap.png` | Where the basket lands, beside the dryer: a solid step with a cushion-style squash, the basket's same clothes on a soft white pile. Anchored at its base. Same source as the table. |
-| `roundWindow` | 96×96 | ▫️ generated | Wall decoration. Prompt 11 (optional). |
-| *(clothesline)* | ~300×70 | — not in game | On the house map; would be a new background sprite. Prompt 11 (optional). |
+| `suppliesShelf` | 150×74 | ✅ `supplies-shelf.png` | Wall decor above the sink and tap, background only: a shelf of laundry supplies. From `laundry_decor.jpg`, cut with `--bg-score 60` (keeps the grey bottle's purple cap). |
+| `clothesline` | 240×122 | ✅ `clothesline.png` | Wall decor high over the table, background only: three pegged socks. Same source and cut as the shelf; the raised `--bg-score` keeps its thin line from being keyed into dashes. |
+| `roundWindow` | 96×96 | ▫️ generated | Wall decoration, the room's last placeholder. Prompt 11 (optional). |
 
 ## Page icons
 

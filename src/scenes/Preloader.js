@@ -58,6 +58,10 @@ export class Preloader extends Scene
         this.load.image('foldingTable', 'assets/sprites/folding-table.png');
         this.load.image('laundryBasket', 'assets/sprites/laundry-basket.png');
         this.load.image('laundryHeap', 'assets/sprites/laundry-heap.png');
+        // Wall decor, background only (cut with --bg-score 60 to keep the
+        // clothesline's thin line and a purple bottle cap).
+        this.load.image('suppliesShelf', 'assets/sprites/supplies-shelf.png');
+        this.load.image('clothesline', 'assets/sprites/clothesline.png');
         this.load.image('rug', 'assets/sprites/rug.png');
         this.load.image('moonWindow', 'assets/sprites/moon-window.png');
         // Stormy has two faces: sad while her yarn is lost, happy once it's back.

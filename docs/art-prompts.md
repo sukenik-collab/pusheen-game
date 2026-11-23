@@ -8,8 +8,9 @@ storyboard for exploring the Sloth's wake-up, not a sprite.
 **Done:** 1-5 and 7 are generated, cut and in the game. Their prompts stay
 here for regenerating, and each one's "In game" line says how it was
 actually cut. **Still to generate:** 6 (Sloth walking) and 8 (the wake-up
-storyboard), both for `ROADMAP.md`'s Sloth wake beat item; and 11, the
-Laundry Room's optional decoration. The Laundry Room's 9 and 10 are done
+storyboard), both for `ROADMAP.md`'s Sloth wake beat item; and the round
+window from 11, the Laundry Room's optional decoration (its clothesline is
+done). The Laundry Room's 9 and 10 are done
 (each one's "As cut" line says how). Sizes and status
 of every sprite are in `docs/pusheen-v2-art-assets.md`; what order to do
 things in is in `ROADMAP.md`.
@@ -361,6 +362,12 @@ spread along one baseline; the table is the widest.
 ```
 
 ## 11. Round window and clothesline (optional decoration)
+
+*Clothesline done,* in a variation that also gave a supplies shelf for over
+the sink: `docs/concept-art/laundry_decor.jpg`, cut to `clothesline`
+240×122 and `suppliesShelf` 150×74 with `--bg-score 60` (`tools/README.md`).
+The round window is still a placeholder; regenerate the prompt below for it
+alone if wanted.
 
 **Save as** `docs/concept-art/laundry_decor.jpg`. **In game:** `roundWindow`
 96×96 high on the Laundry Room's back wall (today a placeholder), and an

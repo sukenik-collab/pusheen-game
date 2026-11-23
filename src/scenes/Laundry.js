@@ -48,10 +48,15 @@ const BASKET_X = TABLE_X - TABLE_W / 2 + 30;
 // through (the yarn is optional) and a normal hop still falls short of the
 // counter. All three units are standable, so once she's up on the dryer she
 // can stroll the whole counter instead of dropping through the washer. The
-// sink's tap is on the wall above it, keeping the counter top flat.
+// sink's tap is on the wall above it, keeping the counter top flat. The
+// supplies shelf and the clothesline are wall decor, background only: the
+// shelf sits above the tap, the clothesline high over the table, clear of
+// the round window.
 const COUNTER_H = LAUNDRY.dryerHeight;
 const LAYOUT = [
     { name: 'roundWindow', role: 'background', sprite: 'roundWindow', x: 640, w: 96, h: 96, yFromGround: 460 },
+    { name: 'suppliesShelf', role: 'background', sprite: 'suppliesShelf', x: SINK_X, w: 150, h: 74, yFromGround: COUNTER_H + 112 },
+    { name: 'clothesline', role: 'background', sprite: 'clothesline', x: TABLE_X, w: 240, h: 122, yFromGround: 340 },
     { name: 'sinkTap', role: 'background', sprite: 'sinkTap', x: SINK_X, w: 33, h: 39, yFromGround: COUNTER_H + 34 },
     { name: 'sink', role: 'standable', sprite: 'sink', oneWay: true, x: SINK_X, w: SINK_W, h: COUNTER_H },
     { name: 'washer', role: 'standable', sprite: 'washer', oneWay: true, x: WASHER_X, w: MACHINE_W, h: COUNTER_H },
