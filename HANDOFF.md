@@ -1,11 +1,19 @@
 # HANDOFF
 
-Where the game stands and how it hangs together. Last updated 2026-10-25.
+Where the game stands and how it hangs together. Last updated 2026-11-23.
 **What to do next is in [`ROADMAP.md`](ROADMAP.md)**; this file is the state
 of play.
 
 ## Start here next time
 
+0. **The Laundry Room is built but has never been run.** Branch
+   `ccr-30ca541b-l5u4wn` (four commits on top of `main`: the mirrored
+   LivingRoom, the reshuffled Bedroom, the cabinet move, the Laundry Room)
+   was written without the game's dependencies installed, so it has had
+   syntax checks only: no `npm run build`, no browser. First thing: `npm
+   ci`, `npm run build`, then play LivingRoom → Laundry Room → Bedroom and
+   back in the browser (the checklist is under "Where things stand"). Don't
+   merge it until that's done.
 1. Open `ROADMAP.md` at **Now**. Items 1 (fridge labels), 2 (the art batch)
    and 4 (the butterfly, landing on Pusheen and on Sloth) are done, and
    item 5 (first impressions) is mostly in: the title, favicon, the music on
@@ -24,9 +32,36 @@ of play.
 - **`main` is the playable build.** Netlify deploys it to
   https://pusheen-game.netlify.app/ on every merge, and every PR gets its
   own deploy preview (the Netlify bot comments the link).
-- **Nothing is in flight.** v2 ("Wake Me for Juice", Room Pair #2), the
-  art batch (PR #19), the butterfly (PRs #20 and #21) and the title,
-  favicon and music start are all merged.
+- **In flight: the Laundry Room** (branch `ccr-30ca541b-l5u4wn`, not
+  merged, never run; see "Start here"). In the browser, then on the
+  tablet, check:
+  - *LivingRoom, mirrored:* she arrives from the garden by the sunbeam on
+    the left; Stormy (flipped) stands on her spot with the hearts over her
+    head; the couch yarn peeks out past the couch's right arm; the cabinet
+    (now x 970) cues as she walks up, not on arrival from the right door;
+    the nap still fires and "Play again" still goes to the Backyard.
+  - *Laundry Room:* the yarn sparkles as she nears the dryer, but a floor
+    hop falls short and she can't take it from the floor. The basket
+    wobbles as she nears the table; E is offered only once she's up on the
+    table. Does the swipe read as a swipe? Does the basket's arc read as
+    "tipped off", or as flying too far (it travels ~230px)? Is the heap's
+    plop satisfying, and the heap-to-dryer hop fair but not trivial (heap
+    50 + hop 82 vs dryer 110)? Leave and come back: the heap should still
+    be there.
+  - *Bedroom, reshuffled:* door on the left; the too-high shelf and its
+    yarn are the first thing she meets; the costume box at the far right
+    pops her out clear of the headboard; Pusheencorn reaches the shelf.
+  - *Whole loop:* Stormy now asks for 4 balls and the HUD reads `x/4`;
+    the fourth ball completes her quest.
+  - *Feel:* does the extra room make the wing feel fuller, or longer?
+    (The definition of done in `CLAUDE.md`.)
+- **Known, not fixed:** arriving in the LivingRoom from the Backyard puts
+  her inside the sunbeam's nap zone, so if the snack is already found
+  (she went back out to the yard and came in again), the nap starts the
+  moment she arrives. It predates the mirror. The likely fix is a sunbeam
+  that arms only once she's been outside it, as doors do. Also, the
+  Backyard's return spot from the LivingRoom (x 880) is east of the gate,
+  which may now read backwards; judge it by eye.
 - **Signed off at the last playtest:** Sloth's hang from the branch and the
   kitchen climb.
 - **The butterfly has had one look, on a deploy preview, not a tablet
@@ -52,8 +87,15 @@ Pusheen Cozy Game). One small connected house. It boots in the Backyard:
 > original slice: the snack in the cabinet, Stormy's lost yarn and the
 > sunbeam nap, then "Play again".
 
-The **Bedroom** is off the LivingRoom. Its costume box turns Pusheen into
-Pusheencorn, whose floatier jump reaches the high shelf. There are no fail
+Past the LivingRoom, the house wing runs left to right like Backyard →
+Kitchen: **LivingRoom → Laundry Room → Bedroom**. In the **Laundry Room**
+(on the branch, see above) a yarn ball sits on a dryer a bit too high to
+hop onto; she hops onto the low folding table, paw-swipes the laundry
+basket off it, and it lands as a squishy heap beside the dryer that she
+hops on and up from. The **Bedroom** is last: the too-high shelf is just
+inside its door, and the costume box at the far end turns Pusheen into
+Pusheencorn, whose floatier jump reaches it. Four yarn balls in all
+(couch, dryer, bed, shelf). There are no fail
 states, timers or enemies anywhere. The music starts with her first move.
 
 A shy **butterfly** flutters into the Backyard from one side ~10s after it
@@ -78,10 +120,13 @@ he's lying down. Nothing to catch, nothing to chase — purely ambient.
   Stormy, furniture). Some of those were cut from concept art; others are
   SVGs in `scripts/new-room-art.html`, rasterized by
   `scripts/gen-new-room-art.mjs`.
-- **Still placeholder shapes** (drawn in `Preloader.makeTexture`): only the
-  backyard's generated-on-purpose scenery (sun, clouds, hedge) and the
+- **Still placeholder shapes** (drawn in `Preloader.makeTexture`): the
+  backyard's generated-on-purpose scenery (sun, clouds, hedge), the
   unused `fridge` closed-door texture (the fridge is painted into
-  `kitchenBg`). Sizes and status of every sprite are in
+  `kitchenBg`), and the whole Laundry Room (`Preloader.makeLaundryTextures`:
+  dryer, washer, folding table, basket, heap, round window). Its heights
+  come from `LAUNDRY` in `feel.js`; real art must be cut to those sizes.
+  It has no prompts in `docs/art-prompts.md` yet. Sizes and status of every sprite are in
   `docs/pusheen-v2-art-assets.md`.
 - **Audio** is synthesized CC0 placeholders;
   `public/assets/audio/CREDITS.md` suggests real replacements.
@@ -149,11 +194,35 @@ he's lying down. Nothing to catch, nothing to chase — purely ambient.
   rooms' input code calls. A scripted move that called them would start
   the music without the player doing anything, so script her with tweens
   or the physics body, as Sloth's shove does.
+- **The Laundry Room's heights are derived from the jump** (`LAUNDRY` in
+  `feel.js`): the dryer sits 28px above her best floor hop and the heap is
+  sized so heap + hop clears the dryer by 22px. Retune `JUMP` and they
+  follow, and so do the placeholder textures. Fix a height by hand and the
+  puzzle can quietly break either way (dryer reachable from the floor, or
+  not from the heap).
+- **The dryer yarn is only takeable from the dryer top** (`YarnBall`'s
+  `standOnY`). Yarn pickup radii are generous (95px) and the ball sits
+  only ~85px above her centre on the floor, so without it she'd take the
+  yarn from the floor and the puzzle would be skipped. Likewise the
+  basket swipe checks her feet are on the table top.
+- **The dryer and table are one-way platforms she walks in front of.** A
+  solid dryer just inside the door would wall off the way back to the
+  LivingRoom until the heap exists.
+- **The laundry heap is built before Pusheen, hidden, with its body off,**
+  and the basket's landing reveals it (`LaundryHeap.plopIn`). That keeps
+  it drawn behind her without any depth sorting; don't create it on
+  landing instead.
+- **Room arrival spots sit outside every sniff zone** (LivingRoom cabinet at
+  x 970; Laundry dryer at x 330), so cues lead her rather than firing the
+  moment she arrives. Moving furniture toward a door can quietly undo it.
 - **In the Backyard, creation order is depth order** (sky, clouds, sun,
   grass, hedge, tree). There's no `setDepth`.
 
 ## How the pieces fit
 
+- **The house:** Backyard ↔ Kitchen, and the garden gate (revealed once
+  Sloth is awake) into LivingRoom ↔ Laundry Room ↔ Bedroom, each door on
+  the wall facing the next room.
 - **Rooms** are data-driven (the v1.5 refactor): each scene has a `LAYOUT`
   of passive furniture (`src/systems/roomBuilder.js`), interactables
   register with `InteractionController`, and doors name the room and spawn
