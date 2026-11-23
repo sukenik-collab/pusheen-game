@@ -18,8 +18,10 @@ const FLOOR_COLOR = 0xd7ccc0;
 const GROUND_COLOR = 0x8d6e63;
 
 const COUCH_BASE_HEIGHT = 50;
-// The cabinet's placement height (was exported from the now-deleted Cabinet.js).
-const CABINET_HEIGHT = 160;
+// The cabinet's placement height: cabinet.png's own height, so its feet sit
+// on the floor. (It was 160 for the placeholder; the real art is 143, and
+// placing it at 160 left it floating ~8px above the floor.)
+const CABINET_HEIGHT = 143;
 
 // The cabinet's contents, previously hardcoded in the UI scene. Order is
 // preserved (socks, t-shirt, popcorn) so number keys 1/2/3 map identically.
@@ -43,8 +45,8 @@ const SPAWN_POINTS = {
 };
 // The cabinet stands a little in from the right door, so arriving through
 // it (fromLaundry, x 1130) lands her outside its sniff zone (RADAR.sniffRadius
-// around the cabinet's centre, 80px up; her centre is ~39px up, so the zone
-// reaches ~134px either side at her height). She walks into the cue instead
+// around the cabinet's centre, ~72px up; her centre is ~39px up, so the zone
+// reaches ~136px either side at her height). She walks into the cue instead
 // of it firing the moment she arrives.
 const CABINET_X = 970;
 
