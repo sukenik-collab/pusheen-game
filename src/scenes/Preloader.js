@@ -46,6 +46,13 @@ export class Preloader extends Scene
         this.load.image('pillow', 'assets/sprites/pillow.png');
         this.load.image('dresser', 'assets/sprites/dresser.png');
         this.load.image('shelf', 'assets/sprites/shelf.png');
+
+        // Laundry Room: the washer and dryer are real art (96x110, cut from
+        // concept-art/laundry_machines.png by tools/cut_items.py; their 110px
+        // height is LAUNDRY.dryerHeight -- re-cut if that changes). The rest
+        // of the room is still placeholder shapes (makeLaundryTextures).
+        this.load.image('dryer', 'assets/sprites/dryer.png');
+        this.load.image('washer', 'assets/sprites/washer.png');
         this.load.image('rug', 'assets/sprites/rug.png');
         this.load.image('moonWindow', 'assets/sprites/moon-window.png');
         // Stormy has two faces: sad while her yarn is lost, happy once it's back.
@@ -213,24 +220,6 @@ export class Preloader extends Scene
     makeLaundryTextures ()
     {
         const OUTLINE = 0x4a3b33;
-        const drumMachine = (key, body, trim, drum) => {
-            const h = LAUNDRY.dryerHeight;
-            this.makeTexture(key, 110, h, (gfx) => {
-                gfx.fillStyle(OUTLINE, 1);
-                gfx.fillRoundedRect(0, 0, 110, h, 10);
-                gfx.fillStyle(body, 1);
-                gfx.fillRoundedRect(4, 4, 102, h - 8, 8);
-                gfx.fillStyle(trim, 1);
-                gfx.fillRect(4, 18, 102, 4);                   // control panel line
-                gfx.fillStyle(OUTLINE, 1);
-                gfx.fillCircle(20, 11, 4);                     // dial
-                gfx.fillCircle(55, 22 + (h - 22) / 2, 32);     // door rim
-                gfx.fillStyle(drum, 1);
-                gfx.fillCircle(55, 22 + (h - 22) / 2, 26);     // door glass
-            });
-        };
-        drumMachine('dryer', 0xfbf7ef, 0xe2d6c4, 0xd7a86e);   // warm: the dryer
-        drumMachine('washer', 0xf1f4f6, 0xc9d3da, 0x9ec6dd);  // cool: the washer
 
         // The sink unit, the same height as the machines so the three make
         // one counter run: a flat worktop with the basin set into it, on a

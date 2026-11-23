@@ -8,9 +8,9 @@ storyboard for exploring the Sloth's wake-up, not a sprite.
 **Done:** 1-5 and 7 are generated, cut and in the game. Their prompts stay
 here for regenerating, and each one's "In game" line says how it was
 actually cut. **Still to generate:** 6 (Sloth walking) and 8 (the wake-up
-storyboard), both for `ROADMAP.md`'s Sloth wake beat item; and 9-11, the
-Laundry Room (9 and 10 replace its placeholders, 11 is optional
-decoration). Sizes and status
+storyboard), both for `ROADMAP.md`'s Sloth wake beat item; and the
+Laundry Room's: 9 (the sink and tap; its washer and dryer are done), 10
+(table, basket and heap) and 11 (optional decoration). Sizes and status
 of every sprite are in `docs/pusheen-v2-art-assets.md`; what order to do
 things in is in `ROADMAP.md`.
 
@@ -272,49 +272,47 @@ COMPOSITION: wide landscape image, about 2400x800. All six frames share
 one baseline.
 ```
 
-## 9. Sink, washer and dryer (a matched counter run)
+## 9. Sink and tap (washer and dryer done)
 
-**Save as** `docs/concept-art/laundry_counter.jpg`. **In game:** `sink`,
-`washer` and `dryer`, each 110×110, plus `sinkTap` about 44×34. The three
-units stand side by side along the Laundry Room's left wall, in that
-order, as one counter run: the yarn ball is on the dryer, and once she's
-up she can walk along all three. So **each unit's top edge is her standing
-surface**: flat, level and at the same height, with nothing sticking up
-from it. The tap is a separate wall-mounted piece above the sink, so it
-doesn't break the counter. They're one image so they match. **Attach:** a
-Laundry Room screenshot (the deploy preview), `dresser.png`,
-`cabinet.png`. *To cut:* `tools/cut_items.py`, the three units at one
-scale to 110×110 (their height is `LAUNDRY.dryerHeight` in `feel.js`; if
-that changes, cut to it), and the tap to its own box.
+**Done: the washer and dryer.** Generated as their own pair, saved as
+`docs/concept-art/laundry_machines.png` (dryer left, washer right), and cut
+to 96×110 each (`tools/README.md` has the command). Its thick, even
+outlines are the look the rest of this room should match.
+
+**Still to generate: the sink and its tap.** **Save as**
+`docs/concept-art/laundry_sink.jpg`. **In game:** `sink`, about 110×110,
+and `sinkTap`, about 44×34. The sink stands first in the counter run along
+the Laundry Room's left wall (sink, washer, dryer), the same height as the
+machines; once she's up on the dryer she can walk along all three, so
+**the sink's top edge is a standing surface**: a low, level back rim is
+fine (she walks along its top), but nothing tall on it. The tap is a
+separate wall-mounted piece above the sink. **The look:** a freestanding
+vintage utility basin with an open underside, supported by legs, so its
+silhouette is clearly different from the machines. Not a kitchen vanity,
+cupboard or cabinet sink. **Attach:** `washer.png` and `dryer.png` (the
+outline weight and flat fills to match), and a Laundry Room screenshot.
+*To cut:* `tools/cut_items.py`, the sink to about 110×110 at its own
+proportions (its height must be `LAUNDRY.dryerHeight` in `feel.js`), the
+tap to its own box.
 
 ```
-ASSET: four separate laundry-room pieces in a row, left to right, each
-with a wide gap of magenta around it. They must not touch or overlap. The
-first three are the same height and drawn at the same scale.
-1. A sink unit, seen straight-on from the front: a chunky wooden cupboard
-   (light wood, #E1A578, two doors with small round knobs) topped with a
-   pale grey worktop (#DFE6E9) with the rim of a basin set into it. About
-   as tall as it is wide. Its TOP is a perfectly flat, level edge running
-   the full width: no tap, splashback or anything on top.
-2. A front-loading washing machine: a chunky, almost-square box with
-   softly rounded corners, cool off-white (#EEF3F5). A narrow control strip
-   across the front just under the top edge, with one small round dial and
-   two tiny round buttons. A big round door in the middle of the lower
-   front with a thick dark rim, its window pale blue (#9EC6DD) with a
-   lighter curved highlight (#CFE6F2).
-3. A front-loading dryer, identical in shape and size to the washer, but
-   warm off-white (#F6EFE2) with a warm amber door window (#E8B84A) and a
-   lighter curved highlight (#F6D98A).
-   For both machines: the TOP is a perfectly flat, level edge running the
-   full width, with no raised control panel, backsplash, lid or knobs on
-   top; and two tiny stubby feet underneath, their bottom edge flat and
-   level.
-4. A wall-mounted tap, small: a rounded wall plate with two little round
-   handles, and a short spout curving down from its middle. Pale grey
-   metal (#C9D3DA). About a third of the sink's width.
-COMPOSITION: wide landscape image, about 2048x768. The sink, washer and
-dryer stand on one baseline and fill about 60% of the image height; the
-tap sits to their right, level with their tops.
+ASSET: two separate laundry-room pieces side by side, with a wide gap of
+magenta between them. They must not touch or overlap. Match the attached
+washer and dryer exactly in style: the same thick, even dark-brown outline
+weight, flat solid fills, no shading, no texture, no speckle.
+1. A freestanding vintage utility sink, seen straight-on from the front: a
+   deep rectangular basin in warm off-white enamel (#F2ECE0) with a slightly
+   rolled front rim and a low, level back rim, standing on four plain
+   straight legs (the same off-white), with the open space underneath
+   showing a simple grey drain pipe (#C9D3DA) curving down in a U-bend.
+   About as tall as it is wide. Its top is level: no tap, splashback panel
+   or anything else on top. Not a kitchen vanity, cupboard or cabinet sink;
+   no doors or panels below the basin.
+2. A small wall-mounted tap: a rounded wall plate, one round handle on top,
+   and a short spout curving down. Pale grey metal (#C9D3DA). About a third
+   of the sink's width.
+COMPOSITION: landscape image, about 1536x1024. The sink fills about 60% of
+the image height; the tap sits to its right, level with the sink's top.
 ```
 
 ## 10. Folding table, laundry basket and laundry heap

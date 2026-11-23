@@ -74,8 +74,8 @@ Sky (`#BACBF4`) and grass (`#80A56F`) are `add.rectangle` fills, not images.
 
 ## Laundry Room
 
-All placeholders today, drawn in `Preloader.makeLaundryTextures` at these
-sizes. Prompts 9-11 in `docs/art-prompts.md`. Heights marked *derived* come
+The washer and dryer are real art; the rest are placeholders, drawn in
+`Preloader.makeLaundryTextures` at these sizes. Prompts 9-11 in `docs/art-prompts.md`. Heights marked *derived* come
 from `LAUNDRY` in `feel.js`, which works them out from the jump so the
 puzzle holds (dryer above a floor hop, heap + hop above the dryer): cut to
 the current value, and re-cut if `JUMP` is retuned. Each sprite's top edge
@@ -84,10 +84,10 @@ surface she stands on.
 
 | Key | Size | Status | Notes |
 |---|---|---|---|
-| `sink` | 110×110 (height *derived*) | ▫️ generated | First of the counter run along the left wall (sink, washer, dryer, side by side, all one-way platforms at one height). Flat top: the tap is separate. Prompt 9. |
+| `sink` | 110×110 (height *derived*) | ▫️ generated | First of the counter run along the left wall (sink, washer, dryer, side by side, all one-way platforms at one height). To be a freestanding vintage utility basin on legs with an open underside, not a cupboard sink; a low level back rim is its standing surface. The tap is separate. Prompt 9 (to regenerate). |
 | `sinkTap` | 44×34 | ▫️ generated | Wall-mounted above the sink, background only. Prompt 9. |
-| `washer` | 110×110 (height *derived*) | ▫️ generated | Middle of the counter run; matches the dryer. Prompt 9. |
-| `dryer` | 110×110 (height *derived*) | ▫️ generated | End of the counter run, nearest the table: she lands on it from the heap, and the fourth yarn ball sits on top. Flat top, no backsplash. Prompt 9. |
+| `washer` | 96×110 (height *derived*) | ✅ `washer.png` | Middle of the counter run; matches the dryer. Cut with it from `concept-art/laundry_machines.png` by `tools/cut_items.py`, both to the same 96×110 box (`tools/README.md`). The art's height is fixed at cut time: re-cut if `LAUNDRY.dryerHeight` moves. |
+| `dryer` | 96×110 (height *derived*) | ✅ `dryer.png` | End of the counter run, nearest the table: she lands on it from the heap, and the fourth yarn ball sits on top. Flat top. Same source and cut as the washer. |
 | `foldingTable` | 200×46 | ▫️ generated | Low one-way platform she hops onto to reach the basket. Prompt 10. |
 | `laundryBasket` | 70×46 | ▫️ generated | Sits at the table's left edge; wobbles as the sniff cue, tumbles off in a tween. Anchored at its base. Prompt 10. |
 | `laundryHeap` | 100×50 (height *derived*) | ▫️ generated | Where the basket lands, beside the dryer: a solid step with a cushion-style squash. Anchored at its base. Must match the basket's clothes. Prompt 10. |

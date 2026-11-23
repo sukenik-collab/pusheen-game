@@ -36,6 +36,11 @@ python3 tools/cut_items.py --src docs/concept-art/fridge_items.jpg --same-scale 
     --item "itemCheese:public/assets/sprites/item-cheese.png" \
     --item "itemLeftovers:public/assets/sprites/item-leftovers.png" \
     --item "juicePitcher:public/assets/sprites/juice-pitcher.png"
+# The laundry washer and dryer: a matched pair, each to the same box. Their
+# 110px height is LAUNDRY.dryerHeight in src/config/feel.js; re-cut if it moves.
+python3 tools/cut_items.py --src docs/concept-art/laundry_machines.png \
+    --item "dryer=96x110:public/assets/sprites/dryer.png" \
+    --item "washer=96x110:public/assets/sprites/washer.png"
 
 # A five-piece animated rig from one image: body+antennae plus four wing
 # quadrants, split at the body's own centre so Butterfly.js can flap each
