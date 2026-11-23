@@ -272,38 +272,49 @@ COMPOSITION: wide landscape image, about 2400x800. All six frames share
 one baseline.
 ```
 
-## 9. Dryer and washer (a matched pair)
+## 9. Sink, washer and dryer (a matched counter run)
 
-**Save as** `docs/concept-art/laundry_machines.jpg`. **In game:** `dryer`
-and `washer`, both 110×110, standing on the Laundry Room floor. The dryer
-is just inside the left door with a yarn ball on top, and she stands on it,
-so **its top edge is her standing surface**: it must be flat and level all
-the way across, with nothing sticking up from it. The washer is decoration
-by the right door. They're one image so they match. **Attach:** a Laundry
-Room screenshot (the deploy preview), `dresser.png`, `cabinet.png`. *To cut:*
-`tools/cut_items.py`, both at the same scale, to 110×110 (the dryer's height
-is `LAUNDRY.dryerHeight` in `feel.js`; if that changes, cut to it).
+**Save as** `docs/concept-art/laundry_counter.jpg`. **In game:** `sink`,
+`washer` and `dryer`, each 110×110, plus `sinkTap` about 44×34. The three
+units stand side by side along the Laundry Room's left wall, in that
+order, as one counter run: the yarn ball is on the dryer, and once she's
+up she can walk along all three. So **each unit's top edge is her standing
+surface**: flat, level and at the same height, with nothing sticking up
+from it. The tap is a separate wall-mounted piece above the sink, so it
+doesn't break the counter. They're one image so they match. **Attach:** a
+Laundry Room screenshot (the deploy preview), `dresser.png`,
+`cabinet.png`. *To cut:* `tools/cut_items.py`, the three units at one
+scale to 110×110 (their height is `LAUNDRY.dryerHeight` in `feel.js`; if
+that changes, cut to it), and the tap to its own box.
 
 ```
-ASSET: two front-loading laundry machines side by side, identical in shape
-and size, seen straight-on from the front. Left: a dryer. Right: a washing
-machine. Each is a chunky, almost-square box with softly rounded corners,
-about as tall as it is wide.
-- The TOP of each machine is a perfectly flat, level edge running the full
-  width. No raised control panel, backsplash, lid, or knobs on top.
-- A narrow control strip across the front, just under the top edge: one
-  small round dial and two tiny round buttons, drawn on the front face.
-- A big round door in the middle of the lower front, with a thick dark
-  rim.
-- Dryer (left): warm off-white body (#F6EFE2), the door's round window a
-  warm amber (#E8B84A) with a lighter curved highlight (#F6D98A).
-- Washer (right): cool off-white body (#EEF3F5), the door's round window a
-  pale blue (#9EC6DD) with a lighter curved highlight (#CFE6F2).
-- Two tiny stubby feet under each machine; their bottom edge is flat and
-  level.
-- A wide gap of magenta between the two machines. They must not touch.
-COMPOSITION: landscape image, about 1536x1024. Each machine is about 60% of
-the image height, both on the same baseline.
+ASSET: four separate laundry-room pieces in a row, left to right, each
+with a wide gap of magenta around it. They must not touch or overlap. The
+first three are the same height and drawn at the same scale.
+1. A sink unit, seen straight-on from the front: a chunky wooden cupboard
+   (light wood, #E1A578, two doors with small round knobs) topped with a
+   pale grey worktop (#DFE6E9) with the rim of a basin set into it. About
+   as tall as it is wide. Its TOP is a perfectly flat, level edge running
+   the full width: no tap, splashback or anything on top.
+2. A front-loading washing machine: a chunky, almost-square box with
+   softly rounded corners, cool off-white (#EEF3F5). A narrow control strip
+   across the front just under the top edge, with one small round dial and
+   two tiny round buttons. A big round door in the middle of the lower
+   front with a thick dark rim, its window pale blue (#9EC6DD) with a
+   lighter curved highlight (#CFE6F2).
+3. A front-loading dryer, identical in shape and size to the washer, but
+   warm off-white (#F6EFE2) with a warm amber door window (#E8B84A) and a
+   lighter curved highlight (#F6D98A).
+   For both machines: the TOP is a perfectly flat, level edge running the
+   full width, with no raised control panel, backsplash, lid or knobs on
+   top; and two tiny stubby feet underneath, their bottom edge flat and
+   level.
+4. A wall-mounted tap, small: a rounded wall plate with two little round
+   handles, and a short spout curving down from its middle. Pale grey
+   metal (#C9D3DA). About a third of the sink's width.
+COMPOSITION: wide landscape image, about 2048x768. The sink, washer and
+dryer stand on one baseline and fill about 60% of the image height; the
+tap sits to their right, level with their tops.
 ```
 
 ## 10. Folding table, laundry basket and laundry heap

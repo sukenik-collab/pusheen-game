@@ -202,7 +202,10 @@ choice is made.
   pickup radius would otherwise reach it from the floor). The room plays
   the LivingRoom's track. The LivingRoom cabinet moved in from the right
   door (x 970), so arriving through it no longer fires its sniff cue on the
-  spot.
+  spot. After the first playtest: the sink, washer and dryer stand side by
+  side as one counter run along the left wall (the order laundry goes),
+  all walkable once she's up; the basket stays something she walks past,
+  not a platform (she'd be standing on the thing she has to knock off).
 - 2026-11-23: The planned Laundry Room goes between the LivingRoom and the
   Bedroom, not off the Bedroom, so she meets its knock-over puzzle before
   she can get the costume (which would skip it). The LivingRoom → Laundry

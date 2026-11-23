@@ -90,8 +90,8 @@ Pusheen Cozy Game). One small connected house. It boots in the Backyard:
 
 Past the LivingRoom, the house wing runs left to right like Backyard →
 Kitchen: **LivingRoom → Laundry Room → Bedroom**. In the **Laundry Room**
-(on the branch, see above) a yarn ball sits on a dryer a bit too high to
-hop onto; she hops onto the low folding table, paw-swipes the laundry
+(on the branch, see above) a counter run of sink, washer and dryer lines
+the left wall, a bit too high to hop onto, with a yarn ball on the dryer; she hops onto the low folding table, paw-swipes the laundry
 basket off it, and it lands as a squishy heap beside the dryer that she
 hops on and up from. The **Bedroom** is last: the too-high shelf is just
 inside its door, and the costume box at the far end turns Pusheen into
@@ -125,7 +125,8 @@ he's lying down. Nothing to catch, nothing to chase — purely ambient.
   backyard's generated-on-purpose scenery (sun, clouds, hedge), the
   unused `fridge` closed-door texture (the fridge is painted into
   `kitchenBg`), and the whole Laundry Room (`Preloader.makeLaundryTextures`:
-  dryer, washer, folding table, basket, heap, round window). Its heights
+  sink and its tap, washer, dryer, folding table, basket, heap, round
+  window). Its heights
   come from `LAUNDRY` in `feel.js`; real art must be cut to those sizes.
   Its Gemini prompts are 9-11 in `docs/art-prompts.md` (11 is optional). Sizes and status of every sprite are in
   `docs/pusheen-v2-art-assets.md`.
@@ -206,9 +207,12 @@ he's lying down. Nothing to catch, nothing to chase — purely ambient.
   only ~85px above her centre on the floor, so without it she'd take the
   yarn from the floor and the puzzle would be skipped. Likewise the
   basket swipe checks her feet are on the table top.
-- **The dryer and table are one-way platforms she walks in front of.** A
-  solid dryer just inside the door would wall off the way back to the
-  LivingRoom until the heap exists.
+- **The counter (sink, washer, dryer) and the table are one-way platforms
+  she walks in front of.** A solid counter by the door would wall off the
+  way back to the LivingRoom until the heap exists. All three units can be
+  stood on, so once she's up she can walk the whole counter rather than
+  dropping through the washer; the sink's tap is a separate wall sprite so
+  nothing sticks up from it.
 - **The laundry heap is built before Pusheen, hidden, with its body off,**
   and the basket's landing reveals it (`LaundryHeap.plopIn`). That keeps
   it drawn behind her without any depth sorting; don't create it on
@@ -220,7 +224,8 @@ he's lying down. Nothing to catch, nothing to chase — purely ambient.
   before the reshuffle too; the yarn is in plain sight, so it may not
   matter, but if playtesters miss it, that's why.
 - **Room arrival spots sit outside every sniff zone** (LivingRoom cabinet at
-  x 970; Laundry dryer at x 330), so cues lead her rather than firing the
+  x 970; the Laundry yarn on the dryer, the far end of the sink-washer-dryer
+  counter), so cues lead her rather than firing the
   moment she arrives. Moving furniture toward a door can quietly undo it.
 - **In the Backyard, creation order is depth order** (sky, clouds, sun,
   grass, hedge, tree). There's no `setDepth`.

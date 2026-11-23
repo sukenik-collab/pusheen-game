@@ -25,25 +25,35 @@ const SPAWN_POINTS = {
     fromBedroom: { x: 1130 }
 };
 
-// The puzzle, left to right: the dryer near the entrance (a bit too high to
-// hop onto, with a yarn ball on top), the heap's landing spot butting up
-// against its right side, then the low folding table with the basket at its
-// left edge, facing the dryer. A decorative washer stands by the far door.
-const DRYER_X = 330;
-const DRYER_W = 110;
-const HEAP_X = DRYER_X + DRYER_W / 2 + 5 + HEAP_WIDTH / 2;
-const TABLE_X = 750;
+// The room, left to right, in the order laundry goes: a counter run of sink,
+// washer and dryer side by side (all one height, a bit too high to hop onto;
+// the yarn ball is on the dryer), the heap's landing spot butting up against
+// the dryer's right side, then the low folding table with the basket at its
+// left edge, facing the dryer.
+const UNIT_W = 110;
+const UNIT_GAP = 5;
+const SINK_X = 235;
+const WASHER_X = SINK_X + UNIT_W + UNIT_GAP;
+const DRYER_X = WASHER_X + UNIT_W + UNIT_GAP;
+const HEAP_X = DRYER_X + UNIT_W / 2 + UNIT_GAP + HEAP_WIDTH / 2;
+const TABLE_X = 880;
 const TABLE_W = 200;
 const BASKET_X = TABLE_X - TABLE_W / 2 + 20;
 
-// The room's passive furniture (see roomBuilder for the roles). The dryer
-// and table are one-way, top-only platforms: she walks in front of them and
-// only lands on them from above, so neither ever walls off the walk through
-// (the yarn is optional) and a normal hop still falls short of the dryer.
+// The room's passive furniture (see roomBuilder for the roles). The counter
+// units and the table are one-way, top-only platforms: she walks in front of
+// them and only lands on them from above, so none ever walls off the walk
+// through (the yarn is optional) and a normal hop still falls short of the
+// counter. All three units are standable, so once she's up on the dryer she
+// can stroll the whole counter instead of dropping through the washer. The
+// sink's tap is on the wall above it, keeping the counter top flat.
+const COUNTER_H = LAUNDRY.dryerHeight;
 const LAYOUT = [
     { name: 'roundWindow', role: 'background', sprite: 'roundWindow', x: 640, w: 96, h: 96, yFromGround: 460 },
-    { name: 'washer', role: 'background', sprite: 'washer', x: 1080, w: 110, h: 110 },
-    { name: 'dryer', role: 'standable', sprite: 'dryer', oneWay: true, x: DRYER_X, w: DRYER_W, h: LAUNDRY.dryerHeight },
+    { name: 'sinkTap', role: 'background', sprite: 'sinkTap', x: SINK_X, w: 44, h: 34, yFromGround: COUNTER_H + 30 },
+    { name: 'sink', role: 'standable', sprite: 'sink', oneWay: true, x: SINK_X, w: UNIT_W, h: COUNTER_H },
+    { name: 'washer', role: 'standable', sprite: 'washer', oneWay: true, x: WASHER_X, w: UNIT_W, h: COUNTER_H },
+    { name: 'dryer', role: 'standable', sprite: 'dryer', oneWay: true, x: DRYER_X, w: UNIT_W, h: COUNTER_H },
     { name: 'foldingTable', role: 'standable', sprite: 'foldingTable', oneWay: true, x: TABLE_X, w: TABLE_W, h: LAUNDRY.tableHeight }
 ];
 

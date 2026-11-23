@@ -352,7 +352,8 @@ export const KITCHEN = {
 //           dryer top with room to spare (~50 + 82 = 132 vs 110)
 //   table : a low step she hops onto to reach the basket (well under a hop)
 // The placeholder textures (Preloader) are drawn at these sizes, so the art
-// and the bodies stay matched.
+// and the bodies stay matched. The sink and washer share the dryer's height:
+// the three are one counter run she can walk along once she's up.
 const NORMAL_HOP_APEX = (JUMP.velocity * JUMP.velocity) / (2 * JUMP.gravity);
 const DRYER_HEIGHT = Math.round(NORMAL_HOP_APEX + 28);
 

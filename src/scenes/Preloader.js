@@ -232,6 +232,35 @@ export class Preloader extends Scene
         drumMachine('dryer', 0xfbf7ef, 0xe2d6c4, 0xd7a86e);   // warm: the dryer
         drumMachine('washer', 0xf1f4f6, 0xc9d3da, 0x9ec6dd);  // cool: the washer
 
+        // The sink unit, the same height as the machines so the three make
+        // one counter run: a flat worktop with the basin set into it, on a
+        // wooden cupboard. Its tap is a separate wall sprite above it, so
+        // nothing sticks up from the counter she can walk along.
+        this.makeTexture('sink', 110, LAUNDRY.dryerHeight, (gfx) => {
+            const h = LAUNDRY.dryerHeight;
+            gfx.fillStyle(OUTLINE, 1);
+            gfx.fillRoundedRect(0, 0, 110, 18, 5);             // worktop
+            gfx.fillRoundedRect(4, 14, 102, h - 14, 6);        // cupboard
+            gfx.fillStyle(0xdfe6e9, 1);
+            gfx.fillRoundedRect(3, 3, 104, 12, 4);
+            gfx.fillStyle(0xb9c6cc, 1);
+            gfx.fillRoundedRect(22, 5, 66, 6, 3);              // the basin's rim
+            gfx.fillStyle(0xe1a578, 1);
+            gfx.fillRect(8, 19, 46, h - 24);                   // two doors
+            gfx.fillRect(58, 19, 44, h - 24);
+            gfx.fillStyle(OUTLINE, 1);
+            gfx.fillCircle(48, 19 + (h - 24) / 2, 3);          // knobs
+            gfx.fillCircle(64, 19 + (h - 24) / 2, 3);
+        });
+        this.makeTexture('sinkTap', 44, 34, (gfx) => {
+            gfx.fillStyle(OUTLINE, 1);
+            gfx.fillRoundedRect(4, 0, 36, 12, 5);              // wall plate + handles
+            gfx.fillRoundedRect(17, 6, 10, 28, 4);             // spout, curving down
+            gfx.fillStyle(0xc9d3da, 1);
+            gfx.fillRoundedRect(7, 3, 30, 6, 3);
+            gfx.fillRoundedRect(20, 8, 4, 23, 2);
+        });
+
         this.makeTexture('foldingTable', 200, LAUNDRY.tableHeight, (gfx) => {
             const h = LAUNDRY.tableHeight;
             gfx.fillStyle(OUTLINE, 1);
