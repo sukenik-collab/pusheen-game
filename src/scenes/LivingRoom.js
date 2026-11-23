@@ -41,6 +41,13 @@ const SPAWN_POINTS = {
     fromBackyard: { x: 150 },
     fromBedroom: { x: 1130 }
 };
+// The cabinet stands a little in from the right door, so arriving through
+// it (fromBedroom, x 1130) lands her outside its sniff zone (RADAR.sniffRadius
+// around the cabinet's centre, 80px up; her centre is ~39px up, so the zone
+// reaches ~134px either side at her height). She walks into the cue instead
+// of it firing the moment she arrives.
+const CABINET_X = 970;
+
 // Derived from feel.js's own JUMP values (apex = v^2/2g) rather than a
 // hand-copied comment, so retuning JUMP can't silently strand the cushion
 // out of reach (or make it trivial to clear) without this moving too.
@@ -82,7 +89,7 @@ export class LivingRoom extends Scene
         // Right -- cabinet with the sniff/peek radar. A generic Container; its
         // snack-gate (goes quiet once the snack is found) is the isActionable
         // predicate, and its contents drive the UI peek panel.
-        this.cabinet = new Container(this, 1100, groundTop - CABINET_HEIGHT / 2, {
+        this.cabinet = new Container(this, CABINET_X, groundTop - CABINET_HEIGHT / 2, {
             sprite: 'cabinet',
             contents: CABINET_CONTENTS,
             isActionable: (scene) => !scene.registry.get('snack:collected')
