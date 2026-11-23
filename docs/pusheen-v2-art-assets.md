@@ -72,6 +72,30 @@ Sky (`#BACBF4`) and grass (`#80A56F`) are `add.rectangle` fills, not images.
 
 ---
 
+## Laundry Room
+
+All placeholders today, drawn in `Preloader.makeLaundryTextures` at these
+sizes. Prompts 9-11 in `docs/art-prompts.md`. Heights marked *derived* come
+from `LAUNDRY` in `feel.js`, which works them out from the jump so the
+puzzle holds (dryer above a floor hop, heap + hop above the dryer): cut to
+the current value, and re-cut if `JUMP` is retuned. Each sprite's top edge
+is where its one-way or solid body's top is, so the art's top must be the
+surface she stands on.
+
+| Key | Size | Status | Notes |
+|---|---|---|---|
+| `dryer` | 110×110 (height *derived*) | ▫️ generated | Just inside the left door, a one-way platform she lands on from the heap; the fourth yarn ball sits on top. Flat top, no backsplash. Prompt 9. |
+| `washer` | 110×110 | ▫️ generated | Decoration by the right door; matches the dryer. Prompt 9. |
+| `foldingTable` | 200×46 | ▫️ generated | Low one-way platform she hops onto to reach the basket. Prompt 10. |
+| `laundryBasket` | 70×46 | ▫️ generated | Sits at the table's left edge; wobbles as the sniff cue, tumbles off in a tween. Anchored at its base. Prompt 10. |
+| `laundryHeap` | 100×50 (height *derived*) | ▫️ generated | Where the basket lands, beside the dryer: a solid step with a cushion-style squash. Anchored at its base. Must match the basket's clothes. Prompt 10. |
+| `roundWindow` | 96×96 | ▫️ generated | Wall decoration. Prompt 11 (optional). |
+| *(clothesline)* | ~300×70 | — not in game | On the house map; would be a new background sprite. Prompt 11 (optional). |
+
+No pink anywhere in the clothes: the cutter keys out the whole pink and
+purple family with the magenta (the placeholder's pink sock and the map's
+pink sock are both out).
+
 ## Page icons
 
 Not game sprites: the browser tab and a tablet's home screen. Linked from

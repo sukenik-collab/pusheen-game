@@ -127,7 +127,7 @@ he's lying down. Nothing to catch, nothing to chase — purely ambient.
   `kitchenBg`), and the whole Laundry Room (`Preloader.makeLaundryTextures`:
   dryer, washer, folding table, basket, heap, round window). Its heights
   come from `LAUNDRY` in `feel.js`; real art must be cut to those sizes.
-  It has no prompts in `docs/art-prompts.md` yet. Sizes and status of every sprite are in
+  Its Gemini prompts are 9-11 in `docs/art-prompts.md` (11 is optional). Sizes and status of every sprite are in
   `docs/pusheen-v2-art-assets.md`.
 - **Audio** is synthesized CC0 placeholders;
   `public/assets/audio/CREDITS.md` suggests real replacements.

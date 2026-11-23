@@ -8,7 +8,9 @@ storyboard for exploring the Sloth's wake-up, not a sprite.
 **Done:** 1-5 and 7 are generated, cut and in the game. Their prompts stay
 here for regenerating, and each one's "In game" line says how it was
 actually cut. **Still to generate:** 6 (Sloth walking) and 8 (the wake-up
-storyboard), both for `ROADMAP.md`'s Sloth wake beat item. Sizes and status
+storyboard), both for `ROADMAP.md`'s Sloth wake beat item; and 9-11, the
+Laundry Room (9 and 10 replace its placeholders, 11 is optional
+decoration). Sizes and status
 of every sprite are in `docs/pusheen-v2-art-assets.md`; what order to do
 things in is in `ROADMAP.md`.
 
@@ -268,4 +270,97 @@ in every frame, each frame separated by a wide gap of magenta.
 Draw the branch only in frames 1 to 3, as a simple brown bar.
 COMPOSITION: wide landscape image, about 2400x800. All six frames share
 one baseline.
+```
+
+## 9. Dryer and washer (a matched pair)
+
+**Save as** `docs/concept-art/laundry_machines.jpg`. **In game:** `dryer`
+and `washer`, both 110×110, standing on the Laundry Room floor. The dryer
+is just inside the left door with a yarn ball on top, and she stands on it,
+so **its top edge is her standing surface**: it must be flat and level all
+the way across, with nothing sticking up from it. The washer is decoration
+by the right door. They're one image so they match. **Attach:** a Laundry
+Room screenshot (the deploy preview), `dresser.png`, `cabinet.png`. *To cut:*
+`tools/cut_items.py`, both at the same scale, to 110×110 (the dryer's height
+is `LAUNDRY.dryerHeight` in `feel.js`; if that changes, cut to it).
+
+```
+ASSET: two front-loading laundry machines side by side, identical in shape
+and size, seen straight-on from the front. Left: a dryer. Right: a washing
+machine. Each is a chunky, almost-square box with softly rounded corners,
+about as tall as it is wide.
+- The TOP of each machine is a perfectly flat, level edge running the full
+  width. No raised control panel, backsplash, lid, or knobs on top.
+- A narrow control strip across the front, just under the top edge: one
+  small round dial and two tiny round buttons, drawn on the front face.
+- A big round door in the middle of the lower front, with a thick dark
+  rim.
+- Dryer (left): warm off-white body (#F6EFE2), the door's round window a
+  warm amber (#E8B84A) with a lighter curved highlight (#F6D98A).
+- Washer (right): cool off-white body (#EEF3F5), the door's round window a
+  pale blue (#9EC6DD) with a lighter curved highlight (#CFE6F2).
+- Two tiny stubby feet under each machine; their bottom edge is flat and
+  level.
+- A wide gap of magenta between the two machines. They must not touch.
+COMPOSITION: landscape image, about 1536x1024. Each machine is about 60% of
+the image height, both on the same baseline.
+```
+
+## 10. Folding table, laundry basket and laundry heap
+
+**Save as** `docs/concept-art/laundry_set.jpg`. **In game:** `foldingTable`
+200×46, `laundryBasket` 70×46, `laundryHeap` 100×50. She hops onto the low
+table, paw-swipes the basket off its edge, and it tumbles through the air
+and lands as the heap beside the dryer, which she then stands on. So: the
+**table's top edge and the heap's top are standing surfaces** (flat-ish and
+level), and **the heap must read as the basket's clothes spilled out** (the
+same clothes, same colours). They're one image so they match. **Attach:** a
+Laundry Room screenshot, `cushion.png`, `pillow.png` (the heap should feel
+as soft as those). *To cut:* `tools/cut_items.py`, each to its own box
+(the table's and heap's heights are `LAUNDRY.tableHeight` and
+`LAUNDRY.heapHeight` in `feel.js`).
+
+```
+ASSET: three separate laundry-room things in a row, left to right, each
+with a wide gap of magenta around it. They must not touch or overlap.
+1. A low wooden folding table, seen straight-on from the side: a long flat
+   tabletop (light wood, #E1A578, with a darker edge, #C8915F) on two thin
+   straight legs near its ends. About 4.5 times as wide as it is tall. The
+   tabletop's top edge is perfectly flat and level. Nothing on the table.
+2. A wicker laundry basket, seen straight-on: a rounded tub, about 1.5
+   times as wide as it is tall, tan wicker (#D9A86C) with two or three
+   darker horizontal weave bands (#B9844A) and a small cut-out handle on
+   each side. A few clothes poke out of the top: a yellow sock (#F6C945),
+   a blue shirt sleeve (#7DB7E8) and a green towel corner (#9CCB86).
+3. A soft, squishy heap of laundry on the floor: the same clothes as in
+   the basket (the yellow sock, the blue shirt, the green towel, plus an
+   orange (#FFA03C) and an off-white (#F6EFE2) piece), piled into a low,
+   wide mound about twice as wide as it is tall. Its top is a gentle,
+   fairly level curve, NOT a peak, and its bottom edge is flat. It should
+   look soft and bouncy, like a cushion.
+COMPOSITION: wide landscape image, about 2048x768. The three items are
+spread along one baseline; the table is the widest.
+```
+
+## 11. Round window and clothesline (optional decoration)
+
+**Save as** `docs/concept-art/laundry_decor.jpg`. **In game:** `roundWindow`
+96×96 high on the Laundry Room's back wall (today a placeholder), and an
+optional `clothesline`, about 300×70, strung across the upper wall as on
+`docs/house-map.png` (not in the game yet; it would be a new background
+sprite). Nothing stands on either. Only worth doing once 9 and 10 are in.
+**Attach:** a Laundry Room screenshot, `moon-window.png`, `window.png`.
+
+```
+ASSET: two separate wall decorations side by side, with a wide gap of
+magenta between them.
+1. A round porthole-style window: a thick light-wood frame (#E1A578) around
+   a pale sunny sky (#FFF6D8), divided into four by a simple cross of wood.
+   A perfect circle.
+2. A clothesline: a thin, gently sagging line (#8A6A50) between two small
+   wooden end posts, with three pegged socks hanging from it, evenly
+   spaced: yellow (#F6C945), blue (#7DB7E8) and green (#9CCB86). About four
+   times as wide as it is tall.
+COMPOSITION: landscape image, about 1536x768. Both items on one baseline,
+the window about as tall as the clothesline.
 ```
