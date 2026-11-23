@@ -6,14 +6,15 @@
 // deliberately, so don't try to purify those escape hatches into the data.
 //
 // Item shape:
-//   { name, role, sprite?|color?, x, w, h, yFromGround?, oneWay? }
+//   { name, role, sprite?|color?, x, w, h, yFromGround?, oneWay?, flipX? }
 // Roles:
 //   background -- drawn only, no physics body
 //   solid      -- static body, blocks from all sides
 //   standable  -- static body meant to be hopped onto (pair with oneWay)
 // `yFromGround` = center height above the floor top; omitted = sits on it.
 // `sprite` art is sized to match w/h exactly, so the static body a sprite
-// gets from its image bounds equals the declared footprint.
+// gets from its image bounds equals the declared footprint. `flipX` mirrors
+// a sprite's art (e.g. a room laid out mirrored to its art).
 export function buildLayout (scene, layout, groundTop)
 {
     const solids = [];
@@ -23,6 +24,10 @@ export function buildLayout (scene, layout, groundTop)
         const obj = item.sprite
             ? scene.add.image(item.x, y, item.sprite)
             : scene.add.rectangle(item.x, y, item.w, item.h, item.color);
+
+        if (item.flipX && item.sprite) {
+            obj.setFlipX(true);
+        }
 
         if (item.role === 'solid' || item.role === 'standable') {
             scene.physics.add.existing(obj, true);
