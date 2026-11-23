@@ -6,14 +6,12 @@ of play.
 
 ## Start here next time
 
-0. **The Laundry Room is built but has never been run.** Branch
-   `ccr-30ca541b-l5u4wn` (four commits on top of `main`: the mirrored
-   LivingRoom, the reshuffled Bedroom, the cabinet move, the Laundry Room)
-   was written without the game's dependencies installed, so it has had
-   syntax checks only: no `npm run build`, no browser. First thing: `npm
-   ci`, `npm run build`, then play LivingRoom → Laundry Room → Bedroom and
-   back in the browser (the checklist is under "Where things stand"). Don't
-   merge it until that's done.
+0. **The Laundry Room is built and browser-checked, not yet playtested.**
+   Branch `ccr-30ca541b-l5u4wn` (the mirrored LivingRoom, the reshuffled
+   Bedroom, the cabinet move, the Laundry Room, a crash fix) builds, and
+   each room was played in headless Chromium with real key input and
+   screenshots. What's owed is a look by eye and the tablet (the checklist
+   is under "Where things stand"), then the merge.
 1. Open `ROADMAP.md` at **Now**. Items 1 (fridge labels), 2 (the art batch)
    and 4 (the butterfly, landing on Pusheen and on Sloth) are done, and
    item 5 (first impressions) is mostly in: the title, favicon, the music on
@@ -33,8 +31,11 @@ of play.
   https://pusheen-game.netlify.app/ on every merge, and every PR gets its
   own deploy preview (the Netlify bot comments the link).
 - **In flight: the Laundry Room** (branch `ccr-30ca541b-l5u4wn`, not
-  merged, never run; see "Start here"). In the browser, then on the
-  tablet, check:
+  merged; see "Start here"). Already checked in Playwright: every item
+  below that's a yes/no (cues on approach not arrival, floor hop short of
+  the dryer, swipe only from the table, heap -> dryer -> yarn, heap
+  persists, Pusheencorn onto the shelf, 4/4 completes Stormy, Play again
+  resets). Still owed on the deploy preview and the tablet, by eye:
   - *LivingRoom, mirrored:* she arrives from the garden by the sunbeam on
     the left; Stormy (flipped) stands on her spot with the hearts over her
     head; the couch yarn peeks out past the couch's right arm; the cabinet
@@ -212,6 +213,12 @@ he's lying down. Nothing to catch, nothing to chase — purely ambient.
   and the basket's landing reveals it (`LaundryHeap.plopIn`). That keeps
   it drawn behind her without any depth sorting; don't create it on
   landing instead.
+- **Phaser 4 has no `Geom.Point`** (the basket's tip arc crashed on it).
+  Use plain `{ x, y }` objects or `Math.Vector2`.
+- **The Bedroom's shelf yarn never cues from the floor**: it's ~155px
+  above her centre, past the yarn's 150px sniff radius. It was like this
+  before the reshuffle too; the yarn is in plain sight, so it may not
+  matter, but if playtesters miss it, that's why.
 - **Room arrival spots sit outside every sniff zone** (LivingRoom cabinet at
   x 970; Laundry dryer at x 330), so cues lead her rather than firing the
   moment she arrives. Moving furniture toward a door can quietly undo it.
