@@ -1,7 +1,7 @@
 import { GameObjects } from 'phaser';
 import { CUSHION_SQUASH, LAUNDRY } from '../config/feel.js';
 
-export const HEAP_WIDTH = 100;
+export const HEAP_WIDTH = 114;
 
 // The squishy heap of laundry the tipped basket leaves beside the dryer: a
 // soft step she hops onto, and from it up onto the dryer. A solid static

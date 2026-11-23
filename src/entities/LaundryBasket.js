@@ -1,8 +1,8 @@
 import { GameObjects, Geom } from 'phaser';
 import { LAUNDRY } from '../config/feel.js';
 
-export const BASKET_WIDTH = 70;
-export const BASKET_HEIGHT = 46;
+export const BASKET_WIDTH = 81;
+export const BASKET_HEIGHT = 60;
 
 // The laundry basket at the edge of the folding table: the Laundry Room's
 // knock-it-over puzzle. Same concentric-zone pattern as everything else --

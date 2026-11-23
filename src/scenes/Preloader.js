@@ -4,7 +4,6 @@ import { resetRunState } from '../config/gameState.js';
 import { AudioController } from '../audio/AudioController.js';
 import { initAnalytics } from '../analytics.js';
 import { showSplash } from '../splash.js';
-import { LAUNDRY } from '../config/feel.js';
 
 // The Backyard's scenery palette, sampled from the tree art so the generated
 // layers sit in the same world as it. Sky and grass are flat fills the scene
@@ -47,12 +46,18 @@ export class Preloader extends Scene
         this.load.image('dresser', 'assets/sprites/dresser.png');
         this.load.image('shelf', 'assets/sprites/shelf.png');
 
-        // Laundry Room: the washer and dryer are real art (96x110, cut from
-        // concept-art/laundry_machines.png by tools/cut_items.py; their 110px
-        // height is LAUNDRY.dryerHeight -- re-cut if that changes). The rest
-        // of the room is still placeholder shapes (makeLaundryTextures).
+        // Laundry Room art, all cut by tools/cut_items.py (tools/README.md).
+        // Heights are tied to LAUNDRY in feel.js: the counter units are
+        // dryerHeight (110), the table tableHeight (60), the heap heapHeight
+        // (50) -- re-cut if those change. Only the round window is still a
+        // placeholder (makeLaundryTextures).
         this.load.image('dryer', 'assets/sprites/dryer.png');
         this.load.image('washer', 'assets/sprites/washer.png');
+        this.load.image('sink', 'assets/sprites/sink.png');
+        this.load.image('sinkTap', 'assets/sprites/sink-tap.png');
+        this.load.image('foldingTable', 'assets/sprites/folding-table.png');
+        this.load.image('laundryBasket', 'assets/sprites/laundry-basket.png');
+        this.load.image('laundryHeap', 'assets/sprites/laundry-heap.png');
         this.load.image('rug', 'assets/sprites/rug.png');
         this.load.image('moonWindow', 'assets/sprites/moon-window.png');
         // Stormy has two faces: sad while her yarn is lost, happy once it's back.
@@ -183,9 +188,8 @@ export class Preloader extends Scene
             gfx.fillRect(0, 68, 150, 6);           // door split
             gfx.fillRoundedRect(122, 22, 12, 44, 6);   // handle
         });
-        // Laundry Room placeholders (no real art yet; prompts to come in
-        // docs/art-prompts.md). Heights come from LAUNDRY in feel.js, which
-        // derives them from the jump, so the art and the bodies stay matched.
+        // The Laundry Room's last placeholder, the round window (prompt 11 in
+        // docs/art-prompts.md); the rest of its art is loaded above.
         this.makeLaundryTextures();
 
         // Audio: every selectable track + every SFX set's clips. The file path
@@ -215,86 +219,12 @@ export class Preloader extends Scene
         showSplash(this.game);
     }
 
-    // Flat placeholder shapes for the Laundry Room, in the same chunky
-    // outlined style as the backyard's generated scenery.
+    // The Laundry Room's one remaining placeholder shape (the rest is real
+    // art, loaded in preload()), in the same chunky outlined style as the
+    // backyard's generated scenery.
     makeLaundryTextures ()
     {
         const OUTLINE = 0x4a3b33;
-
-        // The sink unit, the same height as the machines so the three make
-        // one counter run: a flat worktop with the basin set into it, on a
-        // wooden cupboard. Its tap is a separate wall sprite above it, so
-        // nothing sticks up from the counter she can walk along.
-        this.makeTexture('sink', 110, LAUNDRY.dryerHeight, (gfx) => {
-            const h = LAUNDRY.dryerHeight;
-            gfx.fillStyle(OUTLINE, 1);
-            gfx.fillRoundedRect(0, 0, 110, 18, 5);             // worktop
-            gfx.fillRoundedRect(4, 14, 102, h - 14, 6);        // cupboard
-            gfx.fillStyle(0xdfe6e9, 1);
-            gfx.fillRoundedRect(3, 3, 104, 12, 4);
-            gfx.fillStyle(0xb9c6cc, 1);
-            gfx.fillRoundedRect(22, 5, 66, 6, 3);              // the basin's rim
-            gfx.fillStyle(0xe1a578, 1);
-            gfx.fillRect(8, 19, 46, h - 24);                   // two doors
-            gfx.fillRect(58, 19, 44, h - 24);
-            gfx.fillStyle(OUTLINE, 1);
-            gfx.fillCircle(48, 19 + (h - 24) / 2, 3);          // knobs
-            gfx.fillCircle(64, 19 + (h - 24) / 2, 3);
-        });
-        this.makeTexture('sinkTap', 44, 34, (gfx) => {
-            gfx.fillStyle(OUTLINE, 1);
-            gfx.fillRoundedRect(4, 0, 36, 12, 5);              // wall plate + handles
-            gfx.fillRoundedRect(17, 6, 10, 28, 4);             // spout, curving down
-            gfx.fillStyle(0xc9d3da, 1);
-            gfx.fillRoundedRect(7, 3, 30, 6, 3);
-            gfx.fillRoundedRect(20, 8, 4, 23, 2);
-        });
-
-        this.makeTexture('foldingTable', 200, LAUNDRY.tableHeight, (gfx) => {
-            const h = LAUNDRY.tableHeight;
-            gfx.fillStyle(OUTLINE, 1);
-            gfx.fillRoundedRect(0, 0, 200, 14, 5);             // top
-            gfx.fillRect(22, 10, 10, h - 10);                  // legs
-            gfx.fillRect(168, 10, 10, h - 10);
-            gfx.fillStyle(0xc89b6d, 1);
-            gfx.fillRoundedRect(3, 3, 194, 8, 4);
-            gfx.fillRect(25, 12, 4, h - 14);
-            gfx.fillRect(171, 12, 4, h - 14);
-        });
-
-        this.makeTexture('laundryBasket', 70, 46, (gfx) => {
-            gfx.fillStyle(0xf6a6c1, 1);                        // a sock poking out
-            gfx.fillRoundedRect(12, 0, 16, 16, 6);
-            gfx.fillStyle(0x9fd0e8, 1);                        // and a shirt
-            gfx.fillCircle(44, 12, 11);
-            gfx.fillStyle(OUTLINE, 1);
-            gfx.fillRoundedRect(2, 12, 66, 34, 8);
-            gfx.fillStyle(0xe7c48e, 1);
-            gfx.fillRoundedRect(6, 16, 58, 26, 6);
-            gfx.fillStyle(0xc99d5f, 1);                        // weave
-            [24, 32].forEach((y) => gfx.fillRect(8, y, 54, 3));
-        });
-
-        this.makeTexture('laundryHeap', 100, LAUNDRY.heapHeight, (gfx) => {
-            const h = LAUNDRY.heapHeight;
-            const lumps = [
-                [22, h - 18, 18, 0xf6a6c1],
-                [50, h - 25, 20, 0x9fd0e8],
-                [78, h - 18, 18, 0xfff1a8],
-                [38, h - 32, 13, 0xc7e8b5],
-                [64, h - 31, 12, 0xf9d1a6]
-            ];
-            for (const [color, grow] of [[OUTLINE, 4], [null, 0]]) {
-                lumps.forEach(([x, y, r, fill]) => {
-                    gfx.fillStyle(color ?? fill, 1);
-                    gfx.fillCircle(x, y, r + grow);
-                });
-            }
-            gfx.fillStyle(OUTLINE, 1);
-            gfx.fillRoundedRect(4, h - 14, 92, 14, 6);
-            gfx.fillStyle(0xe8d7f1, 1);
-            gfx.fillRoundedRect(8, h - 11, 84, 8, 4);
-        });
 
         this.makeTexture('roundWindow', 96, 96, (gfx) => {
             gfx.fillStyle(OUTLINE, 1);

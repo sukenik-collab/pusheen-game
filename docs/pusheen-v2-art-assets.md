@@ -74,29 +74,28 @@ Sky (`#BACBF4`) and grass (`#80A56F`) are `add.rectangle` fills, not images.
 
 ## Laundry Room
 
-The washer and dryer are real art; the rest are placeholders, drawn in
-`Preloader.makeLaundryTextures` at these sizes. Prompts 9-11 in `docs/art-prompts.md`. Heights marked *derived* come
-from `LAUNDRY` in `feel.js`, which works them out from the jump so the
-puzzle holds (dryer above a floor hop, heap + hop above the dryer): cut to
-the current value, and re-cut if `JUMP` is retuned. Each sprite's top edge
-is where its one-way or solid body's top is, so the art's top must be the
-surface she stands on.
+All real art except the round window, which is still a placeholder drawn in
+`Preloader.makeLaundryTextures`. Every sprite is cut by `tools/cut_items.py`
+(the commands are in `tools/README.md`) from three images in
+`docs/concept-art/`: `laundry_machines.png`, `laundry_sink.jpg` and
+`laundry_set.jpg`. Heights marked *derived* are tied to `LAUNDRY` in
+`feel.js`, which works the counter and heap heights out from the jump so
+the puzzle holds (counter above a floor hop, heap + hop above the
+counter): the art is cut to them, so re-cut it if `JUMP` is retuned. Each
+platform sprite's top edge is where its body's top is, so the art's top is
+the surface she stands on.
 
 | Key | Size | Status | Notes |
 |---|---|---|---|
-| `sink` | 110×110 (height *derived*) | ▫️ generated | First of the counter run along the left wall (sink, washer, dryer, side by side, all one-way platforms at one height). To be a freestanding vintage utility basin on legs with an open underside, not a cupboard sink; a low level back rim is its standing surface. The tap is separate. Prompt 9 (to regenerate). |
-| `sinkTap` | 44×34 | ▫️ generated | Wall-mounted above the sink, background only. Prompt 9. |
-| `washer` | 96×110 (height *derived*) | ✅ `washer.png` | Middle of the counter run; matches the dryer. Cut with it from `concept-art/laundry_machines.png` by `tools/cut_items.py`, both to the same 96×110 box (`tools/README.md`). The art's height is fixed at cut time: re-cut if `LAUNDRY.dryerHeight` moves. |
-| `dryer` | 96×110 (height *derived*) | ✅ `dryer.png` | End of the counter run, nearest the table: she lands on it from the heap, and the fourth yarn ball sits on top. Flat top. Same source and cut as the washer. |
-| `foldingTable` | 200×46 | ▫️ generated | Low one-way platform she hops onto to reach the basket. Prompt 10. |
-| `laundryBasket` | 70×46 | ▫️ generated | Sits at the table's left edge; wobbles as the sniff cue, tumbles off in a tween. Anchored at its base. Prompt 10. |
-| `laundryHeap` | 100×50 (height *derived*) | ▫️ generated | Where the basket lands, beside the dryer: a solid step with a cushion-style squash. Anchored at its base. Must match the basket's clothes. Prompt 10. |
+| `sink` | 99×110 (height *derived*) | ✅ `sink.png` | First of the counter run along the left wall (sink, washer, dryer, side by side, all one-way platforms at one height). A freestanding vintage utility basin on legs with an open underside; she walks along its level back rim. From `laundry_sink.jpg`, cut at one scale with the tap. |
+| `sinkTap` | 33×39 | ✅ `sink-tap.png` | Wall-mounted above the sink, background only. Same source and cut as the sink. |
+| `washer` | 96×110 (height *derived*) | ✅ `washer.png` | Middle of the counter run; matches the dryer. From `laundry_machines.png`, both machines to the same 96×110 box. |
+| `dryer` | 96×110 (height *derived*) | ✅ `dryer.png` | End of the counter run, nearest the table: she lands on it from the heap, and the fourth yarn ball sits on top. Same source and cut as the washer. |
+| `foldingTable` | 147×60 (`LAUNDRY.tableHeight`) | ✅ `folding-table.png` | Low one-way platform she hops onto to reach the basket. Cut at its drawn shape rather than squashed to the planned 200×46, so the table is a little taller (60, still 22px under a hop) and narrower. From `laundry_set.jpg`. |
+| `laundryBasket` | 81×60 | ✅ `laundry-basket.png` | Sits at the table's left edge; wobbles as the sniff cue, tumbles off in a tween. Anchored at its base. Sized up from the planned 70×46 so it looks as full as the heap it becomes. Same source as the table. |
+| `laundryHeap` | 114×50 (height *derived*) | ✅ `laundry-heap.png` | Where the basket lands, beside the dryer: a solid step with a cushion-style squash, the basket's same clothes on a soft white pile. Anchored at its base. Same source as the table. |
 | `roundWindow` | 96×96 | ▫️ generated | Wall decoration. Prompt 11 (optional). |
 | *(clothesline)* | ~300×70 | — not in game | On the house map; would be a new background sprite. Prompt 11 (optional). |
-
-No pink anywhere in the clothes: the cutter keys out the whole pink and
-purple family with the magenta (the placeholder's pink sock and the map's
-pink sock are both out).
 
 ## Page icons
 

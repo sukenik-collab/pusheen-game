@@ -30,9 +30,8 @@ const SPAWN_POINTS = {
 // the yarn ball is on the dryer), the heap's landing spot butting up against
 // the dryer's right side, then the low folding table with the basket at its
 // left edge, facing the dryer.
-// Widths are each sprite's own: the machines' real art is 96 wide, the sink
-// placeholder 110.
-const SINK_W = 110;
+// Widths are each sprite's own art width.
+const SINK_W = 99;
 const MACHINE_W = 96;
 const UNIT_GAP = 5;
 const SINK_X = 325;
@@ -40,8 +39,8 @@ const WASHER_X = SINK_X + SINK_W / 2 + UNIT_GAP + MACHINE_W / 2;
 const DRYER_X = WASHER_X + MACHINE_W + UNIT_GAP;
 const HEAP_X = DRYER_X + MACHINE_W / 2 + UNIT_GAP + HEAP_WIDTH / 2;
 const TABLE_X = 950;
-const TABLE_W = 200;
-const BASKET_X = TABLE_X - TABLE_W / 2 + 20;
+const TABLE_W = 147;
+const BASKET_X = TABLE_X - TABLE_W / 2 + 30;
 
 // The room's passive furniture (see roomBuilder for the roles). The counter
 // units and the table are one-way, top-only platforms: she walks in front of
@@ -53,7 +52,7 @@ const BASKET_X = TABLE_X - TABLE_W / 2 + 20;
 const COUNTER_H = LAUNDRY.dryerHeight;
 const LAYOUT = [
     { name: 'roundWindow', role: 'background', sprite: 'roundWindow', x: 640, w: 96, h: 96, yFromGround: 460 },
-    { name: 'sinkTap', role: 'background', sprite: 'sinkTap', x: SINK_X, w: 44, h: 34, yFromGround: COUNTER_H + 30 },
+    { name: 'sinkTap', role: 'background', sprite: 'sinkTap', x: SINK_X, w: 33, h: 39, yFromGround: COUNTER_H + 34 },
     { name: 'sink', role: 'standable', sprite: 'sink', oneWay: true, x: SINK_X, w: SINK_W, h: COUNTER_H },
     { name: 'washer', role: 'standable', sprite: 'washer', oneWay: true, x: WASHER_X, w: MACHINE_W, h: COUNTER_H },
     { name: 'dryer', role: 'standable', sprite: 'dryer', oneWay: true, x: DRYER_X, w: MACHINE_W, h: COUNTER_H },

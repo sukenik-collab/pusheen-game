@@ -41,6 +41,17 @@ python3 tools/cut_items.py --src docs/concept-art/fridge_items.jpg --same-scale 
 python3 tools/cut_items.py --src docs/concept-art/laundry_machines.png \
     --item "dryer=96x110:public/assets/sprites/dryer.png" \
     --item "washer=96x110:public/assets/sprites/washer.png"
+# The laundry sink and its wall tap, at one scale (the sink 110 tall, as above).
+python3 tools/cut_items.py --src docs/concept-art/laundry_sink.jpg --same-scale 110 \
+    --item "sink:public/assets/sprites/sink.png" \
+    --item "sinkTap:public/assets/sprites/sink-tap.png"
+# The folding table, basket and heap, each to its own box at its drawn
+# proportions. The table's 60 and the heap's 50 are LAUNDRY.tableHeight and
+# LAUNDRY.heapHeight; the basket is sized to look as full as the heap.
+python3 tools/cut_items.py --src docs/concept-art/laundry_set.jpg \
+    --item "foldingTable=147x60:public/assets/sprites/folding-table.png" \
+    --item "laundryBasket=81x60:public/assets/sprites/laundry-basket.png" \
+    --item "laundryHeap=114x50:public/assets/sprites/laundry-heap.png"
 
 # A five-piece animated rig from one image: body+antennae plus four wing
 # quadrants, split at the body's own centre so Butterfly.js can flap each

@@ -8,9 +8,9 @@ storyboard for exploring the Sloth's wake-up, not a sprite.
 **Done:** 1-5 and 7 are generated, cut and in the game. Their prompts stay
 here for regenerating, and each one's "In game" line says how it was
 actually cut. **Still to generate:** 6 (Sloth walking) and 8 (the wake-up
-storyboard), both for `ROADMAP.md`'s Sloth wake beat item; and the
-Laundry Room's: 9 (the sink and tap; its washer and dryer are done), 10
-(table, basket and heap) and 11 (optional decoration). Sizes and status
+storyboard), both for `ROADMAP.md`'s Sloth wake beat item; and 11, the
+Laundry Room's optional decoration. The Laundry Room's 9 and 10 are done
+(each one's "As cut" line says how). Sizes and status
 of every sprite are in `docs/pusheen-v2-art-assets.md`; what order to do
 things in is in `ROADMAP.md`.
 
@@ -274,12 +274,15 @@ one baseline.
 
 ## 9. Sink and tap (washer and dryer done)
 
+*Done.* *As cut:* the sink 99×110 and the tap 33×39, at one scale, from
+`docs/concept-art/laundry_sink.jpg`.
+
 **Done: the washer and dryer.** Generated as their own pair, saved as
 `docs/concept-art/laundry_machines.png` (dryer left, washer right), and cut
 to 96×110 each (`tools/README.md` has the command). Its thick, even
 outlines are the look the rest of this room should match.
 
-**Still to generate: the sink and its tap.** **Save as**
+**The sink and its tap** (the prompt below). **Save as**
 `docs/concept-art/laundry_sink.jpg`. **In game:** `sink`, about 110×110,
 and `sinkTap`, about 44×34. The sink stands first in the counter run along
 the Laundry Room's left wall (sink, washer, dryer), the same height as the
@@ -316,6 +319,12 @@ the image height; the tap sits to its right, level with the sink's top.
 ```
 
 ## 10. Folding table, laundry basket and laundry heap
+
+*Done.* *As cut:* each at its drawn proportions, from
+`docs/concept-art/laundry_set.jpg`: the table 147×60 (it came out about 2.4
+times as wide as tall, not 4.5, so it's a little taller and narrower than
+planned rather than squashed), the basket 81×60 (sized up to look as full
+as the heap) and the heap 114×50.
 
 **Save as** `docs/concept-art/laundry_set.jpg`. **In game:** `foldingTable`
 200×46, `laundryBasket` 70×46, `laundryHeap` 100×50. She hops onto the low

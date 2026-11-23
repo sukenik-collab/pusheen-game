@@ -124,13 +124,13 @@ he's lying down. Nothing to catch, nothing to chase — purely ambient.
 - **Still placeholder shapes** (drawn in `Preloader.makeTexture`): the
   backyard's generated-on-purpose scenery (sun, clouds, hedge), the
   unused `fridge` closed-door texture (the fridge is painted into
-  `kitchenBg`), and most of the Laundry Room (`Preloader.makeLaundryTextures`:
-  sink and its tap, folding table, basket, heap, round window). Its washer
-  and dryer are real art (`concept-art/laundry_machines.png`, cut by
-  `tools/cut_items.py`); the sink is to be regenerated as a freestanding
-  utility basin on legs (prompt 9). Its heights
-  come from `LAUNDRY` in `feel.js`; real art must be cut to those sizes.
-  Its Gemini prompts are 9-11 in `docs/art-prompts.md` (11 is optional). Sizes and status of every sprite are in
+  `kitchenBg`), and the Laundry Room's round window
+  (`Preloader.makeLaundryTextures`). The rest of the Laundry Room is real
+  art, cut by `tools/cut_items.py` from three `concept-art/laundry_*`
+  images (`tools/README.md`). Its heights come from `LAUNDRY` in
+  `feel.js`, and the art is cut to them: re-cut if they change. The
+  window and an optional clothesline are prompt 11 in
+  `docs/art-prompts.md`. Sizes and status of every sprite are in
   `docs/pusheen-v2-art-assets.md`.
 - **Audio** is synthesized CC0 placeholders;
   `public/assets/audio/CREDITS.md` suggests real replacements.

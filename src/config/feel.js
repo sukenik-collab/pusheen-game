@@ -350,9 +350,10 @@ export const KITCHEN = {
 //   dryer : a bit above her best hop from the floor (~110 vs ~82)
 //   heap  : low enough to hop onto, high enough that heap + hop clears the
 //           dryer top with room to spare (~50 + 82 = 132 vs 110)
-//   table : a low step she hops onto to reach the basket (well under a hop)
-// The placeholder textures (Preloader) are drawn at these sizes, so the art
-// and the bodies stay matched. The sink and washer share the dryer's height:
+//   table : a low step she hops onto to reach the basket (under a hop by
+//           ~22px; 60 is the real table art's height at its drawn shape)
+// The art is cut to these heights (tools/README.md), so the art and the
+// bodies stay matched: re-cut it if any of these change. The sink and washer share the dryer's height:
 // the three are one counter run she can walk along once she's up.
 const NORMAL_HOP_APEX = (JUMP.velocity * JUMP.velocity) / (2 * JUMP.gravity);
 const DRYER_HEIGHT = Math.round(NORMAL_HOP_APEX + 28);
@@ -360,7 +361,7 @@ const DRYER_HEIGHT = Math.round(NORMAL_HOP_APEX + 28);
 export const LAUNDRY = {
     dryerHeight: DRYER_HEIGHT,
     heapHeight: Math.round(DRYER_HEIGHT - NORMAL_HOP_APEX + 22),
-    tableHeight: 46,
+    tableHeight: 60,
 
     // The basket's radar. Approaching on the floor, the outer zone wobbles
     // it (the sniff cue); the swipe itself is only offered once she's up on
