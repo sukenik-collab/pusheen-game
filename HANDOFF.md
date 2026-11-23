@@ -132,8 +132,8 @@ he's lying down. Nothing to catch, nothing to chase — purely ambient.
   window is prompt 11 in
   `docs/art-prompts.md`. Sizes and status of every sprite are in
   `docs/pusheen-v2-art-assets.md`.
-- **Audio:** the music is three real tracks, one per room (garden and bedroom
-  share one); credits and how they were prepared are in
+- **Audio:** the music is three real tracks across the five rooms (garden and
+  bedroom share one, living room and laundry room another); credits and how they were prepared are in
   `public/assets/audio/CREDITS.md`. The SFX are still synthesized CC0
   placeholders (the Soft set).
 

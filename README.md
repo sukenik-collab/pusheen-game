@@ -70,9 +70,10 @@ npm run build    # production build to dist/
 ## Audio
 
 The music starts with Pusheen's first move (a walk or a jump), not at
-load. Each room has its own track (`ROOM_MUSIC` in `src/config/audioManifest.js`:
-the garden and bedroom share one, the kitchen and living room have their own),
-crossfading as she goes through a door. The music is three real tracks
+load. Each room has a track (`ROOM_MUSIC` in `src/config/audioManifest.js`:
+the garden and bedroom share one, the living room and laundry room share
+another, and the kitchen has its own), crossfading as she goes through a door
+into a room with a different one. The music is three real tracks
 (Kevin MacLeod's "Carefree" and "Wallpaper", jestar's "A Simple Trifle"; credits
 and how they were prepared are in `public/assets/audio/CREDITS.md`). The sound
 effects are still synthesized CC0 placeholders (generated via

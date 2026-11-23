@@ -2,9 +2,9 @@
 
 ## Background music
 
-Each room has its own track (`ROOM_MUSIC` in `src/config/audioManifest.js`):
-the garden and bedroom play A Simple Trifle, the kitchen plays Carefree and
-the living room plays Wallpaper.
+Each room has a track (`ROOM_MUSIC` in `src/config/audioManifest.js`): the
+garden and bedroom play A Simple Trifle, the kitchen plays Carefree, and the
+living room and laundry room play Wallpaper.
 
 | Track | Author | Source | License |
 |-------|--------|--------|---------|
