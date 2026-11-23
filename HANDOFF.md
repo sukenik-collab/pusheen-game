@@ -129,7 +129,7 @@ he's lying down. Nothing to catch, nothing to chase — purely ambient.
   art, cut by `tools/cut_items.py` from three `concept-art/laundry_*`
   images (`tools/README.md`). Its heights come from `LAUNDRY` in
   `feel.js`, and the art is cut to them: re-cut if they change. The
-  window and an optional clothesline are prompt 11 in
+  window is prompt 11 in
   `docs/art-prompts.md`. Sizes and status of every sprite are in
   `docs/pusheen-v2-art-assets.md`.
 - **Audio** is synthesized CC0 placeholders;
