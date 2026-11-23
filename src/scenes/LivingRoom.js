@@ -30,14 +30,16 @@ const CABINET_CONTENTS = [
     { key: 'tshirt', label: 'T-Shirt', sprite: 'itemShirt', effect: 'nope' },
     { key: 'popcorn', label: 'Popcorn', sprite: 'itemPopcorn', effect: 'takeSnack' }
 ];
-// Named entry points. default = a fresh lap near the sunbeam (now reached only
-// via a door -- a fresh boot/Play again starts in the Backyard); fromBedroom =
-// through the left-wall door; fromBackyard = through the right-wall hidden path,
-// just inside it and clear of its trigger.
+// Named entry points. The room is laid out left to right, like Backyard ->
+// Kitchen: the garden gate's path comes in on the left, by the sunbeam, and
+// the rest of the house is through the right-wall door. default = a fresh lap
+// near the sunbeam (now reached only via a door -- a fresh boot/Play again
+// starts in the Backyard); fromBackyard = just inside the left-wall hidden
+// path, clear of its trigger; fromBedroom = just inside the right-wall door.
 const SPAWN_POINTS = {
-    default: { x: 950 },
-    fromBedroom: { x: 150 },
-    fromBackyard: { x: 1130 }
+    default: { x: 330 },
+    fromBackyard: { x: 150 },
+    fromBedroom: { x: 1130 }
 };
 // Derived from feel.js's own JUMP values (apex = v^2/2g) rather than a
 // hand-copied comment, so retuning JUMP can't silently strand the cushion
@@ -51,7 +53,7 @@ const CUSHION_SURFACE_HEIGHT = Math.round(JUMP_APEX_HEIGHT * 0.8);
 // -- without it, only the narrower cushion collided and walking up meant
 // bonking a floating box from the side. The cabinet, cushion, yarn, sunbeam,
 // and door are entities, not layout. The couch yarn is spawned in create()
-// *before* this runs so it renders tucked behind the couch's left arm -- that
+// *before* this runs so it renders tucked behind the couch's right arm -- that
 // render-order nuance stays in create() (see roomBuilder's note).
 const LAYOUT = [
     { name: 'couchBase', role: 'solid', sprite: 'couchBase', x: 640, yFromGround: COUCH_BASE_HEIGHT / 2 }
@@ -77,33 +79,34 @@ export class LivingRoom extends Scene
 
         this.add.rectangle(width / 2, height / 2, width, height, FLOOR_COLOR);
 
-        // Left -- cabinet with the sniff/peek radar. A generic Container; its
+        // Right -- cabinet with the sniff/peek radar. A generic Container; its
         // snack-gate (goes quiet once the snack is found) is the isActionable
         // predicate, and its contents drive the UI peek panel.
-        this.cabinet = new Container(this, 180, groundTop - CABINET_HEIGHT / 2, {
+        this.cabinet = new Container(this, 1100, groundTop - CABINET_HEIGHT / 2, {
             sprite: 'cabinet',
             contents: CABINET_CONTENTS,
             isActionable: (scene) => !scene.registry.get('snack:collected')
         });
 
-        // Right -- window + sunbeam with the nap trigger
-        this.sunbeam = new Sunbeam(this, 1080, groundTop);
+        // Left -- window + sunbeam with the nap trigger, right by where she
+        // arrives from the garden (playtest moved the spawn near it).
+        this.sunbeam = new Sunbeam(this, 200, groundTop);
 
-        // Far left -- doorway to the bedroom
-        this.doorToBedroom = new Door(this, 40, groundTop, { side: 'right', to: 'Bedroom', enterAt: 'fromLivingRoom' });
+        // Far right -- doorway on into the rest of the house
+        this.doorToBedroom = new Door(this, 1240, groundTop, { side: 'left', to: 'Bedroom', enterAt: 'fromLivingRoom' });
 
-        // Far right -- the revealed hidden path back to the Backyard. Always
+        // Far left -- the revealed hidden path back to the Backyard. Always
         // active here: the LivingRoom is only reachable at all once Sloth's been
         // woken (the backyard side is reveal-gated), so arriving here already
         // implies the path is open.
-        this.doorToBackyard = new Door(this, 1240, groundTop, { side: 'left', to: 'Backyard', enterAt: 'fromLivingRoom' });
+        this.doorToBackyard = new Door(this, 40, groundTop, { side: 'right', to: 'Backyard', enterAt: 'fromLivingRoom' });
 
         // Center -- couch base (built from LAYOUT below) + the one squashable
         // cushion, reachable with a hop. Quest: one yarn ball hides behind the
-        // couch's left arm -- spawned before the couch is built so it renders
+        // couch's right arm -- spawned before the couch is built so it renders
         // tucked behind it, edge peeking out (render-order nuance kept here).
         this.yarnBalls = [];
-        this.spawnYarn('couch', 550, groundTop - 14);
+        this.spawnYarn('couch', 730, groundTop - 14);
 
         this.solids = buildLayout(this, LAYOUT, groundTop);
 
@@ -113,9 +116,10 @@ export class LivingRoom extends Scene
         this.ground = this.add.rectangle(width / 2, groundTop + GROUND_HEIGHT / 2, width, GROUND_HEIGHT, GROUND_COLOR);
         this.physics.add.existing(this.ground, true);
 
-        // Stormy waits between the couch and the sunbeam, near the spawn,
+        // Stormy waits between the sunbeam and the couch, near the spawn,
         // so a fresh lap meets her (and hears about the yarn) right away.
-        this.stormy = new Stormy(this, 820, groundTop);
+        // Mirrored with the room, so she faces the way Pusheen comes in.
+        this.stormy = new Stormy(this, 460, groundTop, { flipX: true });
 
         // One dispatcher for every E-press interaction here, registered in the
         // old positional priority order (cabinet > Stormy > yarn) as the
@@ -125,7 +129,7 @@ export class LivingRoom extends Scene
         this.interactions = new InteractionController(this);
         [this.cabinet, this.stormy, ...this.yarnBalls].forEach((item) => this.interactions.register(item));
 
-        // Start near the sunbeam (right), not the cabinet -- playtest moved
+        // Start near the sunbeam (left), not the cabinet -- playtest moved
         // the spawn; see the design doc's scene-layout note for why.
         const spawn = resolveSpawn(SPAWN_POINTS, data);
         this.pusheen = new Pusheen(this, spawn.x, groundTop - SPAWN.heightAboveGround);
