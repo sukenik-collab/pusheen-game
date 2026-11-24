@@ -381,8 +381,8 @@ export const LAUNDRY = {
     // The tip-off: a scripted arc to a fixed landing spot beside the dryer
     // (never physics, so it can't land somewhere unhelpful). It rises by
     // `tipArcPx` above its start before dropping, tumbling as it goes.
-    tipMs: 720,
-    tipArcPx: 90,
+    tipMs: 600,
+    tipArcPx: 55,
     tipSpinDeg: -160,
 
     // The heap plopping down: a volume-conserving squash on landing, then a

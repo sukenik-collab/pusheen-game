@@ -3,6 +3,10 @@ import { CUSHION_SQUASH, LAUNDRY } from '../config/feel.js';
 
 export const HEAP_WIDTH = 114;
 
+// Her half-width (Pusheen.js: 110 wide) less the same 10px grace the kitchen
+// box ledges use: she stands while her centre is over the pile.
+const EDGE_INSET = 55 - 10;
+
 // The squishy heap of laundry the tipped basket leaves beside the dryer: a
 // soft step she hops onto, and from it up onto the dryer. A solid static
 // body (she lands on top, as on the pillow), and it squishes on contact
@@ -31,8 +35,21 @@ export class LaundryHeap extends GameObjects.Container
 
         // Static bodies on a Container need their rect set directly (see
         // Cushion). It never moves again.
-        this.body.setSize(HEAP_WIDTH, height);
-        this.body.position.set(x - HEAP_WIDTH / 2, this.y - height / 2);
+        //
+        // Her standing surface is inset from the pile's drawn edges, as the
+        // kitchen boxes' ledges are (Kitchen.js): Arcade keeps her standing
+        // while any part of her 110-wide body overlaps it, so a surface as
+        // wide as the art let her stand with her centre ~55px past the pile,
+        // on thin air. Inset by her half-width less a little grace, she tips
+        // off where the pile visibly ends. Top face only, like those ledges:
+        // she lands on it from above and walks past it in front, rather than
+        // bumping an invisible wall inside the soft pile.
+        const surfaceW = HEAP_WIDTH - 2 * EDGE_INSET;
+        this.body.setSize(surfaceW, height);
+        this.body.position.set(x - surfaceW / 2, this.y - height / 2);
+        this.body.checkCollision.down = false;
+        this.body.checkCollision.left = false;
+        this.body.checkCollision.right = false;
 
         this.touchedThisStep = false;
         this.wasContacted = false;

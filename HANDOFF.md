@@ -215,6 +215,14 @@ he's lying down. Nothing to catch, nothing to chase — purely ambient.
   stood on, so once she's up she can walk the whole counter rather than
   dropping through the washer; the sink's tap is a separate wall sprite so
   nothing sticks up from it.
+- **The laundry table can't move any closer to the dryer** (x 880). Its top
+  (60) plus a hop clears the dryer (110), so from close enough a running
+  jump off the table lands on the dryer and skips the heap: at 845 it did 3
+  times in 5, from 860 never. Moving the table to shorten the basket's flight
+  re-opens that; shorten the arc in `LAUNDRY` instead.
+- **The heap's standing surface is narrower than its art,** inset by her
+  half-width less 10px like the kitchen box ledges, and top-face only. A
+  surface as wide as the pile let her stand ~55px past it, on thin air.
 - **The laundry heap is built before Pusheen, hidden, with its body off,**
   and the basket's landing reveals it (`LaundryHeap.plopIn`). That keeps
   it drawn behind her without any depth sorting; don't create it on
