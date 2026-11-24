@@ -46,6 +46,10 @@ const HEAP_X = DRYER_X + MACHINE_W / 2 + UNIT_GAP + HEAP_WIDTH / 2;
 const TABLE_X = 880;
 const TABLE_W = 147;
 // Right at the table's left edge, teetering, so its tip-off is a short one.
+// The tabletop she stands on is inset from the table's drawn ends by her
+// half-width less 10px (as the heap's and the kitchen boxes' are), so she
+// steps off where the table visibly ends, not ~55px past it.
+const TABLE_EDGE_INSET = 55 - 10;
 const BASKET_X = TABLE_X - TABLE_W / 2 + 15;
 
 // The room's passive furniture (see roomBuilder for the roles). The counter
@@ -67,7 +71,7 @@ const LAYOUT = [
     { name: 'sink', role: 'standable', sprite: 'sink', oneWay: true, x: SINK_X, w: SINK_W, h: COUNTER_H },
     { name: 'washer', role: 'standable', sprite: 'washer', oneWay: true, x: WASHER_X, w: MACHINE_W, h: COUNTER_H },
     { name: 'dryer', role: 'standable', sprite: 'dryer', oneWay: true, x: DRYER_X, w: MACHINE_W, h: COUNTER_H },
-    { name: 'foldingTable', role: 'standable', sprite: 'foldingTable', oneWay: true, x: TABLE_X, w: TABLE_W, h: LAUNDRY.tableHeight }
+    { name: 'foldingTable', role: 'standable', sprite: 'foldingTable', oneWay: true, x: TABLE_X, w: TABLE_W, h: LAUNDRY.tableHeight, edgeInset: TABLE_EDGE_INSET }
 ];
 
 export class Laundry extends Scene
