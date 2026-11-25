@@ -6,7 +6,7 @@
 // deliberately, so don't try to purify those escape hatches into the data.
 //
 // Item shape:
-//   { name, role, sprite?|color?, x, w, h, yFromGround?, oneWay?, flipX? }
+//   { name, role, sprite?|color?, x, w, h, yFromGround?, oneWay?, flipX?, edgeInset? }
 // Roles:
 //   background -- drawn only, no physics body
 //   solid      -- static body, blocks from all sides
@@ -14,7 +14,11 @@
 // `yFromGround` = center height above the floor top; omitted = sits on it.
 // `sprite` art is sized to match w/h exactly, so the static body a sprite
 // gets from its image bounds equals the declared footprint. `flipX` mirrors
-// a sprite's art (e.g. a room laid out mirrored to its art).
+// a sprite's art (e.g. a room laid out mirrored to its art). `edgeInset`
+// narrows the body by that much at each end, keeping it centred: Arcade
+// keeps her standing while any part of her 110-wide body overlaps a
+// surface, so a body as wide as the art lets her stand well past its drawn
+// edge, on thin air (see Kitchen.js's box ledges for the numbers).
 export function buildLayout (scene, layout, groundTop)
 {
     const solids = [];
@@ -38,6 +42,10 @@ export function buildLayout (scene, layout, groundTop)
                 obj.body.checkCollision.down = false;
                 obj.body.checkCollision.left = false;
                 obj.body.checkCollision.right = false;
+            }
+
+            if (item.edgeInset) {
+                obj.body.setSize(obj.displayWidth - 2 * item.edgeInset, obj.displayHeight, true);
             }
 
             solids.push(obj);

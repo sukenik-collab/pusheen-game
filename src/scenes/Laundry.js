@@ -38,9 +38,19 @@ const SINK_X = 325;
 const WASHER_X = SINK_X + SINK_W / 2 + UNIT_GAP + MACHINE_W / 2;
 const DRYER_X = WASHER_X + MACHINE_W + UNIT_GAP;
 const HEAP_X = DRYER_X + MACHINE_W / 2 + UNIT_GAP + HEAP_WIDTH / 2;
-const TABLE_X = 950;
+// The table is as close to the heap spot as it can be, keeping the basket's
+// flight short: any closer and a running jump off the table's left edge can
+// land on the dryer, skipping the heap (the tabletop's 60 + a hop clears the
+// dryer's 110). Played out with real key input: a table at 845 let her land
+// on the dryer 3 times in 5, 860 and over never did; 880 leaves a margin.
+const TABLE_X = 880;
 const TABLE_W = 147;
-const BASKET_X = TABLE_X - TABLE_W / 2 + 30;
+// Right at the table's left edge, teetering, so its tip-off is a short one.
+// The tabletop she stands on is inset from the table's drawn ends by her
+// half-width less 10px (as the heap's and the kitchen boxes' are), so she
+// steps off where the table visibly ends, not ~55px past it.
+const TABLE_EDGE_INSET = 55 - 10;
+const BASKET_X = TABLE_X - TABLE_W / 2 + 15;
 
 // The room's passive furniture (see roomBuilder for the roles). The counter
 // units and the table are one-way, top-only platforms: she walks in front of
@@ -61,7 +71,7 @@ const LAYOUT = [
     { name: 'sink', role: 'standable', sprite: 'sink', oneWay: true, x: SINK_X, w: SINK_W, h: COUNTER_H },
     { name: 'washer', role: 'standable', sprite: 'washer', oneWay: true, x: WASHER_X, w: MACHINE_W, h: COUNTER_H },
     { name: 'dryer', role: 'standable', sprite: 'dryer', oneWay: true, x: DRYER_X, w: MACHINE_W, h: COUNTER_H },
-    { name: 'foldingTable', role: 'standable', sprite: 'foldingTable', oneWay: true, x: TABLE_X, w: TABLE_W, h: LAUNDRY.tableHeight }
+    { name: 'foldingTable', role: 'standable', sprite: 'foldingTable', oneWay: true, x: TABLE_X, w: TABLE_W, h: LAUNDRY.tableHeight, edgeInset: TABLE_EDGE_INSET }
 ];
 
 export class Laundry extends Scene
